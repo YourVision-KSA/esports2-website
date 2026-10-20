@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}{{ game.name_ar }} — {{ content.BRACKET_TITLE }}{% endblock %}
+{% block content %}
+<section>
+  <h2>{{ game.name_ar }}</h2>
+  {% if champion %}<p><strong>{{ content.CHAMPION }}:</strong> <span dir="ltr">{{ champion }}</span></p>{% endif %}
+
+  {% for round_num, round_name, matches in rounds %}
+  <h3>{{ round_name }}</h3>
+  <table>
+    {% for m in matches %}
+    <tr>
+      <td dir="ltr">{{ m.player1.game_player_id|default:"—" }}</td>
+      <td dir="ltr">{{ m.player2.game_player_id|default:"—" }}</td>
+      <td>
+        {% if m.status == "pending" %}{{ content.MATCH_PENDING }}
+        {% elif m.status == "forfeit" %}{{ content.MATCH_FORFEIT }}
+        {% else %}<span dir="ltr">{{ m.winner.game_player_id }} — {{ m.score_text }}</span>{% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% endfor %}
+</section>
+{# Polling enhancement (10s JSON endpoint) is added with the design bundle — DEC-15 #}
+{% endblock %}

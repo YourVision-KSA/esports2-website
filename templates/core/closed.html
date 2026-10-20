@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block content %}
+<section>
+  {% if message_key == "REG_CLOSED" %}<h2>{{ content.REG_CLOSED }}</h2>
+  {% elif message_key == "VOTE_CLOSED" %}<h2>{{ content.VOTE_CLOSED }}</h2>
+  {% else %}<h2>{{ content.PHASE_SOON }}</h2>{% endif %}
+</section>
+{% endblock %}

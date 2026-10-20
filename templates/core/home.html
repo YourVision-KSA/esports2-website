@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{# Cached at the edge: NO forms, NO csrf token here (docs/routes.md rule zero). #}
+{% block content %}
+
+<header class="hero" id="top">
+  <h1>{{ content.HERO_TITLE }}</h1>
+  <p>{{ content.HERO_TEXT }}</p>
+  <p>
+    {% if phase == "vote" %}<a class="btn" href="/vote/">{{ content.HERO_BTN_VOTE }}</a>{% endif %}
+    {% if phase == "registration" %}<a class="btn" href="/register/">{{ content.HERO_BTN_REGISTER }}</a>{% endif %}
+    {% if phase == "event" or phase == "archive" %}<a class="btn" href="/bracket/">{{ content.BRACKET_TITLE }}</a>{% endif %}
+    <a class="btn" href="#schedule">{{ content.HERO_BTN_SCHEDULE }}</a>
+  </p>
+  <ul class="facts">
+    <li><b dir="ltr">{{ content.HERO_STAT_1_NUM }}</b> <span>{{ content.HERO_STAT_1_LABEL }}</span></li>
+    <li><b dir="ltr">{{ content.HERO_STAT_2_NUM }}</b> <span>{{ content.HERO_STAT_2_LABEL }}</span></li>
+    <li><b dir="ltr">{{ content.HERO_STAT_3_NUM }}</b> <span>{{ content.HERO_STAT_3_LABEL }}</span></li>
+  </ul>
+  {# 3D hero scene mounts here after DEC-15 (docs/frontend.md): poster first, canvas fades in #}
+</header>
+
+<section id="games">
+  <h2>{{ content.SEC_GAMES }}</h2>
+  <p>{{ content.SEC_GAMES_LEAD }}</p>
+  <div class="cards">
+    {% for game in games %}
+    <article class="card">
+      <h3>{{ game.name_ar }}</h3>
+      {% if game.name_en %}<p dir="ltr">{{ game.name_en }} · 1v1</p>{% endif %}
+      <dl>
+        <dt>{{ content.LABEL_SEATS }}</dt><dd dir="ltr">{{ game.seats }}</dd>
+        {% if game.platform %}<dt>{{ content.LABEL_PLATFORM }}</dt><dd dir="ltr">{{ game.platform }}</dd>{% endif %}
+      </dl>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+
+<section id="zones">
+  <h2>{{ content.SEC_ZONES }}</h2>
+  <div class="cards">
+    {% for name, desc in content.ZONES %}
+    <div><h3>{{ name }}</h3><p>{{ desc }}</p></div>
+    {% endfor %}
+  </div>
+</section>
+
+<section id="schedule">
+  <h2>{{ content.SEC_SCHEDULE }}</h2>
+  <p>{{ content.SCHEDULE_TBA }}</p>
+  <p class="note">{{ content.SCHEDULE_NOTE }}</p>
+</section>
+
+<section id="prizes">
+  <h2>{{ content.SEC_PRIZES }}</h2>
+  <ol class="podium">
+    {% for mark, place, desc in content.PRIZES %}
+    <li><b dir="ltr">{{ mark }}</b> <strong>{{ place }}</strong> — {{ desc }}</li>
+    {% endfor %}
+  </ol>
+</section>
+
+<section id="rules">
+  <h2>{{ content.SEC_RULES }}</h2>
+  <ul>
+    {% for rule in content.RULES %}<li>{{ rule }}</li>{% endfor %}
+  </ul>
+</section>
+
+<section id="faq">
+  <h2>{{ content.SEC_FAQ }}</h2>
+  {% for q, a in content.FAQ %}
+  <details><summary>{{ q }}</summary><p>{{ a }}</p></details>
+  {% endfor %}
+</section>
+
+<section id="join">
+  <h2>{{ content.SEC_JOIN }}</h2>
+  <p>{{ content.JOIN_TEXT }}</p>
+  {% if phase == "registration" %}
+  <a class="btn" href="/register/">{{ content.HERO_BTN_REGISTER }}</a>
+  {% else %}
+  <p>{{ content.PHASE_SOON }}</p>
+  {% endif %}
+</section>
+
+{% endblock %}

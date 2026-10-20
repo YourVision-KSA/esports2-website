@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}{{ content.INVITE_TITLE }}{% endblock %}
+{% block content %}
+<section>
+  <h2>{{ content.INVITE_TITLE }}</h2>
+  <p>{{ content.INVITE_BODY }}</p>
+  <p><strong>{{ invitation.guest_name }}</strong>
+     {% if invitation.organization %}— {{ invitation.organization }}{% endif %}</p>
+  <p><img src="{{ qr }}" alt="QR" width="240" height="240"></p>
+</section>
+{% endblock %}

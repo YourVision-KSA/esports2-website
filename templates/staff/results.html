@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Results{% endblock %}
+{% block content %}
+<section>
+  <h2>{{ content.STAFF_RESULTS_TITLE }}</h2>
+  {% if error %}<p class="error" dir="ltr">{{ error }}</p>{% endif %}
+  {% for m in pending %}
+  <form method="post" class="card">
+    {% csrf_token %}
+    <input type="hidden" name="match_id" value="{{ m.pk }}">
+    <h3>{{ m.game.name_ar }} — R{{ m.round }} #{{ m.slot }}</h3>
+    <p>
+      <label><input type="radio" name="winner_id" value="{{ m.player1_id }}" required>
+        <span dir="ltr">{{ m.player1.game_player_id }}</span></label>
+      <label><input type="radio" name="winner_id" value="{{ m.player2_id }}">
+        <span dir="ltr">{{ m.player2.game_player_id }}</span></label>
+    </p>
+    <p><input type="text" name="score" placeholder="3–1" dir="ltr"></p>
+    <button type="submit">{{ content.REG_SUBMIT }}</button>
+  </form>
+  {% empty %}
+  <p>{{ content.MATCH_PENDING }}: 0</p>
+  {% endfor %}
+</section>
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}{{ content.BRACKET_TITLE }}{% endblock %}
+{% block content %}
+<section>
+  <h2>{{ content.BRACKET_TITLE }}</h2>
+  <div class="cards">
+    {% for game in games %}
+    <article class="card">
+      <h3>{{ game.name_ar }}</h3>
+      <a class="btn" href="/bracket/{{ game.slug }}/">{{ content.BRACKET_TITLE }}</a>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

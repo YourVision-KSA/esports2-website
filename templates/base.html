@@ -1,0 +1,35 @@
+{# Base template — STRUCTURE ONLY. Theme tokens/fonts/effects land after DEC-15 #}
+{# (docs/frontend.md). Arabic strings come from core/content.py (CLAUDE.md rule 1). #}
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}{{ content.SITE_NAME }}{% endblock %}</title>
+<link rel="stylesheet" href="/static/css/base.css">
+</head>
+<body>
+<nav>
+  <a class="brand" href="/">{{ content.SITE_NAME }}</a>
+  <ul>
+    {% if phase == "vote" %}<li><a href="/vote/">{{ content.NAV_VOTE }}</a></li>{% endif %}
+    <li><a href="/#games">{{ content.NAV_GAMES }}</a></li>
+    <li><a href="/#zones">{{ content.NAV_ZONES }}</a></li>
+    <li><a href="/#schedule">{{ content.NAV_SCHEDULE }}</a></li>
+    <li><a href="/#prizes">{{ content.NAV_PRIZES }}</a></li>
+    <li><a href="/#faq">{{ content.NAV_FAQ }}</a></li>
+    {% if phase == "registration" %}<li><a href="/register/">{{ content.NAV_REGISTER }}</a></li>{% endif %}
+    {% if phase == "event" or phase == "archive" %}<li><a href="/bracket/">{{ content.BRACKET_TITLE }}</a></li>{% endif %}
+  </ul>
+</nav>
+
+<main>
+{% block content %}{% endblock %}
+</main>
+
+<footer>
+  <span>{{ content.FOOTER_1 }}</span>
+  <span>{{ content.FOOTER_2 }}</span>
+</footer>
+</body>
+</html>

@@ -1,0 +1,24 @@
+/* PLACEHOLDER structure-only styles. The real theme (colors, fonts, effects)
+   comes from the /design artifact — DEC-15, docs/frontend.md. Do not add
+   colors or fonts here before that lands. Logical properties only (RTL). */
+* { box-sizing: border-box; }
+body { max-width: 960px; margin: 0 auto; padding-inline: 16px; line-height: 1.8;
+       font-family: system-ui, sans-serif; }
+nav { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center;
+      justify-content: space-between; padding-block: 12px; }
+nav ul { display: flex; flex-wrap: wrap; gap: 6px 16px; list-style: none;
+         margin: 0; padding: 0; }
+main { display: flex; flex-direction: column; gap: 48px; padding-block: 24px; }
+footer { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between;
+         padding-block: 20px; border-block-start: 1px solid currentColor; }
+section { scroll-margin-block-start: 70px; }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+         gap: 20px; }
+.card { border: 1px solid currentColor; padding: 20px; }
+form p { display: flex; flex-direction: column; gap: 4px; }
+input[type="text"], input[type="tel"], input[type="email"] { padding: 8px; font-size: 1rem; }
+button, .btn { padding: 10px 28px; font-size: 1.1rem; cursor: pointer; }
+.error { border: 2px solid currentColor; padding: 12px; font-weight: 700; }
+[dir="ltr"] { unicode-bidi: isolate; }
+table { border-collapse: collapse; width: 100%; }
+td, th { border: 1px solid currentColor; padding: 6px 10px; text-align: start; }

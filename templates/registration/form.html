@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}{{ content.REG_TITLE }} — {{ game.name_ar }}{% endblock %}
+{% block content %}
+<section>
+  <h2>{{ content.REG_TITLE }} — {{ game.name_ar }}</h2>
+  {% if error_key == "REG_DUP_TOURNAMENT" %}<p class="error">{{ content.REG_DUP_TOURNAMENT }}</p>
+  {% elif error_key == "REG_FULL" %}<p class="error">{{ content.REG_FULL }}</p>{% endif %}
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">{{ content.REG_SUBMIT }}</button>
+  </form>
+</section>
+{% endblock %}

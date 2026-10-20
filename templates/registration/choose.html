@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}{{ content.REG_TITLE }}{% endblock %}
+{% block content %}
+<section>
+  <h2>{{ content.REG_TITLE }}</h2>
+  <p>{{ content.REG_CHOOSE }}</p>
+  <div class="cards">
+    {% for game, left in rows %}
+    <article class="card">
+      <h3>{{ game.name_ar }}</h3>
+      {% if game.name_en %}<p dir="ltr">{{ game.name_en }} · 1v1</p>{% endif %}
+      <p>{{ content.LABEL_SEATS }}: <span dir="ltr">{{ left }}</span></p>
+      <a class="btn" href="/register/{{ game.slug }}/">{{ content.HERO_BTN_REGISTER }}</a>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

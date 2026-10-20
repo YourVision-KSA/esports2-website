@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}{{ content.VOTE_TITLE }}{% endblock %}
+{% block content %}
+<section>
+  <h2>{{ content.VOTE_TITLE }}</h2>
+  <p>{{ content.VOTE_INSTR|cut:"{n}" }}<span dir="ltr">{{ n_choices }}</span></p>
+  {% if error_key %}<p class="error">{{ content.ERR_RETRY }}</p>{% endif %}
+  {% if error %}<p class="error">{{ content.ERR_RETRY }}</p>{% endif %}
+
+  <form method="post" action="/vote/">
+    {% csrf_token %}
+    {% for game in games %}
+    <p>
+      <label>
+        <input type="checkbox" name="choices" value="{{ game.pk }}">
+        {{ game.name_ar }}{% if game.name_en %} <span dir="ltr">({{ game.name_en }})</span>{% endif %}
+      </label>
+    </p>
+    {% endfor %}
+    {% if turnstile_site_key %}
+    <div class="cf-turnstile" data-sitekey="{{ turnstile_site_key }}"></div>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    {% endif %}
+    <button type="submit">{{ content.VOTE_SUBMIT }}</button>
+  </form>
+
+  <h3>{{ content.VOTE_RESULTS_TITLE }}</h3>
+  <p>{{ content.VOTE_RULES }}</p>
+</section>
+{% endblock %}

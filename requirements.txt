@@ -1,0 +1,8 @@
+# Production dependencies. Each entry is justified in docs/architecture.md / CLAUDE.md rule 5.
+Django>=5.2,<5.3           # the framework (5.2 LTS)
+psycopg[binary]>=3.2       # PostgreSQL driver
+django-environ>=0.11       # settings from environment variables
+django-otp>=1.5            # staff TOTP two-factor auth (CLAUDE.md hard rule 4)
+qrcode>=8                  # QR images for VIP invitations
+whitenoise>=6.7            # serve hashed static files from the app container
+gunicorn>=23               # production WSGI server (Cloud Run)

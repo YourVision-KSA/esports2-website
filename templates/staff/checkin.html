@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Check-in{% endblock %}
+{% block content %}
+<section>
+  <h2>{{ content.STAFF_CHECKIN_TITLE }}</h2>
+
+  {% if result == "ok" %}
+    <p class="error">{{ content.CHECKIN_OK }} — <strong>{{ guest.guest_name }}</strong>
+       {% if guest.organization %}({{ guest.organization }}){% endif %}</p>
+  {% elif result == "already" %}
+    <p class="error">{{ content.CHECKIN_ALREADY|cut:"{time}" }}
+       <span dir="ltr">{{ guest.checked_in_at|date:"H:i" }}</span>
+       — {{ guest.checked_in_by }}</p>
+  {% elif result == "invalid" %}
+    <p class="error">{{ content.CHECKIN_INVALID }}</p>
+  {% endif %}
+
+  <form method="post">
+    {% csrf_token %}
+    <p><input type="text" name="token" dir="ltr" placeholder="invite token / URL" required></p>
+    <button type="submit">{{ content.CHECKIN_OK }}</button>
+  </form>
+
+  <h3>{{ content.STAFF_SEARCH }}</h3>
+  <form method="get">
+    <p><input type="text" name="q" value="{{ query }}"></p>
+    <button type="submit">{{ content.STAFF_SEARCH }}</button>
+  </form>
+  {% if guests %}
+  <table>
+    {% for g in guests %}
+    <tr>
+      <td>{{ g.guest_name }}</td><td>{{ g.organization }}</td><td>{{ g.get_status_display }}</td>
+      <td>
+        {% if g.status == "sent" %}
+        <form method="post">{% csrf_token %}
+          <input type="hidden" name="token" value="{{ g.token }}">
+          <button type="submit">{{ content.CHECKIN_OK }}</button>
+        </form>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% endif %}
+</section>
+{% endblock %}
