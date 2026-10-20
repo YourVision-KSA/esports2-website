@@ -2,11 +2,18 @@
 
 ## Design status
 
-- **DESIGN REFERENCE (DEC-15, delivered 2026-10-20): the "E-SPORTS 2 Website Design" artifact**
-  — https://claude.ai/artifact/SNEBV9cXyS8YCmeJJfEvqG — direction **"Tournament Broadcast"**:
-  professional esports look, deep navy + white ground + volt accent, gold reserved for prizes.
-  7 artboards: design tokens, home desktop + mobile, vote, registration, bracket, VIP invite.
-  Implement from it; propose changes there first, then here.
+- **DESIGN REFERENCE (DEC-15, rev 3 "Arena Night", 2026-10-20): the "E-SPORTS 2 Website
+  Design" artifact** — https://claude.ai/artifact/SNEBV9cXyS8YCmeJJfEvqG. The owner rejected
+  the earlier light "Tournament Broadcast" look; rev 3 is a **full dark, immersive esports
+  design** built from competitor research (Esports World Cup, Kingdom of Gaming, BLAST,
+  Gamers8): near-black ground, volt + purple glow accents, gold for prizes, atmospheric
+  arena/controller/crowd/trophy photography under gradient overlays. 7 artboards: tokens,
+  home desktop + mobile, vote, registration, bracket, VIP invite. Implement from it; propose
+  changes there first, then here.
+- **Imagery note:** the canvas uses AI-generated placeholder photos (stored as artifact
+  assets, preview resolution). Production uses full-resolution, licensed or event-owned
+  photography with the same treatment: dark duotone atmosphere, gradient-to-background
+  overlay, purple/green light.
 - `reference/prototype.html` is the **CONTENT reference only**: its Arabic text and event
   information (captured in docs/content-ar.md). **Do not copy its code, colors, fonts or
   layout.**
@@ -16,28 +23,29 @@
 ## Theme tokens (from the design artifact — define as CSS custom properties on `:root`)
 
 ```css
---ink: #0E1433;        /* navy: dark sections, headings, card header bands */
---panel-dark: #141B45; /* panels on navy */
---line-dark: #2A3370;  /* borders on navy (hairline #232B5C) */
---volt: #D8F24A;       /* THE accent: CTAs, highlights, section slashes */
---ground: #F5F6FA;     /* page background */
---surface: #FFFFFF;    /* cards */
---surface-2: #EEF0F7;  /* alternate light sections */
---line: #DDE1EE;       /* borders on light */
---text: #171C3F;       /* body on light */
---muted: #5A6180;      /* secondary on light */
---text-dark: #E9ECFA;  /* body on navy */
---muted-dark: #A9B1D6; /* secondary on navy */
---link: #2443D6;       /* links on light */
---gold: #D9A441;       /* prizes/VIP decorative; as TEXT on light use #8A6513, on navy #E9C15C */
---error: #B3261E;
+--bg: #07080F;          /* near-black page ground */
+--bg-2: #0B0E1A;        /* alternate section band */
+--surface: #10131F;     /* cards, panels */
+--surface-2: #161A2B;   /* badges, inner chips */
+--line: #242A40;        /* borders */
+--line-strong: #32395A; /* input borders, secondary buttons */
+--volt: #D8F24A;        /* THE accent: CTAs, numbers, highlights, ticker */
+--purple: #8C5CFF;      /* glow/gradient only; text-safe variant #B9A6FF */
+--text: #F2F4FF;        /* headings/body strong */
+--body: #C5CBE8;        /* body text */
+--muted: #9AA3C4;       /* secondary */
+--link: #C9D2FF;        /* links (hover: volt) */
+--gold: #E9C15C;        /* prizes/VIP (decor #D9A441, bronze #C8906B) */
+--error: #FFB4AE;
 ```
-Theme model: **single theme** — light ground with navy "broadcast" bands (hero, schedule,
-join CTA, bracket, invite). Radius 0 everywhere. Spacing scale 4/8/12/16/24/36/48/72.
-Motifs: 12° skew slashes (`transform: skewX(-12deg)`) as separators and section-tag marks;
-**cut-corner CTAs** (`clip-path` 10–12px) on primary buttons only; cards = white, 1px
-`--line` border, navy header band + 3–4px volt rule; EN section tags in Space Grotesk
-letterspaced (`01 · TOURNAMENTS`).
+Theme model: **single dark theme**. Radius 0. Spacing 4/8/12/16/24/36/48/72.
+Motifs: **glow** (volt `box-shadow`/`text-shadow` on CTAs and key numbers; purple radial
+gradients + shadows on panels) · photo sections with **gradient-to-bg overlays**
+(`linear-gradient(to bottom|top, …, var(--bg))`) · 12° skew slashes · **cut-corner CTAs**
+(`clip-path` 10–12px, primary only) · cards = `--surface`, 1px `--line`, photo header +
+3–4px accent rule · EN section tags in Space Grotesk letterspaced (`01 · TOURNAMENTS`) ·
+countdown cells with volt bottom rule · page ground carries two faint radials (purple
+top-corner, volt low-corner).
 
 ## Fonts (from the design artifact); delivery rules FIXED
 
@@ -83,11 +91,11 @@ interaction or run while its element is off-screen.
 
 ## 3D scenes — subjects CONFIRMED by the design; engineering requirements FIXED
 
-The design keeps both subjects, restyled to the new palette: **hero = game controller over a
-lit pedestal** (navy scene, volt ring accents, drag-to-rotate + pointer parallax, in a framed
-panel with the `3D INTERACTIVE SCENE` label and the hint «اسحب يد التحكم لتدويرها»), and
-**prizes = gold trophy with star topper** (navy panel, gold ring, lazy-loaded). The artboards
-show each scene's framed placeholder/poster composition — the poster IS the LOW/FALLBACK tier.
+The design keeps both subjects in the Arena Night palette: **hero = game controller over a
+lit pedestal** (dark glass panel over the arena-photo hero, volt + purple ring accents,
+drag-to-rotate + pointer parallax, `3D INTERACTIVE SCENE` label, hint «اسحب يد التحكم
+لتدويرها»), and **prizes = gold trophy** (photo-poster panel with gold glow; the Three.js
+scene mounts lazily over it). Each framed poster IS the LOW/FALLBACK tier.
 
 Engineering requirements (apply to whatever the design specifies):
 
