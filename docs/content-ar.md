@@ -225,6 +225,22 @@ Note for owner: «أفضل لاعب في اليوم» may need rewording for a 3
 | CHECKIN-ALREADY | هذه الدعوة مستخدمة مسبقًا ({time}) | DRAFT |
 | CHECKIN-INVALID | دعوة غير صالحة | DRAFT |
 
+## Strings added during the build (all DRAFT — flagged for owner review 2026-10-20)
+
+| Key | Text | Where used |
+|---|---|---|
+| HERO-TEXT (new draft) | ثلاثة أيام من المنافسات الفردية على ثلاث بطولات، مع مناطق لعب حر وتجارب واقع افتراضي. نافس على المسرح الرئيسي أمام الجمهور. | hero paragraph (replaces the 1-day/teams text) |
+| HERO-BTN-SCHEDULE / SEC-SCHEDULE | جدول الفعالية | hero button + schedule heading |
+| SEC-GAMES-LEAD (new draft) | ثلاث بطولات بنظام خروج المغلوب، والنهائيات كلها على المسرح الرئيسي. | games section lead ("three" instead of "four") |
+| HERO-STATS (new draft) | 3 بطولات · 6 مناطق تجربة · 3 أيام | hero stats (middle one is KEEP) |
+| SCHEDULE-TBA | يُعلن جدول الأيام الثلاثة قريبًا. | schedule placeholder until DEC-01 |
+| RULE-ONE-TOURNAMENT | يمكن لكل لاعب التسجيل في بطولة واحدة فقط لإتاحة الفرصة لأكبر عدد من اللاعبين. | rules list (replaces the two-tournament rule) |
+| REG-LINK-EXISTING | استخدم رابط الإدارة الذي حصلت عليه سابقًا، أو تواصل مع المنظمين إذا فقدته. | re-registration success page |
+| STAFF-RESULTS-TITLE | إدخال النتائج | referee results page |
+| STAFF-CHECKIN-TITLE | تسجيل الحضور | door-staff page |
+| STAFF-SEARCH | بحث | door-staff guest search |
+| Seed game names | روكيت ليج · فيفا · كول أوف ديوتي · تيكن · فالورانت | candidate games (data; editable in admin) |
+
 ## System / errors (all DRAFT)
 
 | Key | Text |

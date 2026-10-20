@@ -30,8 +30,25 @@ Rationale: `docs/architecture.md`.
 
 ## Status (2026-10-20)
 
-Documentation phase complete; no application code yet. Timeline and gates: `docs/plan.md`.
+W1 implementation done: all five apps, 55 tests green (incl. concurrency on PostgreSQL 16),
+ruff clean, CI + Dockerfile. Visual design pending DEC-15. Timeline and gates: `docs/plan.md`.
 Target: vote opens ~Nov 2, registration ~Nov 16, event late Nov / early Dec 2026.
+
+## Quickstart (Windows)
+
+```powershell
+python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements-dev.txt
+copy .env.example .env               # defaults work with the local Postgres below
+.\scripts\dev-db.ps1 start           # portable PostgreSQL 16 (see script header for setup)
+python manage.py migrate
+python manage.py setup_roles         # referee + door groups
+python manage.py seed_demo           # candidate games + opens a 7-day vote window
+python manage.py createsuperuser
+python manage.py runserver           # http://127.0.0.1:8000  (admin at /staff/)
+pytest                               # run all tests (needs the local Postgres)
+```
 
 ## Documentation map
 
