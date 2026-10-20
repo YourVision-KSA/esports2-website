@@ -14,6 +14,11 @@
   assets, preview resolution). Production uses full-resolution, licensed or event-owned
   photography with the same treatment: dark duotone atmosphere, gradient-to-background
   overlay, purple/green light.
+- **Game-card imagery rule:** each tournament card carries imagery that EVOKES its game
+  without using game IP (no official art, logos or characters): rocket-car + giant ball in a
+  neon arena (Rocket League), night football stadium (EA FC), tactical soldier silhouette
+  (Call of Duty). When the vote confirms different games, produce equivalents in the same
+  palette.
 - `reference/prototype.html` is the **CONTENT reference only**: its Arabic text and event
   information (captured in docs/content-ar.md). **Do not copy its code, colors, fonts or
   layout.**
@@ -79,13 +84,18 @@ sponsors → footer; nav anchors. Separate funnel routes (/vote/, /register/, /b
 
 ## Page effects (from the design artifact)
 
-Deliberately restrained — no glitch/scanline/cursor effects from the prototype. Allowed set:
-subtle hover lift on cards and CTAs, the volt rule sweep on card headers (optional), smooth
-scroll to anchors, bracket "LIVE" badge pulse, the **volt marquee ticker** (CSS keyframes,
-duplicated item sequence for a seamless loop), and the **hero countdown** (1s interval JS,
-digits show "--" until the event date is configured in SiteConfig). Rev 2 additions came from
-competitor research (Kingdom of Gaming: countdown, audience split; Esports World Cup:
-big-stats band, tiered partner rows). FIXED regardless: all effects honor
+Rev 3.1 motion spec (BLAST-inspired; all CSS/vanilla-JS, no animation library):
+- **volt marquee ticker** — CSS keyframes, duplicated sequence for a seamless loop
+- **hero countdown** — 1s interval; digits "--" until the date is set in SiteConfig
+- **stats count-up** — numbers animate 0→value on first scroll into view (IntersectionObserver)
+- **game-card hover** — lift 4px + volt border glow + image `scale(1.05)` (overflow hidden)
+- **primary CTA hover** — invert to white bg / ink text
+- **LIVE bar** — red dot pulse; the bar renders only during the event phase
+- **section reveals** — 24px rise + fade on first entry
+- **giant outline display word** ("GAME ON", `-webkit-text-stroke` volt @ ~18% alpha) and the
+  vertical "REGISTER NOW" rail are static decor; **diagonal section edges** via `clip-path`
+  wedges
+FIXED regardless: all effects honor
 `prefers-reduced-motion: reduce` (animations off, static states), and no effect may block
 interaction or run while its element is off-screen.
 

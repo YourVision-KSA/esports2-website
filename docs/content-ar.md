@@ -248,6 +248,8 @@ Note for owner: «أفضل لاعب في اليوم» may need rewording for a 3
 | PATH-PLAYERS | للاعبين — نافس في البطولات | dual-path section title (body reuses JOIN-TEXT) |
 | PATH-FANS | للجمهور — عيش الأجواء | dual-path section title (body reuses the KEEP FAQ spectator answer) |
 | TIER-DIAMOND / GOLD / SILVER | الراعي الماسي · الراعي الذهبي · الراعي الفضي · شريك مشارك | tiered sponsor rows (tiers are FACT from the brief) |
+| LIVE-NOW | مباشر الآن | live match bar (event days only) |
+| LIVE-WATCH | تابع البث | live match bar stream link |
 
 ## System / errors (all DRAFT)
 
