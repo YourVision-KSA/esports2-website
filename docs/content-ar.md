@@ -240,6 +240,14 @@ Note for owner: «أفضل لاعب في اليوم» may need rewording for a 3
 | STAFF-CHECKIN-TITLE | تسجيل الحضور | door-staff page |
 | STAFF-SEARCH | بحث | door-staff guest search |
 | Seed game names | روكيت ليج · فيفا · كول أوف ديوتي · تيكن · فالورانت | candidate games (data; editable in admin) |
+| GAMES-PENDING-VOTE | الألعاب النهائية تُعتمد بعد انتهاء التصويت العام. | note under the tournaments grid |
+| COUNTDOWN-LABEL | ينطلق الحدث بعد | hero countdown (design rev 2) |
+| COUNTDOWN-TBA | يُعلن التاريخ قريبًا | hero countdown, until DEC-01 |
+| COUNTDOWN-UNITS | يوم · ساعة · دقيقة · ثانية | countdown cells |
+| STAT-CAPTIONS | بطولات رئيسية · لاعبًا متنافسًا · مناطق تجربة · أيام متواصلة | big-stats band (3 / 48 / 6 / 3) |
+| PATH-PLAYERS | للاعبين — نافس في البطولات | dual-path section title (body reuses JOIN-TEXT) |
+| PATH-FANS | للجمهور — عيش الأجواء | dual-path section title (body reuses the KEEP FAQ spectator answer) |
+| TIER-DIAMOND / GOLD / SILVER | الراعي الماسي · الراعي الذهبي · الراعي الفضي · شريك مشارك | tiered sponsor rows (tiers are FACT from the brief) |
 
 ## System / errors (all DRAFT)
 

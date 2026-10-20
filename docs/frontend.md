@@ -73,7 +73,11 @@ sponsors → footer; nav anchors. Separate funnel routes (/vote/, /register/, /b
 
 Deliberately restrained — no glitch/scanline/cursor effects from the prototype. Allowed set:
 subtle hover lift on cards and CTAs, the volt rule sweep on card headers (optional), smooth
-scroll to anchors, bracket "LIVE" badge pulse. FIXED regardless: all effects honor
+scroll to anchors, bracket "LIVE" badge pulse, the **volt marquee ticker** (CSS keyframes,
+duplicated item sequence for a seamless loop), and the **hero countdown** (1s interval JS,
+digits show "--" until the event date is configured in SiteConfig). Rev 2 additions came from
+competitor research (Kingdom of Gaming: countdown, audience split; Esports World Cup:
+big-stats band, tiered partner rows). FIXED regardless: all effects honor
 `prefers-reduced-motion: reduce` (animations off, static states), and no effect may block
 interaction or run while its element is off-screen.
 
