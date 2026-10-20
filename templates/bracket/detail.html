@@ -1,26 +1,39 @@
 {% extends "base.html" %}
 {% block title %}{{ game.name_ar }} — {{ content.BRACKET_TITLE }}{% endblock %}
+{% block funnel_tag %}LIVE BRACKET{% endblock %}
 {% block content %}
-<section>
-  <h2>{{ game.name_ar }}</h2>
-  {% if champion %}<p><strong>{{ content.CHAMPION }}:</strong> <span dir="ltr">{{ champion }}</span></p>{% endif %}
+<div class="funnel" style="max-width: 1100px;">
+  <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+    <h1>{{ game.name_ar }}</h1>
+    {% if champion %}
+    <div class="champion-panel" style="padding: 10px 22px;">
+      <span class="t">{{ content.CHAMPION }}: <span class="num" dir="ltr">{{ champion }}</span></span>
+    </div>
+    {% endif %}
+  </div>
 
   {% for round_num, round_name, matches in rounds %}
-  <h3>{{ round_name }}</h3>
-  <table>
-    {% for m in matches %}
-    <tr>
-      <td dir="ltr">{{ m.player1.game_player_id|default:"—" }}</td>
-      <td dir="ltr">{{ m.player2.game_player_id|default:"—" }}</td>
-      <td>
-        {% if m.status == "pending" %}{{ content.MATCH_PENDING }}
-        {% elif m.status == "forfeit" %}{{ content.MATCH_FORFEIT }}
-        {% else %}<span dir="ltr">{{ m.winner.game_player_id }} — {{ m.score_text }}</span>{% endif %}
-      </td>
-    </tr>
-    {% endfor %}
-  </table>
+  <section style="display: flex; flex-direction: column; gap: 10px;">
+    <div class="round-title">{{ round_name }}</div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px;">
+      {% for m in matches %}
+      <div class="match-cell">
+        <div class="row">
+          <span class="p {% if m.winner_id == m.player1_id and m.winner_id %}win{% endif %}" dir="ltr">{{ m.player1.game_player_id|default:"—" }}</span>
+        </div>
+        <div class="row">
+          <span class="p {% if m.winner_id == m.player2_id and m.winner_id %}win{% endif %}" dir="ltr">{{ m.player2.game_player_id|default:"—" }}</span>
+          <span>
+            {% if m.status == "pending" %}<span style="font-size: 11px; color: var(--muted);">{{ content.MATCH_PENDING }}</span>
+            {% elif m.status == "forfeit" %}<span style="font-size: 11px; color: var(--muted);">{{ content.MATCH_FORFEIT }}</span>
+            {% else %}<span class="s" dir="ltr">{{ m.score_text }}</span>{% endif %}
+          </span>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
   {% endfor %}
-</section>
-{# Polling enhancement (10s JSON endpoint) is added with the design bundle — DEC-15 #}
+</div>
+{# Polling enhancement: /api/bracket/<slug>.json every 15s — added with the JS bundle #}
 {% endblock %}

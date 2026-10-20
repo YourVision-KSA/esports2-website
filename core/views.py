@@ -19,11 +19,27 @@ from .outbox import send_due
 @cache_control(public=True, max_age=60, s_maxage=60)
 def home(request):
     """The single long home page. No forms here (docs/routes.md rule zero)."""
+    from .phases import Phase, current_phase
+
     games = Game.objects.filter(status=Game.Status.CONFIRMED)
     if not games.exists():
         # Before the vote result, show the candidates instead.
         games = Game.objects.filter(status=Game.Status.CANDIDATE)
-    return render(request, "core/home.html", {"games": games})
+
+    # LIVE bar (event days only): the next match that has both players.
+    live_match = None
+    if current_phase() == Phase.EVENT:
+        from bracket.models import Match
+
+        live_match = (
+            Match.objects.filter(
+                status=Match.Status.PENDING, player1__isnull=False, player2__isnull=False
+            )
+            .select_related("game", "player1", "player2")
+            .order_by("round", "slot")
+            .first()
+        )
+    return render(request, "core/home.html", {"games": games, "live_match": live_match})
 
 
 def healthz(request):

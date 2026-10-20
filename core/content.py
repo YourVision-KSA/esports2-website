@@ -146,6 +146,34 @@ CONTENT = {
     "CHECKIN_OK": "تم تأكيد الحضور — أهلًا وسهلًا",  # APPROVED (owner, 2026-10)
     "CHECKIN_ALREADY": "هذه الدعوة مستخدمة مسبقًا ({time})",  # DRAFT
     "CHECKIN_INVALID": "دعوة غير صالحة",  # DRAFT
+    # Home — design rev 3.1 additions (all DRAFT unless noted) -----------------
+    "COUNTDOWN_LABEL": "ينطلق الحدث بعد",
+    "COUNTDOWN_TBA": "يُعلن التاريخ قريبًا",
+    "UNIT_DAY": "يوم",
+    "UNIT_HOUR": "ساعة",
+    "UNIT_MIN": "دقيقة",
+    "UNIT_SEC": "ثانية",
+    "TICKER": ["١٦ لاعبًا لكل بطولة", "النهائيات على المسرح الرئيسي", "الدخول للجمهور مجاني"],
+    "STATS_BAND": [
+        ("3", "بطولات رئيسية"),
+        ("48", "لاعبًا متنافسًا"),
+        ("6", "مناطق تجربة"),
+        ("3", "أيام متواصلة"),
+    ],
+    "PATH_PLAYERS": "للاعبين — نافس في البطولات",
+    "PATH_FANS": "للجمهور — عيش الأجواء",
+    # KEEP (FAQ answer text, reused on the fans card)
+    "PATH_FANS_TEXT": "منطقة اللعب الحر والواقع الافتراضي وركن الريترو مفتوحة للجميع، والمدرجات متاحة لمتابعة النهائيات.",
+    "GAMES_PENDING_VOTE": "الألعاب النهائية تُعتمد بعد انتهاء التصويت العام.",
+    "LIVE_NOW": "مباشر الآن",
+    "LIVE_WATCH": "تابع البث",
+    "TIER_DIAMOND": "الراعي الماسي",
+    "TIER_GOLD": "الراعي الذهبي",
+    "TIER_SILVER": "الراعي الفضي · شريك مشارك",
+    "DAY_1": "اليوم 1",
+    "DAY_2": "اليوم 2",
+    "DAY_3": "اليوم 3 — النهائيات",
+    "SCHEDULE_ROW_TBA": "[تُعلن الفقرات لاحقًا]",
     # Staff pages (all DRAFT) --------------------------------------------------
     "STAFF_RESULTS_TITLE": "إدخال النتائج",
     "STAFF_CHECKIN_TITLE": "تسجيل الحضور",

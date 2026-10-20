@@ -1,15 +1,24 @@
 {% extends "base.html" %}
+{% load static ui %}
 {% block title %}{{ content.BRACKET_TITLE }}{% endblock %}
+{% block funnel_tag %}LIVE BRACKET{% endblock %}
 {% block content %}
-<section>
-  <h2>{{ content.BRACKET_TITLE }}</h2>
-  <div class="cards">
+<div class="funnel" style="max-width: 1000px;">
+  <h1>{{ content.BRACKET_TITLE }}</h1>
+  <div class="grid-3">
     {% for game in games %}
-    <article class="card">
-      <h3>{{ game.name_ar }}</h3>
-      <a class="btn" href="/bracket/{{ game.slug }}/">{{ content.BRACKET_TITLE }}</a>
+    <article class="game-card">
+      <div class="media" style="height: 130px;">
+        <img src="{% static game|game_image %}" alt="">
+        <div class="shade" aria-hidden="true"></div>
+        <div class="title-row"><h3 style="font-size: 20px;">{{ game.name_ar }}</h3></div>
+      </div>
+      <div class="rule" style="background: {{ forloop.counter0|accent }};"></div>
+      <div class="body">
+        <a class="go" href="/bracket/{{ game.slug }}/">{{ content.BRACKET_TITLE }} ←</a>
+      </div>
     </article>
     {% endfor %}
   </div>
-</section>
+</div>
 {% endblock %}

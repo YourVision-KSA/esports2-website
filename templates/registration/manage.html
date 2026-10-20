@@ -1,28 +1,37 @@
 {% extends "base.html" %}
+{% block funnel_tag %}MY SEAT{% endblock %}
 {% block content %}
-<section>
-  {% if registration.status == "confirmed" %}
-    <h2>{{ content.REG_OK_CONFIRMED|cut:"{game}" }}{{ registration.game.name_ar }}</h2>
-  {% elif registration.status == "waitlisted" %}
-    <h2>{{ content.REG_OK_WAITLIST|cut:"{n}" }}<span dir="ltr">{{ registration.waitlist_position }}</span></h2>
-  {% else %}
-    <h2>{{ content.REG_WITHDRAWN }}</h2>
-  {% endif %}
+<div class="funnel">
+  <div class="success-panel">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#D8F24A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="m8 12 3 3 5-6"></path></svg>
+      <h1 style="font-size: 22px;">
+        {% if registration.status == "confirmed" %}
+          {{ content.REG_OK_CONFIRMED|cut:"{game}" }}{{ registration.game.name_ar }}
+        {% elif registration.status == "waitlisted" %}
+          {{ content.REG_OK_WAITLIST|cut:"{n}" }}<span class="num" dir="ltr">{{ registration.waitlist_position }}</span>
+        {% else %}
+          {{ content.REG_WITHDRAWN }}
+        {% endif %}
+      </h1>
+    </div>
+    {% if is_new %}
+    <div style="font-size: 13px; color: var(--muted);">{{ content.REG_SAVE_LINK }}</div>
+    <div class="token-box" dir="ltr">{{ request.scheme }}://{{ request.get_host }}/r/{{ manage_token }}/</div>
+    {% if player.email %}<div style="font-size: 12px; color: var(--muted);">{{ content.REG_LINK_EMAILED }}</div>{% endif %}
+    {% endif %}
+  </div>
 
-  {% if is_new %}
-  <p class="error">{{ content.REG_SAVE_LINK }}</p>
-  <p><code dir="ltr">{{ request.scheme }}://{{ request.get_host }}/r/{{ manage_token }}/</code></p>
-  {% if player.email %}<p>{{ content.REG_LINK_EMAILED }}</p>{% endif %}
-  {% endif %}
-
-  <table>
-    <tr><th>{{ content.NAV_GAMES }}</th><td>{{ registration.game.name_ar }}</td></tr>
-    <tr><th dir="ltr">Gamer Tag</th><td dir="ltr">{{ registration.game_player_id }}</td></tr>
-    <tr><th>{{ content.REG_FIELD_NAME }}</th><td>{{ player.full_name }}</td></tr>
-  </table>
+  <div class="panel" style="padding: 8px 18px;">
+    <table>
+      <tr><th>{{ content.NAV_GAMES }}</th><td style="font-weight: 600; color: var(--text);">{{ registration.game.name_ar }}</td></tr>
+      <tr><th dir="ltr">Gamer Tag</th><td class="num" dir="ltr" style="color: var(--volt);">{{ registration.game_player_id }}</td></tr>
+      <tr><th>{{ content.REG_FIELD_NAME }}</th><td>{{ player.full_name }}</td></tr>
+    </table>
+  </div>
 
   {% if can_withdraw %}
-  <p><a class="btn" href="/r/{{ manage_token }}/withdraw/">{{ content.REG_WITHDRAW }}</a></p>
+  <p><a class="btn btn-ghost" href="/r/{{ manage_token }}/withdraw/">{{ content.REG_WITHDRAW }}</a></p>
   {% endif %}
-</section>
+</div>
 {% endblock %}

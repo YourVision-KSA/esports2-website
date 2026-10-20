@@ -1,18 +1,36 @@
 {% extends "base.html" %}
+{% load static ui %}
 {% block title %}{{ content.REG_TITLE }}{% endblock %}
+{% block funnel_tag %}REGISTER{% endblock %}
 {% block content %}
-<section>
-  <h2>{{ content.REG_TITLE }}</h2>
-  <p>{{ content.REG_CHOOSE }}</p>
-  <div class="cards">
+<div class="funnel" style="max-width: 1000px;">
+  <div style="display: flex; flex-direction: column; gap: 8px;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <span class="step-badge" dir="ltr">1/2</span>
+      <h1>{{ content.REG_TITLE }}</h1>
+    </div>
+    <p style="font-size: 14px; color: var(--muted);">{{ content.REG_CHOOSE }}</p>
+  </div>
+  <div class="grid-3">
     {% for game, left in rows %}
-    <article class="card">
-      <h3>{{ game.name_ar }}</h3>
-      {% if game.name_en %}<p dir="ltr">{{ game.name_en }} · 1v1</p>{% endif %}
-      <p>{{ content.LABEL_SEATS }}: <span dir="ltr">{{ left }}</span></p>
-      <a class="btn" href="/register/{{ game.slug }}/">{{ content.HERO_BTN_REGISTER }}</a>
+    <article class="game-card">
+      <div class="media" style="height: 130px;">
+        <img src="{% static game|game_image %}" alt="">
+        <div class="shade" aria-hidden="true"></div>
+        <div class="title-row">
+          <h3 style="font-size: 20px;">{{ game.name_ar }}</h3>
+          {% if game.name_en %}<span class="en" dir="ltr">{{ game.name_en|upper }}</span>{% endif %}
+        </div>
+      </div>
+      <div class="rule" style="background: {{ forloop.counter0|accent }};"></div>
+      <div class="body">
+        <div class="foot" style="border: 0; padding: 0;">
+          <span class="seats">{{ content.LABEL_SEATS }}: <b dir="ltr">{{ left }}</b></span>
+          <a class="go" href="/register/{{ game.slug }}/">{{ content.HERO_BTN_REGISTER }} ←</a>
+        </div>
+      </div>
     </article>
     {% endfor %}
   </div>
-</section>
+</div>
 {% endblock %}

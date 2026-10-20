@@ -1,30 +1,38 @@
 {% extends "base.html" %}
 {% block title %}{{ content.VOTE_TITLE }}{% endblock %}
+{% block funnel_tag %}VOTE{% endblock %}
 {% block content %}
-<section>
-  <h2>{{ content.VOTE_TITLE }}</h2>
-  <p>{{ content.VOTE_INSTR|cut:"{n}" }}<span dir="ltr">{{ n_choices }}</span></p>
-  {% if error_key %}<p class="error">{{ content.ERR_RETRY }}</p>{% endif %}
-  {% if error %}<p class="error">{{ content.ERR_RETRY }}</p>{% endif %}
+<div class="funnel">
+  <div style="display: flex; flex-direction: column; gap: 8px;">
+    <h1>{{ content.VOTE_TITLE }}</h1>
+    <p style="font-size: 14px; color: var(--muted);">
+      {{ content.VOTE_INSTR|cut:"{n}" }}<b dir="ltr" class="num" style="color: var(--volt);">{{ n_choices }}</b>
+    </p>
+  </div>
 
-  <form method="post" action="/vote/">
+  {% if error_key or error %}<p class="error">{{ content.ERR_RETRY }}</p>{% endif %}
+
+  <form method="post" action="/vote/" style="display: flex; flex-direction: column; gap: 10px;">
     {% csrf_token %}
     {% for game in games %}
-    <p>
-      <label>
-        <input type="checkbox" name="choices" value="{{ game.pk }}">
-        {{ game.name_ar }}{% if game.name_en %} <span dir="ltr">({{ game.name_en }})</span>{% endif %}
-      </label>
-    </p>
+    <label class="choice">
+      <input type="checkbox" name="choices" value="{{ game.pk }}">
+      <span class="name">{{ game.name_ar }}</span>
+      {% if game.name_en %}<span class="en" dir="ltr">{{ game.name_en|upper }}</span>{% endif %}
+    </label>
     {% endfor %}
+
     {% if turnstile_site_key %}
-    <div class="cf-turnstile" data-sitekey="{{ turnstile_site_key }}"></div>
+    <div class="cf-turnstile" data-sitekey="{{ turnstile_site_key }}" style="margin-block-start: 6px;"></div>
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     {% endif %}
-    <button type="submit">{{ content.VOTE_SUBMIT }}</button>
+
+    <button type="submit" style="margin-block-start: 4px;">{{ content.VOTE_SUBMIT }}</button>
   </form>
 
-  <h3>{{ content.VOTE_RESULTS_TITLE }}</h3>
-  <p>{{ content.VOTE_RULES }}</p>
-</section>
+  <div class="help-panel">
+    <div class="t">{{ content.VOTE_RESULTS_TITLE }}</div>
+    <p>{{ content.VOTE_RULES }}</p>
+  </div>
+</div>
 {% endblock %}

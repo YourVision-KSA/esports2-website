@@ -1,16 +1,22 @@
 {% extends "base.html" %}
 {% block title %}{{ content.VOTE_RESULTS_TITLE }}{% endblock %}
+{% block funnel_tag %}RESULTS{% endblock %}
 {% block content %}
-<section>
-  <h2>{{ content.VOTE_RESULTS_TITLE }}</h2>
-  <table>
-    {% for row in tally.choices %}
-    <tr><td>{{ row.game__name_ar }}</td><td dir="ltr">{{ row.votes }}</td></tr>
-    {% endfor %}
-  </table>
-  <p>
+<div class="funnel">
+  <h1>{{ content.VOTE_RESULTS_TITLE }}</h1>
+  <div class="panel" style="padding: 8px 18px;">
+    <table>
+      {% for row in tally.choices %}
+      <tr>
+        <td style="font-weight: 600; color: var(--text);">{{ row.game__name_ar }}</td>
+        <td class="num" dir="ltr" style="color: var(--volt); font-weight: 700;">{{ row.votes }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+  <p style="font-size: 14px; color: var(--muted);">
     {{ content.VOTE_RESULTS_NOTE|cut:"{counted}"|cut:"{held}" }}
-    <span dir="ltr">{{ tally.counted }} / {{ tally.held }}</span>
+    <span class="num" dir="ltr">{{ tally.counted }} / {{ tally.held }}</span>
   </p>
-</section>
+</div>
 {% endblock %}

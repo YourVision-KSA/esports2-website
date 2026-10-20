@@ -1,11 +1,12 @@
 {% extends "base.html" %}
+{% block funnel_tag %}WITHDRAW{% endblock %}
 {% block content %}
-<section>
-  <h2>{{ content.REG_WITHDRAW }} — {{ registration.game.name_ar }}</h2>
-  <p>{{ content.REG_WITHDRAW_CONFIRM }}</p>
+<div class="funnel">
+  <h1>{{ content.REG_WITHDRAW }} — {{ registration.game.name_ar }}</h1>
+  <p style="color: var(--body);">{{ content.REG_WITHDRAW_CONFIRM }}</p>
   <form method="post">
     {% csrf_token %}
     <button type="submit">{{ content.REG_WITHDRAW }}</button>
   </form>
-</section>
+</div>
 {% endblock %}

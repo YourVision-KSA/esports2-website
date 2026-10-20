@@ -1,11 +1,15 @@
 {% extends "base.html" %}
 {% block content %}
-<section>
-  {% if registration.status == "confirmed" %}
-    <h2>{{ content.REG_OK_CONFIRMED|cut:"{game}" }}{{ registration.game.name_ar }}</h2>
-  {% else %}
-    <h2>{{ content.REG_OK_WAITLIST|cut:"{n}" }}<span dir="ltr">{{ registration.waitlist_position }}</span></h2>
-  {% endif %}
-  <p>{{ content.REG_LINK_EXISTING }}</p>
-</section>
+<div class="funnel">
+  <div class="success-panel">
+    <h1 style="font-size: 22px;">
+      {% if registration.status == "confirmed" %}
+        {{ content.REG_OK_CONFIRMED|cut:"{game}" }}{{ registration.game.name_ar }}
+      {% else %}
+        {{ content.REG_OK_WAITLIST|cut:"{n}" }}<span class="num" dir="ltr">{{ registration.waitlist_position }}</span>
+      {% endif %}
+    </h1>
+    <p style="font-size: 14px; color: var(--muted);">{{ content.REG_LINK_EXISTING }}</p>
+  </div>
+</div>
 {% endblock %}
