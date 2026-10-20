@@ -1,25 +1,52 @@
 # Front-end — Design Status, RTL, 3D, Performance
 
-## Design status (updated after the prototype was demoted to content reference)
+## Design status
 
+- **DESIGN REFERENCE (DEC-15, delivered 2026-10-20): the "E-SPORTS 2 Website Design" artifact**
+  — https://claude.ai/artifact/SNEBV9cXyS8YCmeJJfEvqG — direction **"Tournament Broadcast"**:
+  professional esports look, deep navy + white ground + volt accent, gold reserved for prizes.
+  7 artboards: design tokens, home desktop + mobile, vote, registration, bracket, VIP invite.
+  Implement from it; propose changes there first, then here.
 - `reference/prototype.html` is the **CONTENT reference only**: its Arabic text and event
   information (captured in docs/content-ar.md). **Do not copy its code, colors, fonts or
-  layout.** Its visual design is no longer the reference.
-- The visual design will come from a new **/design artifact (DEC-15, pending)**. When it
-  exists, record here: the theme tokens, the font choices, the 3D scene subjects/specs, and
-  the page-effect list — then remove the PENDING markers below.
+  layout.**
 - **Fixed product requirements regardless of design:** Arabic-first RTL · gaming style ·
   interactive 3D scenes · mobile-first performance (budgets below).
 
-## Theme tokens — PENDING (DEC-15)
+## Theme tokens (from the design artifact — define as CSS custom properties on `:root`)
 
-To be filled from the /design artifact: color palette as CSS custom properties on `:root`,
-theme model (single dark / light+dark), backgrounds, accents. Until then, do not define theme
-colors anywhere; base templates use structure only. Do not reuse the prototype's palette.
+```css
+--ink: #0E1433;        /* navy: dark sections, headings, card header bands */
+--panel-dark: #141B45; /* panels on navy */
+--line-dark: #2A3370;  /* borders on navy (hairline #232B5C) */
+--volt: #D8F24A;       /* THE accent: CTAs, highlights, section slashes */
+--ground: #F5F6FA;     /* page background */
+--surface: #FFFFFF;    /* cards */
+--surface-2: #EEF0F7;  /* alternate light sections */
+--line: #DDE1EE;       /* borders on light */
+--text: #171C3F;       /* body on light */
+--muted: #5A6180;      /* secondary on light */
+--text-dark: #E9ECFA;  /* body on navy */
+--muted-dark: #A9B1D6; /* secondary on navy */
+--link: #2443D6;       /* links on light */
+--gold: #D9A441;       /* prizes/VIP decorative; as TEXT on light use #8A6513, on navy #E9C15C */
+--error: #B3261E;
+```
+Theme model: **single theme** — light ground with navy "broadcast" bands (hero, schedule,
+join CTA, bracket, invite). Radius 0 everywhere. Spacing scale 4/8/12/16/24/36/48/72.
+Motifs: 12° skew slashes (`transform: skewX(-12deg)`) as separators and section-tag marks;
+**cut-corner CTAs** (`clip-path` 10–12px) on primary buttons only; cards = white, 1px
+`--line` border, navy header band + 3–4px volt rule; EN section tags in Space Grotesk
+letterspaced (`01 · TOURNAMENTS`).
 
-## Fonts — choice PENDING (DEC-15); delivery rules FIXED
+## Fonts (from the design artifact); delivery rules FIXED
 
-The design artifact decides which fonts are used. Whatever they are:
+- **Alexandria** 700/800 — display and headings (Arabic + Latin)
+- **Rubik** 400/500/600/700 — body and UI (Arabic + Latin)
+- **Space Grotesk** 500/700 — numbers, scores, times, EN tags (Latin only; always inside
+  `dir="ltr"` isolation)
+
+Delivery rules for them:
 
 - **Self-host trimmed `.woff2` subsets** served from `/static/` with 1-year immutable cache.
   No Google Fonts CDN or any third-party font host (performance + no visitor data leakage).
@@ -42,18 +69,21 @@ One long home page: hero → stats → tournaments → zones → schedule → pr
 sponsors → footer; nav anchors. Separate funnel routes (/vote/, /register/, /bracket/, /r/,
 /invite/) reuse the theme with a compact header and **no 3D** (fast, form-first pages).
 
-## Page effects — PENDING (DEC-15)
+## Page effects (from the design artifact)
 
-The effect set (glitch, scanlines, cursor light, card tilt, …) is defined by the new design.
-FIXED regardless of design: all effects honor `prefers-reduced-motion: reduce` (animations
-off, static states), and no effect may block interaction or run while its element is
-off-screen.
+Deliberately restrained — no glitch/scanline/cursor effects from the prototype. Allowed set:
+subtle hover lift on cards and CTAs, the volt rule sweep on card headers (optional), smooth
+scroll to anchors, bracket "LIVE" badge pulse. FIXED regardless: all effects honor
+`prefers-reduced-motion: reduce` (animations off, static states), and no effect may block
+interaction or run while its element is off-screen.
 
-## 3D scenes — subjects PENDING (DEC-15); engineering requirements FIXED
+## 3D scenes — subjects CONFIRMED by the design; engineering requirements FIXED
 
-The product requires an **interactive 3D hero scene** (user-manipulable, e.g. drag-to-rotate
-+ pointer parallax) and allows a second scene in a content section. Whether the subjects stay
-controller/trophy or change is the design artifact's call.
+The design keeps both subjects, restyled to the new palette: **hero = game controller over a
+lit pedestal** (navy scene, volt ring accents, drag-to-rotate + pointer parallax, in a framed
+panel with the `3D INTERACTIVE SCENE` label and the hint «اسحب يد التحكم لتدويرها»), and
+**prizes = gold trophy with star topper** (navy panel, gold ring, lazy-loaded). The artboards
+show each scene's framed placeholder/poster composition — the poster IS the LOW/FALLBACK tier.
 
 Engineering requirements (apply to whatever the design specifies):
 

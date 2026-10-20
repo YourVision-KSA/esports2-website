@@ -76,7 +76,7 @@ server-side phase gating · backups/PITR · the printed event-day fallback.
 | DEC-12 | VIP mail sender mailbox/domain; SPF/DKIM configured + test email passed | before W5 | OPEN |
 | DEC-13 | Prize values / descriptions for the prizes section | before G3 | OPEN |
 | DEC-14 | Confirm no payments (A5) and no national ID (A6) | this week | ASSUMED YES |
-| DEC-15 | **New design from /design** — the design artifact that becomes the design reference (theme tokens, fonts, 3D scene subjects, effects → recorded in docs/frontend.md). `reference/prototype.html` is content reference only | before the base template in W1 | OPEN |
+| DEC-15 | **New design from /design** — the design artifact that becomes the design reference (theme tokens, fonts, 3D scene subjects, effects → recorded in docs/frontend.md). `reference/prototype.html` is content reference only | before the base template in W1 | **DELIVERED 2026-10-20** — "Tournament Broadcast" direction, 7 artboards: https://claude.ai/artifact/SNEBV9cXyS8YCmeJJfEvqG (tokens recorded in docs/frontend.md); owner sign-off pending |
 
 When a DEC closes, record the answer here (edit the row, add the date) — this table is the
 single place future sessions check before building anything that depends on an open decision.
