@@ -22,6 +22,18 @@ earlier than needed). Dates shift with DEC-01; the **sequence and gates are fixe
   `/vote/`, `/register/`, `/bracket/`, `/healthz`. Execution checklist with per-person
   assignments added: `docs/tasks.md`.
 
+- **2026-10-21 — CHECKPOINT `checkpoint-2026-10-21`** (git tag; restore with
+  `git checkout checkpoint-2026-10-21`). Frozen state: W1 build complete on the Arena
+  Night rev 3.1 theme, **59/59 tests green**, ruff clean. Infrastructure this day:
+  GitHub org **YourVision-KSA** (public repo, `main` protected via ruleset: PR + CI
+  required), work branch `dev-hussein`, owner invite to Yousef pending, branded org
+  profile. New since W1 log: `enroll_totp` command (staff 2FA first-device enrollment,
+  4 tests). A full logo-driven redesign (rev 4: event-logo palette, hero 3D controller
+  scene, static logo panel) was built, then **reverted at the owner's direction** —
+  it lives in history between `2f9746e` and `fc19a91` on `dev-hussein` and can be
+  cherry-picked back selectively. Event logo source: `Downloads/UI` on the dev machine.
+  Next up: DEC answers (Yousef), GCP/Cloudflare (~Oct 29), design direction decision.
+
 ## Timeline
 
 | Week | Dates | Build focus | Milestone |
