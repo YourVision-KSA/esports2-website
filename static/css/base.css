@@ -50,7 +50,7 @@ h1, h2, h3 { font-family: var(--display); font-weight: 800; line-height: 1.25; m
 p { margin: 0; }
 img { max-width: 100%; }
 a:focus-visible, button:focus-visible, summary:focus-visible, input:focus-visible {
-  outline: 2px solid var(--gold); outline-offset: 3px;
+  outline: 2px solid var(--volt); outline-offset: 3px;
 }
 .num, time { font-family: var(--num); }
 [dir="ltr"] { unicode-bidi: isolate; }
@@ -300,18 +300,18 @@ section { scroll-margin-block-start: 76px; }
 .podium li { display: flex; gap: 20px; align-items: baseline; padding-block: 16px; border-block-end: 1px solid var(--line); }
 .podium li:last-child { border-block-end: 0; }
 .podium b { font-family: var(--num); font-weight: 700; font-size: 32px; min-width: 2ch; direction: ltr; }
-.podium .p1 { color: var(--gold); }
+.podium .p1 { color: var(--volt); }
 .podium .p2 { color: var(--body); }
 .podium .p3 { color: var(--bronze); }
 .podium h3 { font-size: 19px; font-weight: 700; }
 .podium p { font-size: 14px; color: var(--muted); }
 .trophy-frame {
-  position: relative; height: clamp(260px, 36vw, 480px); border: 1px solid #45401F;
+  position: relative; height: clamp(260px, 36vw, 480px); border: 1px solid var(--line-strong);
   overflow: hidden; box-shadow: var(--shadow);
 }
 .trophy-frame img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .trophy-frame .shade { position: absolute; inset: 0; background: linear-gradient(to top, rgba(10, 19, 34, 0.6), transparent 45%); }
-.trophy-frame .scene-badge i { background: var(--gold); }
+.trophy-frame .scene-badge i { background: var(--volt); }
 
 /* ---- rules / faq ---------------------------------------------------------------------------- */
 .rules-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; font-size: 15px; color: var(--body); }
@@ -340,7 +340,7 @@ details p { padding-block-start: 8px; font-size: 14px; color: var(--muted); max-
 .sponsors { display: flex; flex-direction: column; gap: 18px; }
 .tier-row { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
 .tier-name { min-width: 110px; font-size: 12px; font-weight: 700; color: var(--muted); }
-.tier-name.diamond { color: var(--gold); }
+.tier-name.diamond { color: var(--volt); }
 .logo-slot {
   border: 1px dashed var(--line-strong); background: var(--surface);
   display: flex; align-items: center; justify-content: center;
@@ -420,10 +420,10 @@ th { color: var(--muted); font-weight: 600; }
 .match-cell .s { font-family: var(--num); color: var(--volt); direction: ltr; }
 .round-title { font-family: var(--display); font-weight: 700; font-size: 16px; color: var(--volt); }
 .champion-panel {
-  background: var(--bg-2); border: 1px solid var(--gold-deep); padding: 18px;
+  background: var(--bg-2); border: 1px solid var(--line-strong); padding: 18px;
   display: flex; flex-direction: column; gap: 8px; align-items: center; text-align: center;
 }
-.champion-panel .t { font-family: var(--display); font-weight: 700; font-size: 17px; color: var(--gold); }
+.champion-panel .t { font-family: var(--display); font-weight: 700; font-size: 17px; color: var(--volt); }
 
 /* ---- reveal + count-up (JS adds .in / .counted) ----------------------------------------------------- */
 .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }

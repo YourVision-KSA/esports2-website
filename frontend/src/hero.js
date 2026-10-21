@@ -124,13 +124,16 @@ function buildController() {
     g.add(recess, stem, cap, rim);
   }
 
-  // Center column: touchpad up top, slim home button below it.
-  const touchpad = new Mesh(new RoundedBoxGeometry(0.62, 0.34, 0.05, 3, 0.06), plasticDark);
-  touchpad.position.set(0, 0.3, FRONT + 0.02);
+  // Center column, PlayStation-style: wide touchpad with a thin light bar
+  // above it, slim home button below.
+  const touchpad = new Mesh(new RoundedBoxGeometry(0.72, 0.34, 0.05, 3, 0.06), plasticDark);
+  touchpad.position.set(0, 0.28, FRONT + 0.02);
+  const lightBar = new Mesh(new RoundedBoxGeometry(0.5, 0.045, 0.04, 2, 0.02), cyan);
+  lightBar.position.set(0, 0.5, FRONT);
   const home = new Mesh(new CylinderGeometry(0.05, 0.05, 0.05, 16), cyan);
   home.position.set(0, -0.08, FRONT + 0.01);
   home.rotation.x = Math.PI / 2;
-  g.add(touchpad, home);
+  g.add(touchpad, lightBar, home);
 
   // Shoulder bumpers wrapping the top edge.
   for (const side of [-1, 1]) {
@@ -225,7 +228,8 @@ export function mountHero(frame, startTier) {
   scene.add(voltLight, purpleLight);
 
   const controller = buildController();
-  controller.position.y = 1.0; // body extends downward from its y=0 top edge
+  controller.scale.setScalar(0.68); // owner feedback: the gamepad read far too large
+  controller.position.y = 0.72; // body extends downward from its y=0 top edge
   controller.rotation.x = -0.35;
   const pedestal = buildPedestal();
   pedestal.position.y = -1.15;
@@ -292,7 +296,7 @@ export function mountHero(frame, startTier) {
     if (!dragging) targetYaw += 0.0012; // idle spin
     controller.rotation.y += (targetYaw - controller.rotation.y) * 0.08;
     controller.rotation.x += (-0.35 + targetPitch - controller.rotation.x) * 0.08;
-    controller.position.y = 1.0 + Math.sin(t * 1.1) * 0.06; // gentle bob
+    controller.position.y = 0.72 + Math.sin(t * 1.1) * 0.05; // gentle bob
     camera.position.x += (parallaxX * 0.25 - camera.position.x) * 0.04;
     camera.position.y += (1.1 - parallaxY * 0.2 - camera.position.y) * 0.04;
     camera.lookAt(0, 0.3, 0);
