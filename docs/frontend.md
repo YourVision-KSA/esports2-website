@@ -9,6 +9,11 @@
   extracted logo assets live in `static/img/` (`logo.png`, `logo-mark.png`, `favicon.png`).
   **No colored glow shadows anywhere** — only the neutral elevation shadow token.
   The rev 3 "Arena Night" notes below remain for layout/motion/structure, which are kept.
+- **REV 4.1 (2026-10-21, owner-directed): hero 3D scene REMOVED.** The hero panel now
+  shows the event logo (`static/img/logo.png`), static, in the framed panel where the 3D
+  controller was; typography colors apply. The Vite/Three.js pipeline stays in `frontend/`
+  but no bundle is loaded on any page. **Open question for the owner: is the trophy 3D
+  scene (W5) still wanted, or is 3D dropped entirely?**
 - **DEC-02 evidence:** the logo wordmark reads «تجمع الرياضات الإلكترونية» — supports the
   rebrand answer; owner should confirm so the site name string can be switched.
 

@@ -1,8 +1,6 @@
 {% extends "base.html" %}
-{% load static ui vite %}
+{% load static ui %}
 {# Cached at the edge: NO forms, NO csrf token here (docs/routes.md rule zero). #}
-
-{% block scripts %}{% vite_js "src/main.js" %}{% endblock %}{# hero 3D scene #}
 
 {% block header %}{% endblock %}{# the hero carries its own nav #}
 
@@ -39,7 +37,7 @@
           <span class="slash"></span>
           <span class="hero-eyebrow" dir="ltr">E-SPORTS 2 · AOU RIYADH</span>
         </div>
-        <h1><img class="hero-logo" src="{% static 'img/logo.png' %}" alt="{{ content.SITE_NAME }}"></h1>
+        <h1>يوم <span class="hl">الرياضات الإلكترونية</span></h1>
         <p class="lead">{{ content.HERO_TEXT }}</p>
         <div class="hero-ctas">
           {% if phase == "vote" %}
@@ -68,26 +66,10 @@
         </div>
       </div>
 
-      <!-- 3D hero scene (Three.js mounts here; this frame is the LOW/FALLBACK poster) -->
-      <div class="scene" id="hero-scene">
+      <!-- Event logo panel (owner direction 2026-10-21: static logo instead of the 3D scene) -->
+      <div class="scene">
         <div class="scene-frame">
-          <svg viewBox="0 0 400 300" aria-hidden="true">
-            <g stroke="#24395B" stroke-width="1">
-              <line x1="0" y1="250" x2="400" y2="250"></line>
-              <line x1="40" y1="300" x2="120" y2="200"></line>
-              <line x1="260" y1="300" x2="210" y2="200"></line>
-              <line x1="60" y1="265" x2="340" y2="265"></line>
-            </g>
-            <ellipse cx="200" cy="225" rx="95" ry="16" fill="none" stroke="#3EC7D6" stroke-width="2"></ellipse>
-            <ellipse cx="200" cy="232" rx="120" ry="20" fill="none" stroke="#C9479B" stroke-width="1.5" opacity="0.7"></ellipse>
-            <g transform="translate(130,110)" fill="none" stroke="#92A5C0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M20 40 C 8 40 2 28 6 16 C 9 7 18 4 28 8 C 36 2 104 2 112 8 C 122 4 131 7 134 16 C 138 28 132 40 120 40 C 112 48 96 50 86 42 L 54 42 C 44 50 28 48 20 40 Z"></path>
-              <circle cx="42" cy="22" r="9" stroke="#C9479B"></circle>
-              <circle cx="98" cy="22" r="9" stroke="#3EC7D6"></circle>
-            </g>
-          </svg>
-          <div class="scene-badge"><i></i><span dir="ltr">3D INTERACTIVE SCENE</span></div>
-          <div class="scene-hint">{{ content.HERO_3D_HINT }}</div>
+          <img class="scene-logo" src="{% static 'img/logo.png' %}" alt="">
         </div>
       </div>
     </div>

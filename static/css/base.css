@@ -138,8 +138,6 @@ section { scroll-margin-block-start: 76px; }
 }
 .hero-copy h1 { font-size: clamp(40px, 6.5vw, 74px); line-height: 1.15; }
 .hero-copy h1 .hl { color: var(--volt); }
-/* The hero headline IS the event logo (rev 4: big and clear; alt carries the name). */
-.hero-logo { display: block; width: min(560px, 88vw); height: auto; }
 .hero-copy .lead { max-width: 54ch; font-size: 18px; color: var(--body); }
 .hero-ctas { display: flex; flex-wrap: wrap; gap: 14px; padding-block-start: 4px; }
 
@@ -156,7 +154,7 @@ section { scroll-margin-block-start: 76px; }
 .cd-cell b { display: block; font-family: var(--num); font-weight: 700; font-size: 30px; color: var(--text); }
 .cd-cell span { font-size: 12px; color: var(--muted); direction: rtl; }
 
-/* 3D scene frame (poster = LOW/FALLBACK tier; Three.js mounts over it) */
+/* Hero logo panel (rev 4.1: the event logo, static, where the 3D scene was) */
 .scene { flex: 1 1 400px; min-width: 0; }
 .scene-frame {
   position: relative; height: clamp(240px, 36vw, 440px);
@@ -164,15 +162,7 @@ section { scroll-margin-block-start: 76px; }
   display: flex; align-items: center; justify-content: center; overflow: hidden;
   box-shadow: var(--shadow);
 }
-.scene-frame svg { position: absolute; inset: 0; width: 100%; height: 100%; transition: opacity 0.8s ease; }
-/* Three.js canvas mounts over the poster SVG and fades in when ready
-   (docs/frontend.md: content renders before the 3D bundle). */
-.scene-frame canvas {
-  position: absolute; inset: 0; width: 100%; height: 100%;
-  opacity: 0; transition: opacity 0.8s ease; cursor: grab;
-}
-.scene-frame canvas.on { opacity: 1; }
-.scene-frame canvas:active { cursor: grabbing; }
+.scene-logo { max-width: 88%; max-height: 92%; width: auto; height: auto; display: block; }
 .scene-badge {
   position: absolute; top: 14px; inset-inline-start: 14px;
   display: flex; align-items: center; gap: 8px;
@@ -182,7 +172,6 @@ section { scroll-margin-block-start: 76px; }
   font-family: var(--num); font-size: 11px; letter-spacing: 0.2em;
   color: var(--muted); direction: ltr;
 }
-.scene-hint { position: absolute; inset-block-end: 12px; inset-inline-start: 14px; font-size: 13px; color: var(--muted); }
 
 /* ---- ticker marquee -------------------------------------------------------- */
 .ticker { background: var(--volt); color: var(--bg); overflow: hidden; }
