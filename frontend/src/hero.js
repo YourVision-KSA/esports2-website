@@ -26,16 +26,17 @@ import {
 import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
 import { persistTier } from "./tiers.js";
 
-const VOLT = 0xd8f24a;
-const PURPLE = 0x8c5cff;
-const BODY = 0x161a2b;
+// Logo palette (design rev 4): cyan + magenta accents on navy.
+const VOLT = 0x3ec7d6;
+const PURPLE = 0xc9479b;
+const BODY = 0x1a2c49;
 const DPR_CAP = { HIGH: 2.0, MID: 1.5 };
 const PARTICLES = { HIGH: 140, MID: 50 };
 
 function buildController() {
   const g = new Group();
   const shell = new MeshStandardMaterial({ color: BODY, roughness: 0.45, metalness: 0.3 });
-  const dark = new MeshStandardMaterial({ color: 0x0b0e1a, roughness: 0.6, metalness: 0.2 });
+  const dark = new MeshStandardMaterial({ color: 0x0e1a2e, roughness: 0.6, metalness: 0.2 });
   const volt = new MeshStandardMaterial({ color: VOLT, emissive: VOLT, emissiveIntensity: 0.55 });
   const purple = new MeshStandardMaterial({
     color: PURPLE,
@@ -100,11 +101,11 @@ function buildPedestal() {
   const g = new Group();
   const top = new Mesh(
     new CylinderGeometry(1.55, 1.7, 0.22, 48),
-    new MeshStandardMaterial({ color: 0x10131f, roughness: 0.35, metalness: 0.5 }),
+    new MeshStandardMaterial({ color: 0x13223a, roughness: 0.35, metalness: 0.5 }),
   );
   const voltRing = new Mesh(
     new TorusGeometry(1.56, 0.035, 10, 64),
-    new MeshStandardMaterial({ color: VOLT, emissive: VOLT, emissiveIntensity: 1.6 }),
+    new MeshStandardMaterial({ color: VOLT, emissive: VOLT, emissiveIntensity: 1.2 }),
   );
   voltRing.rotation.x = Math.PI / 2;
   voltRing.position.y = 0.12;
@@ -132,8 +133,8 @@ function buildParticles(count) {
   sprite.width = sprite.height = 32;
   const ctx = sprite.getContext("2d");
   const grad = ctx.createRadialGradient(16, 16, 0, 16, 16, 16);
-  grad.addColorStop(0, "rgba(216,242,74,0.9)");
-  grad.addColorStop(1, "rgba(216,242,74,0)");
+  grad.addColorStop(0, "rgba(62,199,214,0.9)");
+  grad.addColorStop(1, "rgba(62,199,214,0)");
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, 32, 32);
   return new Points(
@@ -164,7 +165,7 @@ export function mountHero(frame, startTier) {
   camera.position.set(0, 1.1, 6.2);
   camera.lookAt(0, 0.3, 0);
 
-  scene.add(new AmbientLight(0x404a6b, 0.9));
+  scene.add(new AmbientLight(0x3a4c6e, 0.9));
   const key = new DirectionalLight(0xf2f4ff, 1.1);
   key.position.set(3, 5, 4);
   scene.add(key);
