@@ -2,21 +2,6 @@
 
 ## Design status
 
-- **REV 4 (2026-10-21, owner-directed): "Event Logo" palette.** The owner supplied the
-  official event logo (Downloads/UI; deep navy panel, cyan + magenta neon shields, gold "2"
-  badge) and directed: take the site colors from the logo, drop the neon-glow styling for a
-  flat professional look, and adopt the logo itself on the site. Tokens below updated;
-  extracted logo assets live in `static/img/` (`logo.png`, `logo-mark.png`, `favicon.png`).
-  **No colored glow shadows anywhere** — only the neutral elevation shadow token.
-  The rev 3 "Arena Night" notes below remain for layout/motion/structure, which are kept.
-- **REV 4.1 (2026-10-21, owner-directed): hero 3D scene REMOVED.** The hero panel now
-  shows the event logo (`static/img/logo.png`), static, in the framed panel where the 3D
-  controller was; typography colors apply. The Vite/Three.js pipeline stays in `frontend/`
-  but no bundle is loaded on any page. **Open question for the owner: is the trophy 3D
-  scene (W5) still wanted, or is 3D dropped entirely?**
-- **DEC-02 evidence:** the logo wordmark reads «تجمع الرياضات الإلكترونية» — supports the
-  rebrand answer; owner should confirm so the site name string can be switched.
-
 - **DESIGN REFERENCE (DEC-15, rev 3 "Arena Night", 2026-10-20): the "E-SPORTS 2 Website
   Design" artifact** — https://claude.ai/artifact/SNEBV9cXyS8YCmeJJfEvqG. The owner rejected
   the earlier light "Tournament Broadcast" look; rev 3 is a **full dark, immersive esports
@@ -43,33 +28,29 @@
 ## Theme tokens (from the design artifact — define as CSS custom properties on `:root`)
 
 ```css
-/* REV 4 — from the official event logo. Var names kept from rev 3 so templates
-   didn't churn: --volt now holds the logo CYAN, --purple the logo MAGENTA. */
---bg: #0A1322;          /* deep navy page ground (logo panel dark) */
---bg-2: #0E1A2E;        /* alternate section band */
---surface: #13223A;     /* cards, panels */
---surface-2: #1A2C49;   /* badges, inner chips */
---line: #24395B;        /* borders */
---line-strong: #32496F; /* input borders, secondary buttons */
---volt: #3EC7D6;        /* THE accent (logo cyan): CTAs, numbers, ticker */
---purple: #C9479B;      /* secondary accent (logo magenta); text-safe #E795C8 */
---text: #F2F6FC;        /* headings/body strong */
---body: #C5D1E4;        /* body text */
---muted: #92A5C0;       /* secondary */
---link: #BFD6F2;        /* links (hover: cyan) */
---gold: #CDAE4B;        /* prizes/VIP, from the logo "2" badge (deep #B29238) */
+--bg: #07080F;          /* near-black page ground */
+--bg-2: #0B0E1A;        /* alternate section band */
+--surface: #10131F;     /* cards, panels */
+--surface-2: #161A2B;   /* badges, inner chips */
+--line: #242A40;        /* borders */
+--line-strong: #32395A; /* input borders, secondary buttons */
+--volt: #D8F24A;        /* THE accent: CTAs, numbers, highlights, ticker */
+--purple: #8C5CFF;      /* glow/gradient only; text-safe variant #B9A6FF */
+--text: #F2F4FF;        /* headings/body strong */
+--body: #C5CBE8;        /* body text */
+--muted: #9AA3C4;       /* secondary */
+--link: #C9D2FF;        /* links (hover: volt) */
+--gold: #E9C15C;        /* prizes/VIP (decor #D9A441, bronze #C8906B) */
 --error: #FFB4AE;
---shadow: 0 12px 28px -14px rgba(0,0,0,0.55); /* the ONLY shadow allowed */
 ```
 Theme model: **single dark theme**. Radius 0. Spacing 4/8/12/16/24/36/48/72.
-Motifs: **flat professional surfaces — NO colored glows** (no neon box/text-shadows, no
-accent radial gradients; `--shadow` is the only shadow) · photo sections with
-**gradient-to-bg overlays** (`linear-gradient(to bottom|top, …, var(--bg))`) · 12° skew
-slashes · **cut-corner CTAs** (`clip-path` 10–12px, primary only) · cards = `--surface`,
-1px `--line`, photo header + 3–4px accent rule · EN section tags in Space Grotesk
-letterspaced (`01 · TOURNAMENTS`) · countdown cells with cyan bottom rule · flat page
-ground (no radials) · **the event logo**: `logo-mark.png` in headers, `favicon.png` as
-the tab icon, `logo.png` full lockup where needed.
+Motifs: **glow** (volt `box-shadow`/`text-shadow` on CTAs and key numbers; purple radial
+gradients + shadows on panels) · photo sections with **gradient-to-bg overlays**
+(`linear-gradient(to bottom|top, …, var(--bg))`) · 12° skew slashes · **cut-corner CTAs**
+(`clip-path` 10–12px, primary only) · cards = `--surface`, 1px `--line`, photo header +
+3–4px accent rule · EN section tags in Space Grotesk letterspaced (`01 · TOURNAMENTS`) ·
+countdown cells with volt bottom rule · page ground carries two faint radials (purple
+top-corner, volt low-corner).
 
 ## Fonts (from the design artifact); delivery rules FIXED
 

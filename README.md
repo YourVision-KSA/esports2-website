@@ -51,11 +51,6 @@ python manage.py seed_demo           # candidate games + opens a 7-day vote wind
 python manage.py createsuperuser
 python manage.py runserver           # http://127.0.0.1:8000  (admin at /staff/)
 pytest                               # run all tests (needs the local Postgres)
-
-# 3D hero scene (optional for backend work — the site runs without it):
-cd frontend
-npm install
-npm run build                        # writes static/dist/ (gitignored; Docker builds it too)
 ```
 
 ## Documentation map

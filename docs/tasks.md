@@ -42,10 +42,7 @@ Yousef (24446357ksa@aou.edu.sa — org owner on GitHub, owner-facing follow-ups)
       fixed 2026-10-21: new `enroll_totp` management command + 4 tests (59 total green)
 - [ ] GCP + Cloudflare setup per `docs/operations.md` (~Oct 29; needs DEC-04/05 from Yousef first)
 - [ ] Vote-page counting-rules content (needs DEC-03)
-- [x] Hero 3D scene — built 2026-10-21, then **removed the same day at the owner's
-      direction** (rev 4.1): the hero panel now shows the event logo, static. The Vite +
-      Three.js pipeline remains in `frontend/` unused. Ask the owner whether the trophy
-      3D scene (W5) is still wanted; if not, delete `frontend/` and the Docker Node stage.
+- [ ] Hero 3D scene: Vite + Three.js bundle (W3 — not started, no `package.json` yet)
 - [ ] Trophy 3D scene (W5; cut-list fallback: static image)
 - [ ] Monitoring + uptime alert before G1 (vote opens ~Nov 2)
 - [ ] Staging cache + abuse rehearsal (W2)

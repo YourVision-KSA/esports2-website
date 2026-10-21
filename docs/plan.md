@@ -22,12 +22,6 @@ earlier than needed). Dates shift with DEC-01; the **sequence and gates are fixe
   `/vote/`, `/register/`, `/bracket/`, `/healthz`. Execution checklist with per-person
   assignments added: `docs/tasks.md`.
 
-- **2026-10-21 (later)** — Owner supplied the official event logo → **design rev 4**:
-  site re-themed to the logo palette (navy/cyan/magenta/gold), all neon glows removed
-  (flat professional look), logo adopted in headers + favicon (assets extracted to
-  static/img/). Hero 3D scene recolored to match. docs/frontend.md tokens updated.
-  Logo wordmark uses «تجمع الرياضات الإلكترونية» — evidence for DEC-02, owner to confirm.
-
 ## Timeline
 
 | Week | Dates | Build focus | Milestone |
