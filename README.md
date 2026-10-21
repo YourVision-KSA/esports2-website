@@ -28,10 +28,13 @@ Django 5.2 LTS (server-rendered, Arabic RTL) · PostgreSQL · Three.js via a Vit
 Cloud Run + Cloud SQL (me-central2, Dammam) · Cloudflare (CDN, Turnstile, rate limits).
 Rationale: `docs/architecture.md`.
 
-## Status (2026-10-20)
+## Status (2026-10-21)
 
 W1 implementation done: all five apps, 55 tests green (incl. concurrency on PostgreSQL 16),
-ruff clean, CI + Dockerfile. Visual design pending DEC-15. Timeline and gates: `docs/plan.md`.
+ruff clean, CI + Dockerfile. DEC-15 design delivered — "Arena Night" rev 3.1 theme
+implemented (owner sign-off pending). Code lives in the GitHub org
+[YourVision-KSA](https://github.com/YourVision-KSA/esports2-website) (private).
+Timeline and gates: `docs/plan.md` · execution checklist per person: `docs/tasks.md`.
 Target: vote opens ~Nov 2, registration ~Nov 16, event late Nov / early Dec 2026.
 
 ## Quickstart (Windows)

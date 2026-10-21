@@ -15,6 +15,13 @@ earlier than needed). Dates shift with DEC-01; the **sequence and gates are fixe
   DEC answers (esp. DEC-03 vote definition, DEC-15 design), 2FA enrollment flow check,
   GCP/Cloudflare setup per docs/operations.md.
 
+- **2026-10-21** — Code pushed to GitHub org **YourVision-KSA** (private repo
+  `esports2-website`); owner invite sent to Yousef (24446357ksa@aou.edu.sa, pending
+  acceptance); org profile branded from the official guideline PDF. Arena Night rev 3.1
+  theme is implemented on the site (commit 761e9b5). Local smoke test green: `/`,
+  `/vote/`, `/register/`, `/bracket/`, `/healthz`. Execution checklist with per-person
+  assignments added: `docs/tasks.md`.
+
 ## Timeline
 
 | Week | Dates | Build focus | Milestone |
