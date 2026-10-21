@@ -38,7 +38,8 @@ Yousef (24446357ksa@aou.edu.sa — org owner on GitHub, owner-facing follow-ups)
 ## ⬜ Remaining — Hussein (with Claude)
 
 - [ ] Upload the org avatar: Desktop `yourvision-avatar-dark.png` → GitHub org settings → profile picture
-- [ ] Verify staff 2FA enrollment flow end-to-end (left over from W1)
+- [x] Verify staff 2FA enrollment flow end-to-end (left over from W1) — gap found and
+      fixed 2026-10-21: new `enroll_totp` management command + 4 tests (59 total green)
 - [ ] GCP + Cloudflare setup per `docs/operations.md` (~Oct 29; needs DEC-04/05 from Yousef first)
 - [ ] Vote-page counting-rules content (needs DEC-03)
 - [ ] Hero 3D scene: Vite + Three.js bundle (W3 — not started, no `package.json` yet)

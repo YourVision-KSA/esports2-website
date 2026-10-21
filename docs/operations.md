@@ -30,8 +30,11 @@ registrations and brackets continuously from first deploy.
    `/healthz`.
 7. Run migrations as a Cloud Run **job** (same image, `python manage.py migrate`) — not at
    container boot.
-8. `createsuperuser` via a one-off job; enroll TOTP 2FA immediately; create groups
-   admin/referee/door and the staff users (roster: DEC-11).
+8. `createsuperuser` via a one-off job; enroll TOTP 2FA immediately in the same job with
+   `python manage.py enroll_totp <username>` (prints the otpauth:// URL to scan — required,
+   because OTPAdminSite refuses login without a confirmed device); create groups
+   admin/referee/door and the staff users (roster: DEC-11). Rotate a compromised device
+   with `enroll_totp <username> --replace`.
 9. **Cloud Scheduler**: `outbox-tick` every 5 min → authenticated POST `/internal/outbox/`
    (OIDC token, Cloud Run IAM); `vote-report` twice daily during the vote window.
 10. Domain mapping or a Cloudflare-proxied CNAME to the Cloud Run URL.
