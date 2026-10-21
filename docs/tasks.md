@@ -22,18 +22,42 @@ Yousef (24446357ksa@aou.edu.sa — org owner on GitHub, owner-facing follow-ups)
 - [x] Org profile branded from `YOUR VISION Guide Line.pdf` (README, colors, logo assets)
 - [x] Owner invitation sent to Yousef (24446357ksa@aou.edu.sa)
 - [x] Local smoke test 2026-10-21: `/`, `/vote/`, `/register/`, `/bracket/`, `/healthz` all OK
+- [x] Yousef accepted the GitHub owner invitation (active org admin, 2026-10-21)
+- [x] Yousef's Mac dev environment set up (README → Quickstart macOS); 59/59 tests green
+- [x] **Rebrand to the event logo — frontend rev 4 "logo palette"** (Yousef, 2026-10-21,
+      branch `dev-yousef`): colours from the owner's logo (cyan / magenta / silver on deep
+      navy, soft glows, volt green removed), clean SVG emblem + header lockup + favicon,
+      placeholder photos regraded. Details: `docs/frontend.md` → Theme tokens rev 4.
+      Logo export files for the owner were delivered outside the repo.
 
 ## ⬜ Remaining — Yousef
 
-- [ ] Accept the GitHub owner invitation (email from GitHub, or https://github.com/orgs/YourVision-KSA/invitation)
 - [ ] Chase Your Vision for the open decisions in `docs/plan.md` — most urgent:
   - [ ] DEC-01 final event dates + venue
   - [ ] DEC-03 vote definition (game list, choices per ballot, window, counting-rules text)
   - [ ] DEC-04 final domain + who owns the Cloudflare account
   - [ ] DEC-05 GCP billing account owner
   - [ ] DEC-02, DEC-06..09, DEC-11..14 (see the decision log table)
-- [ ] Get owner sign-off on the DEC-15 design (Arena Night rev 3.1, live on the site)
+- [ ] Get owner sign-off on the design **with the new logo colours** (rev 4, branch `dev-yousef`)
+- [ ] **DEC-02**: the logo says «تجمع الرياضات الإلكترونية» but SITE-NAME / hero title say
+      «يوم الرياضات الإلكترونية» — ask which name the site uses (one-line change after)
+- [ ] Owner review of the new DRAFT strings LOGO-TITLE / LOGO-SUB (`docs/content-ar.md`)
 - [ ] Collect content: prize values (DEC-13), staff roster (DEC-11), VIP sender mailbox (DEC-12)
+
+## ⬜ Remaining — Yousef (code, with Claude) — next session starts here
+
+Checkpoint 2026-10-21: rebrand done and committed on `dev-yousef` (PR open to `main`).
+Order agreed — code work that does NOT wait on owner decisions:
+
+- [ ] Merge the rebrand PR after review (Hussein to glance at it)
+- [ ] Staff pages polish for phones: `/staff/results/` (wrong button label — uses REG_SUBMIT)
+      and `/staff/checkin/` layout
+- [ ] Privacy notice page + consent checkbox wiring (Arabic as DRAFT until DEC-08)
+- [ ] Live bracket polling JS on `/bracket/<slug>/` (endpoint already exists)
+- [ ] Camera QR scanner on `/staff/checkin/` (manual entry stays as fallback)
+- [ ] CI job 3: `npm run build` + 3D bundle size budget (after the Vite bundle exists)
+- [ ] Deploy workflow (GitHub Actions → Cloud Run), written now, enabled after DEC-04/05
+- [ ] Coordinate with Hussein: who builds the 3D hero/trophy scenes (listed under Hussein)
 
 ## ⬜ Remaining — Hussein (with Claude)
 
