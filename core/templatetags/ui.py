@@ -5,8 +5,8 @@ from django.contrib.staticfiles.finders import find
 
 register = template.Library()
 
-# Per-game accent for the card rule (docs/frontend.md: volt / purple / gold cycle).
-_ACCENTS = ["var(--volt)", "var(--purple)", "var(--gold)"]
+# Per-game accent for the card rule (docs/frontend.md rev 4: cyan / magenta / gold cycle).
+_ACCENTS = ["var(--accent)", "var(--accent-2)", "var(--gold)"]
 
 
 @register.filter

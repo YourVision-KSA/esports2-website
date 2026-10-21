@@ -16,6 +16,9 @@ CONTENT = {
     "SITE_NAME": "يوم الرياضات الإلكترونية",
     "FOOTER_1": "يوم الرياضات الإلكترونية · الرياض",
     "FOOTER_2": "الرعاة والشركاء: تضاف الشعارات هنا",
+    # Logo lockup — wording copied from the owner-supplied event logo (2026-10-21). DRAFT
+    "LOGO_TITLE": "تجمع الرياضات الإلكترونية",
+    "LOGO_SUB": "الجامعة العربية المفتوحة",
     # Navigation ------------------------------------------------------ KEEP
     "NAV_GAMES": "البطولات",
     "NAV_ZONES": "المناطق",

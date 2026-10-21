@@ -6,14 +6,14 @@
   Design" artifact** — https://claude.ai/artifact/SNEBV9cXyS8YCmeJJfEvqG. The owner rejected
   the earlier light "Tournament Broadcast" look; rev 3 is a **full dark, immersive esports
   design** built from competitor research (Esports World Cup, Kingdom of Gaming, BLAST,
-  Gamers8): near-black ground, volt + purple glow accents, gold for prizes, atmospheric
+  Gamers8): near-black ground, volt + purple glow accents (**colours superseded by rev 4 below**), gold for prizes, atmospheric
   arena/controller/crowd/trophy photography under gradient overlays. 7 artboards: tokens,
   home desktop + mobile, vote, registration, bracket, VIP invite. Implement from it; propose
   changes there first, then here.
 - **Imagery note:** the canvas uses AI-generated placeholder photos (stored as artifact
   assets, preview resolution). Production uses full-resolution, licensed or event-owned
   photography with the same treatment: dark duotone atmosphere, gradient-to-background
-  overlay, purple/green light.
+  overlay, cyan/magenta light (rev 4).
 - **Game-card imagery rule:** each tournament card carries imagery that EVOKES its game
   without using game IP (no official art, logos or characters): rocket-car + giant ball in a
   neon arena (Rocket League), night football stadium (EA FC), tactical soldier silhouette
@@ -25,32 +25,53 @@
 - **Fixed product requirements regardless of design:** Arabic-first RTL · gaming style ·
   interactive 3D scenes · mobile-first performance (budgets below).
 
-## Theme tokens (from the design artifact — define as CSS custom properties on `:root`)
+## Theme tokens — rev 4 "logo palette" (owner request 2026-10-21; defined on `:root` in static/css/base.css)
+
+Rev 4 keeps the Arena Night layout, motifs and motion **unchanged** and replaces only the
+colours: the owner supplied the event logo (two silver shields — D-pad / face buttons — with
+cyan and magenta outlines on deep navy) and asked that the whole site use the logo's colours,
+**without the neon beam look** and without the old volt green. Sampled from the logo:
+cyan #32DEE7, magenta #CB5BB3, silver #8C9299→#DCE3EA, gold badge #AF8220, navy #0F243A→#030A16.
 
 ```css
---bg: #07080F;          /* near-black page ground */
---bg-2: #0B0E1A;        /* alternate section band */
---surface: #10131F;     /* cards, panels */
---surface-2: #161A2B;   /* badges, inner chips */
---line: #242A40;        /* borders */
---line-strong: #32395A; /* input borders, secondary buttons */
---volt: #D8F24A;        /* THE accent: CTAs, numbers, highlights, ticker */
---purple: #8C5CFF;      /* glow/gradient only; text-safe variant #B9A6FF */
---text: #F2F4FF;        /* headings/body strong */
---body: #C5CBE8;        /* body text */
---muted: #9AA3C4;       /* secondary */
---link: #C9D2FF;        /* links (hover: volt) */
---gold: #E9C15C;        /* prizes/VIP (decor #D9A441, bronze #C8906B) */
---error: #FFB4AE;
+--bg: #050A14;          /* deep navy page ground (from the logo panel) */
+--bg-2: #08101E;        /* alternate section band */
+--surface: #0D1626;     /* cards, panels */
+--surface-2: #132036;   /* badges, inner chips */
+--line: #1F2D45;        /* borders */
+--line-strong: #2C3D5C; /* input borders, secondary buttons */
+--accent: #3CD6E0;      /* logo cyan — THE accent: CTAs, numbers, highlights, ticker */
+--accent-2: #D15EB9;    /* logo magenta — secondary: slashes, glows, secondary buttons */
+--accent-2-text: #EBA6DC; /* text-safe magenta */
+--silver: #B4BFCC;      /* logo silver, neutral decor */
+--ink: #04111A;         /* text on accent backgrounds */
+--text: #EEF4FA;  --body: #C2CDDC;  --muted: #8E9CB3;  --link: #B8E8EE;
+--gold: #E9C15C;        /* prizes/VIP + the logo's "2" badge (decor #D9A441, bronze #C8906B) */
+--error: #FFB4AE;  --live: #FF4D5E;
 ```
+Every translucent colour uses a channel token (`rgb(var(--accent-rgb) / 0.2)`) — **no raw
+hex/rgba in templates or CSS rules**, so a future recolour is a `:root`-only change. SVG
+presentation attributes (which cannot read CSS variables) are the only place hex is repeated.
+Colour balance rule: cyan carries the UI; magenta appears in small doses (slashes, secondary
+button, ambient radials); glows are soft (≈0.2–0.3 alpha) — no neon beams.
+
+**Logo:** `static/img/brand/emblem.svg` — clean flat redraw of the owner's emblem (silver
+shields, cyan/magenta outlines, deep-tone icons for legibility down to favicon size). Header
+lockup = emblem + LOGO-TITLE + gold "2" badge + LOGO-SUB (`templates/partials/brand.html`).
+Also the favicon. **Placeholder photos** were hue-regraded to cyan/magenta (gold untouched);
+production photography follows the same treatment.
+
+**Superseded:** rev 3.1 tokens (`--volt #D8F24A`, `--purple #8C5CFF`, ground `#07080F`).
+The design artifact (DEC-15 link above) still shows rev 3.1 colours — layout reference only.
+
 Theme model: **single dark theme**. Radius 0. Spacing 4/8/12/16/24/36/48/72.
-Motifs: **glow** (volt `box-shadow`/`text-shadow` on CTAs and key numbers; purple radial
+Motifs: **glow** (soft accent `box-shadow`/`text-shadow` on CTAs and key numbers; magenta radial
 gradients + shadows on panels) · photo sections with **gradient-to-bg overlays**
 (`linear-gradient(to bottom|top, …, var(--bg))`) · 12° skew slashes · **cut-corner CTAs**
 (`clip-path` 10–12px, primary only) · cards = `--surface`, 1px `--line`, photo header +
 3–4px accent rule · EN section tags in Space Grotesk letterspaced (`01 · TOURNAMENTS`) ·
-countdown cells with volt bottom rule · page ground carries two faint radials (purple
-top-corner, volt low-corner).
+countdown cells with accent bottom rule · page ground carries two faint radials (magenta
+top-corner, cyan low-corner).
 
 ## Fonts (from the design artifact); delivery rules FIXED
 
@@ -85,14 +106,14 @@ sponsors → footer; nav anchors. Separate funnel routes (/vote/, /register/, /b
 ## Page effects (from the design artifact)
 
 Rev 3.1 motion spec (BLAST-inspired; all CSS/vanilla-JS, no animation library):
-- **volt marquee ticker** — CSS keyframes, duplicated sequence for a seamless loop
+- **accent (cyan) marquee ticker** — CSS keyframes, duplicated sequence for a seamless loop
 - **hero countdown** — 1s interval; digits "--" until the date is set in SiteConfig
 - **stats count-up** — numbers animate 0→value on first scroll into view (IntersectionObserver)
-- **game-card hover** — lift 4px + volt border glow + image `scale(1.05)` (overflow hidden)
+- **game-card hover** — lift 4px + accent border glow + image `scale(1.05)` (overflow hidden)
 - **primary CTA hover** — invert to white bg / ink text
 - **LIVE bar** — red dot pulse; the bar renders only during the event phase
 - **section reveals** — 24px rise + fade on first entry
-- **giant outline display word** ("GAME ON", `-webkit-text-stroke` volt @ ~18% alpha) and the
+- **giant outline display word** ("GAME ON", `-webkit-text-stroke` accent @ ~18% alpha) and the
   vertical "REGISTER NOW" rail are static decor; **diagonal section edges** via `clip-path`
   wedges
 FIXED regardless: all effects honor
@@ -102,7 +123,7 @@ interaction or run while its element is off-screen.
 ## 3D scenes — subjects CONFIRMED by the design; engineering requirements FIXED
 
 The design keeps both subjects in the Arena Night palette: **hero = game controller over a
-lit pedestal** (dark glass panel over the arena-photo hero, volt + purple ring accents,
+lit pedestal** (dark glass panel over the arena-photo hero, cyan + magenta ring accents,
 drag-to-rotate + pointer parallax, `3D INTERACTIVE SCENE` label, hint «اسحب يد التحكم
 لتدويرها»), and **prizes = gold trophy** (photo-poster panel with gold glow; the Three.js
 scene mounts lazily over it). Each framed poster IS the LOW/FALLBACK tier.

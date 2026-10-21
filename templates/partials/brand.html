@@ -1,0 +1,9 @@
+{% load static %}
+{# Event logo lockup (logo palette rev 4): emblem + wordmark. Text from content (LOGO-TITLE/LOGO-SUB). #}
+<a class="brand" href="{{ href|default:'/' }}" aria-label="{{ content.LOGO_TITLE }} — {{ content.LOGO_SUB }}">
+  <img class="brand-emblem" src="{% static 'img/brand/emblem.svg' %}" alt="" width="62" height="48">
+  <span class="brand-words">
+    <span class="brand-title">{{ content.LOGO_TITLE }}<span class="brand-ed" dir="ltr">2</span></span>
+    <span class="brand-sub">{{ content.LOGO_SUB }}</span>
+  </span>
+</a>

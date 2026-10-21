@@ -15,7 +15,7 @@
 
   <div class="wrap" style="position: relative;">
     <nav class="nav">
-      <a class="brand" href="#top"><span class="mark"></span>{{ content.SITE_NAME }}</a>
+      {% include "partials/brand.html" with href="#top" %}
       <ul>
         {% if phase == "vote" %}<li><a href="/vote/">{{ content.NAV_VOTE }}</a></li>{% endif %}
         <li><a href="#games">{{ content.NAV_GAMES }}</a></li>
@@ -41,13 +41,13 @@
         <p class="lead">{{ content.HERO_TEXT }}</p>
         <div class="hero-ctas">
           {% if phase == "vote" %}
-          <a class="btn btn-volt" href="/vote/">{{ content.HERO_BTN_VOTE }}</a>
+          <a class="btn btn-primary" href="/vote/">{{ content.HERO_BTN_VOTE }}</a>
           {% elif phase == "registration" %}
-          <a class="btn btn-volt" href="/register/">{{ content.HERO_BTN_REGISTER }}</a>
+          <a class="btn btn-primary" href="/register/">{{ content.HERO_BTN_REGISTER }}</a>
           {% elif phase == "event" or phase == "archive" %}
-          <a class="btn btn-volt" href="/bracket/">{{ content.BRACKET_TITLE }}</a>
+          <a class="btn btn-primary" href="/bracket/">{{ content.BRACKET_TITLE }}</a>
           {% else %}
-          <a class="btn btn-volt" href="#join">{{ content.HERO_BTN_REGISTER }}</a>
+          <a class="btn btn-primary" href="#join">{{ content.HERO_BTN_REGISTER }}</a>
           {% endif %}
           <a class="btn btn-ghost" href="#schedule">{{ content.HERO_BTN_SCHEDULE }}</a>
         </div>
@@ -70,18 +70,18 @@
       <div class="scene" id="hero-scene">
         <div class="scene-frame">
           <svg viewBox="0 0 400 300" aria-hidden="true">
-            <g stroke="#242A40" stroke-width="1">
+            <g stroke="#1F2D45" stroke-width="1">
               <line x1="0" y1="250" x2="400" y2="250"></line>
               <line x1="40" y1="300" x2="120" y2="200"></line>
               <line x1="260" y1="300" x2="210" y2="200"></line>
               <line x1="60" y1="265" x2="340" y2="265"></line>
             </g>
-            <ellipse cx="200" cy="225" rx="95" ry="16" fill="none" stroke="#D8F24A" stroke-width="2"></ellipse>
-            <ellipse cx="200" cy="232" rx="120" ry="20" fill="none" stroke="#8C5CFF" stroke-width="1.5" opacity="0.7"></ellipse>
-            <g transform="translate(130,110)" fill="none" stroke="#9AA3C4" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <ellipse cx="200" cy="225" rx="95" ry="16" fill="none" stroke="#3CD6E0" stroke-width="2"></ellipse>
+            <ellipse cx="200" cy="232" rx="120" ry="20" fill="none" stroke="#D15EB9" stroke-width="1.5" opacity="0.7"></ellipse>
+            <g transform="translate(130,110)" fill="none" stroke="#8E9CB3" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
               <path d="M20 40 C 8 40 2 28 6 16 C 9 7 18 4 28 8 C 36 2 104 2 112 8 C 122 4 131 7 134 16 C 138 28 132 40 120 40 C 112 48 96 50 86 42 L 54 42 C 44 50 28 48 20 40 Z"></path>
-              <circle cx="42" cy="22" r="9" stroke="#8C5CFF"></circle>
-              <circle cx="98" cy="22" r="9" stroke="#D8F24A"></circle>
+              <circle cx="42" cy="22" r="9" stroke="#D15EB9"></circle>
+              <circle cx="98" cy="22" r="9" stroke="#3CD6E0"></circle>
             </g>
           </svg>
           <div class="scene-badge"><i></i><span dir="ltr">3D INTERACTIVE SCENE</span></div>
@@ -148,7 +148,7 @@
       <div class="rule" style="background: {{ forloop.counter0|accent }};"></div>
       <div class="body">
         <div class="chips">
-          <span class="chip chip-volt" dir="ltr">1v1</span>
+          <span class="chip chip-accent" dir="ltr">1v1</span>
           <span class="chip">خروج المغلوب</span>
           {% if game.platform %}<span class="chip" dir="ltr">{{ game.platform }}</span>{% endif %}
         </div>
@@ -172,20 +172,20 @@
       <img src="{% static 'img/controller.jpg' %}" alt="">
       <div class="shade" aria-hidden="true"></div>
       <div class="content">
-        <span class="label" style="color: var(--volt);" dir="ltr">FOR PLAYERS</span>
+        <span class="label" style="color: var(--accent);" dir="ltr">FOR PLAYERS</span>
         <h3>{{ content.PATH_PLAYERS }}</h3>
         <p>{{ content.JOIN_TEXT }}</p>
-        <a class="btn btn-volt" href="{% if phase == 'registration' %}/register/{% else %}#join{% endif %}">{{ content.HERO_BTN_REGISTER }}</a>
+        <a class="btn btn-primary" href="{% if phase == 'registration' %}/register/{% else %}#join{% endif %}">{{ content.HERO_BTN_REGISTER }}</a>
       </div>
     </div>
     <div class="path-card reveal">
       <img src="{% static 'img/crowd.jpg' %}" alt="">
       <div class="shade" aria-hidden="true"></div>
       <div class="content">
-        <span class="label" style="color: var(--purple-text);" dir="ltr">FOR FANS</span>
+        <span class="label" style="color: var(--accent-2-text);" dir="ltr">FOR FANS</span>
         <h3>{{ content.PATH_FANS }}</h3>
         <p>{{ content.PATH_FANS_TEXT }}</p>
-        <a class="btn btn-purple" href="#zones">{{ content.SEC_ZONES }}</a>
+        <a class="btn btn-secondary" href="#zones">{{ content.SEC_ZONES }}</a>
       </div>
     </div>
   </div>
@@ -286,13 +286,13 @@
 <!-- ===== Join CTA ===== -->
 <div id="join" class="wrap" style="padding-block-end: 88px;">
   <div class="join-panel reveal">
-    <span class="label" style="font-family: var(--num); font-weight: 700; font-size: 12px; letter-spacing: 0.22em; color: var(--volt);" dir="ltr">JOIN GAME</span>
+    <span class="label" style="font-family: var(--num); font-weight: 700; font-size: 12px; letter-spacing: 0.22em; color: var(--accent);" dir="ltr">JOIN GAME</span>
     <h2>{{ content.SEC_JOIN }}</h2>
     <p>{{ content.JOIN_TEXT }}</p>
     {% if phase == "registration" %}
-    <a class="btn btn-volt" href="/register/" style="margin-block-start: 8px;">{{ content.HERO_BTN_REGISTER }}</a>
+    <a class="btn btn-primary" href="/register/" style="margin-block-start: 8px;">{{ content.HERO_BTN_REGISTER }}</a>
     {% elif phase == "vote" %}
-    <a class="btn btn-volt" href="/vote/" style="margin-block-start: 8px;">{{ content.HERO_BTN_VOTE }}</a>
+    <a class="btn btn-primary" href="/vote/" style="margin-block-start: 8px;">{{ content.HERO_BTN_VOTE }}</a>
     {% else %}
     <p style="color: var(--muted);">{{ content.PHASE_SOON }}</p>
     {% endif %}

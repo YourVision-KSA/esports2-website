@@ -22,6 +22,12 @@ earlier than needed). Dates shift with DEC-01; the **sequence and gates are fixe
   `/vote/`, `/register/`, `/bracket/`, `/healthz`. Execution checklist with per-person
   assignments added: `docs/tasks.md`.
 
+- **2026-10-21** — Owner supplied the event logo and asked for the site colours to follow
+  it (no neon beams, no volt green). Implemented as frontend rev 4 "logo palette": colour
+  tokens only (layout/motion unchanged), clean SVG redraw of the emblem as header lockup +
+  favicon, placeholder photos regraded. The logo reads «تجمع الرياضات الإلكترونية» while
+  SITE-NAME/hero still read «يوم …» → **DEC-02 needs a decision** (logo wording suggests «تجمع»).
+
 ## Timeline
 
 | Week | Dates | Build focus | Milestone |
