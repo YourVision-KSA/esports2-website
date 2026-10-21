@@ -11,6 +11,7 @@
 <link rel="preload" href="{% static 'fonts/Rubik-400-arabic.woff2' %}" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="{% static 'css/base.css' %}">
 <script src="{% static 'js/main.js' %}" defer></script>
+{% block scripts %}{% endblock %}{# pages with 3D add their Vite bundle here #}
 </head>
 <body>
 

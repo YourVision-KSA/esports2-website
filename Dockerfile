@@ -1,4 +1,14 @@
 # Production image for Cloud Run (docs/operations.md). One stateless container.
+
+# Stage 1: build the Vite/Three.js bundle (static/dist is gitignored, so the
+# image builds it from source — docs/frontend.md → Build).
+FROM node:22-slim AS frontend
+WORKDIR /app/frontend
+COPY frontend/package.json frontend/package-lock.json ./
+RUN npm ci
+COPY frontend/ ./
+RUN npm run build
+
 FROM python:3.13-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 \
@@ -10,6 +20,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
+COPY --from=frontend /app/static/dist ./static/dist
 
 # Collect hashed static files at build time (SECRET_KEY not needed for this,
 # but Django imports settings — pass harmless build-time values).

@@ -1,6 +1,8 @@
 {% extends "base.html" %}
-{% load static ui %}
+{% load static ui vite %}
 {# Cached at the edge: NO forms, NO csrf token here (docs/routes.md rule zero). #}
+
+{% block scripts %}{% vite_js "src/main.js" %}{% endblock %}{# hero 3D scene #}
 
 {% block header %}{% endblock %}{# the hero carries its own nav #}
 

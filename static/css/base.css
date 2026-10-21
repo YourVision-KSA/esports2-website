@@ -175,7 +175,15 @@ section { scroll-margin-block-start: 76px; }
   display: flex; align-items: center; justify-content: center; overflow: hidden;
   box-shadow: var(--glow-purple);
 }
-.scene-frame svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.scene-frame svg { position: absolute; inset: 0; width: 100%; height: 100%; transition: opacity 0.8s ease; }
+/* Three.js canvas mounts over the poster SVG and fades in when ready
+   (docs/frontend.md: content renders before the 3D bundle). */
+.scene-frame canvas {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  opacity: 0; transition: opacity 0.8s ease; cursor: grab;
+}
+.scene-frame canvas.on { opacity: 1; }
+.scene-frame canvas:active { cursor: grabbing; }
 .scene-badge {
   position: absolute; top: 14px; inset-inline-start: 14px;
   display: flex; align-items: center; gap: 8px;

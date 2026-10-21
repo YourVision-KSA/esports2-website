@@ -42,7 +42,11 @@ Yousef (24446357ksa@aou.edu.sa — org owner on GitHub, owner-facing follow-ups)
       fixed 2026-10-21: new `enroll_totp` management command + 4 tests (59 total green)
 - [ ] GCP + Cloudflare setup per `docs/operations.md` (~Oct 29; needs DEC-04/05 from Yousef first)
 - [ ] Vote-page counting-rules content (needs DEC-03)
-- [ ] Hero 3D scene: Vite + Three.js bundle (W3 — not started, no `package.json` yet)
+- [x] Hero 3D scene: Vite + Three.js bundle — done 2026-10-21 ahead of W3: controller over
+      lit pedestal, drag + parallax, quality tiers + FPS probe + poster fallback,
+      123 KB gzip (budget 250 KB), Node build stage in Dockerfile. Tier beacon endpoint
+      deferred: frontend.md asks for it but routes.md calls /api/bracket the only JSON
+      endpoint — doc conflict to resolve before building it.
 - [ ] Trophy 3D scene (W5; cut-list fallback: static image)
 - [ ] Monitoring + uptime alert before G1 (vote opens ~Nov 2)
 - [ ] Staging cache + abuse rehearsal (W2)
