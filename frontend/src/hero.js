@@ -6,10 +6,9 @@ import {
   AmbientLight,
   BufferGeometry,
   CanvasTexture,
-  CapsuleGeometry,
-  Color,
   CylinderGeometry,
   DirectionalLight,
+  ExtrudeGeometry,
   Float32BufferAttribute,
   Group,
   Mesh,
@@ -19,6 +18,7 @@ import {
   Points,
   PointsMaterial,
   Scene,
+  Shape,
   SphereGeometry,
   TorusGeometry,
   WebGLRenderer,
@@ -33,66 +33,112 @@ const BODY = 0x1a2c49;
 const DPR_CAP = { HIGH: 2.0, MID: 1.5 };
 const PARTICLES = { HIGH: 140, MID: 50 };
 
+function bodyOutline() {
+  // Top-view silhouette of a real dual-grip gamepad (symmetric, PS-style):
+  // wide rounded top, shoulders flaring out, grips sweeping down and in,
+  // a thumb valley across the lower middle. Units ≈ the old model's scale.
+  const s = new Shape();
+  s.moveTo(0, 0.6);
+  s.bezierCurveTo(0.55, 0.6, 0.95, 0.56, 1.3, 0.44); // top edge → right shoulder
+  s.bezierCurveTo(1.66, 0.3, 1.76, 0.04, 1.72, -0.22); // shoulder round-off
+  s.bezierCurveTo(1.68, -0.78, 1.54, -1.32, 1.24, -1.46); // outer grip sweep
+  s.bezierCurveTo(0.99, -1.58, 0.77, -1.44, 0.67, -1.1); // grip bottom
+  s.bezierCurveTo(0.59, -0.82, 0.48, -0.58, 0.2, -0.5); // inner thumb valley
+  s.lineTo(-0.2, -0.5);
+  s.bezierCurveTo(-0.48, -0.58, -0.59, -0.82, -0.67, -1.1); // mirrored left side
+  s.bezierCurveTo(-0.77, -1.44, -0.99, -1.58, -1.24, -1.46);
+  s.bezierCurveTo(-1.54, -1.32, -1.68, -0.78, -1.72, -0.22);
+  s.bezierCurveTo(-1.76, 0.04, -1.66, 0.3, -1.3, 0.44);
+  s.bezierCurveTo(-0.95, 0.56, -0.55, 0.6, 0, 0.6);
+  return s;
+}
+
 function buildController() {
   const g = new Group();
-  const shell = new MeshStandardMaterial({ color: BODY, roughness: 0.45, metalness: 0.3 });
-  const dark = new MeshStandardMaterial({ color: 0x0e1a2e, roughness: 0.6, metalness: 0.2 });
-  const volt = new MeshStandardMaterial({ color: VOLT, emissive: VOLT, emissiveIntensity: 0.55 });
-  const purple = new MeshStandardMaterial({
+  // Real-controller materials: matte dark plastic, rubberized sticks,
+  // brand-colored face buttons as the only accents.
+  const plastic = new MeshStandardMaterial({ color: 0x1b202b, roughness: 0.52, metalness: 0.12 });
+  const plasticDark = new MeshStandardMaterial({ color: 0x0e1218, roughness: 0.62, metalness: 0.1 });
+  const rubber = new MeshStandardMaterial({ color: 0x0b0e13, roughness: 0.9, metalness: 0 });
+  const cyan = new MeshStandardMaterial({ color: VOLT, emissive: VOLT, emissiveIntensity: 0.35 });
+  const magenta = new MeshStandardMaterial({
     color: PURPLE,
     emissive: PURPLE,
-    emissiveIntensity: 0.55,
+    emissiveIntensity: 0.35,
   });
 
-  const body = new Mesh(new RoundedBoxGeometry(2.6, 1.0, 0.55, 4, 0.24), shell);
-  g.add(body);
+  const bodyGeometry = new ExtrudeGeometry(bodyOutline(), {
+    depth: 0.3,
+    bevelEnabled: true,
+    bevelThickness: 0.17,
+    bevelSize: 0.15,
+    bevelSegments: 6,
+    curveSegments: 32,
+  });
+  bodyGeometry.translate(0, 0, -0.15); // center the depth; x/y stay as authored
+  g.add(new Mesh(bodyGeometry, plastic));
+  const FRONT = 0.32; // depth/2 + bevelThickness
 
-  for (const side of [-1, 1]) {
-    const grip = new Mesh(new CapsuleGeometry(0.34, 0.8, 4, 12), shell);
-    grip.position.set(side * 1.05, -0.55, 0.1);
-    grip.rotation.z = side * 0.45;
-    grip.rotation.x = -0.25;
-    g.add(grip);
-  }
-
-  // Analog sticks: ring base + stem + cap.
-  for (const [x, accent] of [
-    [-0.62, purple],
-    [0.3, volt],
-  ]) {
-    const base = new Mesh(new CylinderGeometry(0.21, 0.24, 0.1, 20), dark);
-    base.position.set(x, 0.1, 0.32);
-    base.rotation.x = Math.PI / 2;
-    const stem = new Mesh(new CylinderGeometry(0.07, 0.07, 0.22, 10), dark);
-    stem.position.set(x, 0.1, 0.42);
-    stem.rotation.x = Math.PI / 2;
-    const cap = new Mesh(new SphereGeometry(0.15, 16, 12), accent);
-    cap.scale.z = 0.55;
-    cap.position.set(x, 0.1, 0.52);
-    g.add(base, stem, cap);
-  }
-
-  // D-pad: two crossed bars.
+  // D-pad on the left lobe: raised cross on a recessed disc.
+  const dpadBase = new Mesh(new CylinderGeometry(0.3, 0.32, 0.05, 24), plasticDark);
+  dpadBase.position.set(-1.02, 0.02, FRONT);
+  dpadBase.rotation.x = Math.PI / 2;
+  g.add(dpadBase);
   for (const rot of [0, Math.PI / 2]) {
-    const bar = new Mesh(new RoundedBoxGeometry(0.46, 0.15, 0.1, 2, 0.04), dark);
-    bar.position.set(-1.0, 0.22, 0.3);
+    const bar = new Mesh(new RoundedBoxGeometry(0.44, 0.15, 0.08, 2, 0.035), rubber);
+    bar.position.set(-1.02, 0.02, FRONT + 0.05);
     bar.rotation.z = rot;
     g.add(bar);
   }
 
-  // Face buttons: diamond of four.
-  const buttonMats = [volt, purple, dark, dark];
+  // Face buttons on the right lobe: diamond of four, cyan top / magenta bottom.
+  const buttonMats = [cyan, magenta, plasticDark, plasticDark];
   [
-    [1.0, 0.44],
-    [1.0, 0.0],
-    [0.78, 0.22],
-    [1.22, 0.22],
+    [1.02, 0.26],
+    [1.02, -0.22],
+    [0.8, 0.02],
+    [1.24, 0.02],
   ].forEach(([x, y], i) => {
-    const b = new Mesh(new CylinderGeometry(0.09, 0.09, 0.08, 16), buttonMats[i]);
-    b.position.set(x, y, 0.3);
+    const well = new Mesh(new CylinderGeometry(0.105, 0.115, 0.03, 20), plasticDark);
+    well.position.set(x, y, FRONT);
+    well.rotation.x = Math.PI / 2;
+    const b = new Mesh(new CylinderGeometry(0.085, 0.09, 0.06, 20), buttonMats[i]);
+    b.position.set(x, y, FRONT + 0.04);
     b.rotation.x = Math.PI / 2;
-    g.add(b);
+    g.add(well, b);
   });
+
+  // Symmetric analog sticks in the lower middle: recess ring, stem,
+  // concave rubber cap (flattened sphere + raised rim reads as concave).
+  for (const x of [-0.44, 0.44]) {
+    const recess = new Mesh(new TorusGeometry(0.21, 0.045, 10, 28), plasticDark);
+    recess.position.set(x, -0.42, FRONT);
+    const stem = new Mesh(new CylinderGeometry(0.065, 0.075, 0.2, 14), plasticDark);
+    stem.position.set(x, -0.42, FRONT + 0.1);
+    stem.rotation.x = Math.PI / 2;
+    const cap = new Mesh(new SphereGeometry(0.155, 20, 14), rubber);
+    cap.scale.z = 0.38;
+    cap.position.set(x, -0.42, FRONT + 0.2);
+    const rim = new Mesh(new TorusGeometry(0.135, 0.028, 10, 24), rubber);
+    rim.position.set(x, -0.42, FRONT + 0.23);
+    g.add(recess, stem, cap, rim);
+  }
+
+  // Center column: touchpad up top, slim home button below it.
+  const touchpad = new Mesh(new RoundedBoxGeometry(0.62, 0.34, 0.05, 3, 0.06), plasticDark);
+  touchpad.position.set(0, 0.3, FRONT + 0.02);
+  const home = new Mesh(new CylinderGeometry(0.05, 0.05, 0.05, 16), cyan);
+  home.position.set(0, -0.08, FRONT + 0.01);
+  home.rotation.x = Math.PI / 2;
+  g.add(touchpad, home);
+
+  // Shoulder bumpers wrapping the top edge.
+  for (const side of [-1, 1]) {
+    const bumper = new Mesh(new RoundedBoxGeometry(0.62, 0.16, 0.28, 3, 0.06), plasticDark);
+    bumper.position.set(side * 0.98, 0.56, 0.05);
+    bumper.rotation.z = side * -0.18;
+    g.add(bumper);
+  }
 
   return g;
 }
@@ -166,9 +212,12 @@ export function mountHero(frame, startTier) {
   camera.lookAt(0, 0.3, 0);
 
   scene.add(new AmbientLight(0x3a4c6e, 0.9));
-  const key = new DirectionalLight(0xf2f4ff, 1.1);
+  const key = new DirectionalLight(0xf2f4ff, 1.4);
   key.position.set(3, 5, 4);
   scene.add(key);
+  const fill = new DirectionalLight(0xbfd6e7, 0.45); // soft front fill, plastic reads matte
+  fill.position.set(-2, 1, 6);
+  scene.add(fill);
   const voltLight = new PointLight(VOLT, 18, 9);
   voltLight.position.set(0, -0.4, 1.6);
   const purpleLight = new PointLight(PURPLE, 28, 11);
@@ -176,7 +225,7 @@ export function mountHero(frame, startTier) {
   scene.add(voltLight, purpleLight);
 
   const controller = buildController();
-  controller.position.y = 0.55;
+  controller.position.y = 1.0; // body extends downward from its y=0 top edge
   controller.rotation.x = -0.35;
   const pedestal = buildPedestal();
   pedestal.position.y = -1.15;
@@ -243,7 +292,7 @@ export function mountHero(frame, startTier) {
     if (!dragging) targetYaw += 0.0012; // idle spin
     controller.rotation.y += (targetYaw - controller.rotation.y) * 0.08;
     controller.rotation.x += (-0.35 + targetPitch - controller.rotation.x) * 0.08;
-    controller.position.y = 0.55 + Math.sin(t * 1.1) * 0.06; // gentle bob
+    controller.position.y = 1.0 + Math.sin(t * 1.1) * 0.06; // gentle bob
     camera.position.x += (parallaxX * 0.25 - camera.position.x) * 0.04;
     camera.position.y += (1.1 - parallaxY * 0.2 - camera.position.y) * 0.04;
     camera.lookAt(0, 0.3, 0);
