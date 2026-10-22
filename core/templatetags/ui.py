@@ -50,9 +50,3 @@ def vite_asset(entry: str) -> str:
         _vite_manifest.cache_clear()  # pick up rebuilds while developing
     chunk = _vite_manifest().get(entry)
     return static(f"dist/{chunk['file']}") if chunk else ""
-
-
-@register.simple_tag
-def static_if_exists(path: str) -> str:
-    """Static URL only when the file is actually shipped (e.g. the optional 3D model)."""
-    return static(path) if find(path) else ""

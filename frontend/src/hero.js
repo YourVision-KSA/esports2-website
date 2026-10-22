@@ -54,18 +54,17 @@ function whenNear(el, fn) {
 }
 
 const mount = document.getElementById("hero-scene");
-const modelUrl = mount && mount.dataset.model;
 const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const tier = startingTier();
 
-if (mount && modelUrl && !still && tier !== "low") {
+if (mount && !still && tier !== "low") {
   afterLoad(() =>
     whenIdle(() =>
       whenNear(mount, () => {
         import("./scene.js")
-          .then((m) => m.start(mount, { tier, modelUrl, tierKey: TIER_KEY }))
+          .then((m) => m.start(mount, { tier, tierKey: TIER_KEY }))
           .catch(() => {
-            /* FALLBACK tier: bundle or model failed — the poster stays, page unaffected */
+            /* FALLBACK tier: bundle or WebGL failed — the poster stays, page unaffected */
           });
       }),
     ),
