@@ -54,8 +54,12 @@ Merge order: #2 → `main`, then retarget #3 to `main` and merge.
 Order agreed — code work that does NOT wait on owner decisions:
 
 - [ ] Merge the rebrand PR after review (Hussein to glance at it)
-- [ ] Staff pages polish for phones: `/staff/results/` (wrong button label — uses REG_SUBMIT)
-      and `/staff/checkin/` layout
+- [x] **Staff pages for phones** (2026-10-22, branch `feat/staff-pages`): shared staff layout
+      (who's signed in + logout, no public footer); results = Arabic round names, big
+      winner cards (✓ + dim the other), score field, PRG + confirmation, game filter,
+      Arabic errors; check-in = **look up → check ID → confirm** (nothing written on
+      lookup), distinct ok/already/invalid cards, Arabic status chips, card list search.
+      15 new tests. 20 new strings in content-ar.md are DRAFT (owner review).
 - [ ] Privacy notice page + consent checkbox wiring (Arabic as DRAFT until DEC-08)
 - [ ] Live bracket polling JS on `/bracket/<slug>/` (endpoint already exists)
 - [ ] Camera QR scanner on `/staff/checkin/` (manual entry stays as fallback)

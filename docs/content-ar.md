@@ -241,6 +241,27 @@ Note for owner: «أفضل لاعب في اليوم» may need rewording for a 3
 | STAFF-RESULTS-TITLE | إدخال النتائج | referee results page |
 | STAFF-CHECKIN-TITLE | تسجيل الحضور | door-staff page |
 | STAFF-SEARCH | بحث | door-staff guest search |
+| STAFF-SIGNED-IN | مسجّل الدخول باسم {user} | DRAFT — needs owner review (staff bar) |
+| STAFF-LOGOUT | تسجيل الخروج | DRAFT — needs owner review (staff bar) |
+| STAFF-MATCH | مباراة {n} | DRAFT — needs owner review (results: match label inside a round) |
+| STAFF-PICK-WINNER | اختر الفائز | DRAFT — needs owner review (results) |
+| STAFF-SCORE | النتيجة (اختياري) | DRAFT — needs owner review (results: score field label) |
+| STAFF-SAVE-RESULT | حفظ النتيجة | DRAFT — needs owner review (results: submit button) |
+| STAFF-RESULT-SAVED | تم حفظ النتيجة — تأهّل {winner} | DRAFT — needs owner review (results: confirmation) |
+| STAFF-NO-PENDING | لا توجد مباريات بانتظار نتيجة حاليًا | DRAFT — needs owner review (results: empty state) |
+| STAFF-ALL-GAMES | كل الألعاب | DRAFT — needs owner review (results: game filter) |
+| STAFF-ERR-WINNER | اختر أحد اللاعبَين قبل الحفظ | DRAFT — needs owner review (results: validation) |
+| STAFF-ERR-SAVE | تعذّر حفظ النتيجة — حدّث الصفحة وحاول مجددًا | DRAFT — needs owner review (results: save failed (e.g. already entered)) |
+| STAFF-TOKEN | رمز الدعوة أو رابطها | DRAFT — needs owner review (check-in: manual entry label) |
+| STAFF-LOOKUP | عرض الدعوة | DRAFT — needs owner review (check-in: look up before confirming) |
+| STAFF-VERIFY-ID | تحقّق من هوية الضيف قبل التأكيد | DRAFT — needs owner review (check-in: reminder on the guest card) |
+| STAFF-CONFIRM-CHECKIN | تأكيد الحضور | DRAFT — needs owner review (check-in: confirm button) |
+| STAFF-CHECKED-BY | بواسطة {user} | DRAFT — needs owner review (check-in: who checked the guest in) |
+| STAFF-SEARCH-HINT | ابحث باسم الضيف أو الجهة | DRAFT — needs owner review (check-in: search field) |
+| STAFF-NO-RESULTS | لا توجد نتائج مطابقة | DRAFT — needs owner review (check-in: empty search) |
+| STAFF-SELECT | اختيار | DRAFT — needs owner review (check-in: pick a guest from the list) |
+| STAFF-NEXT-GUEST | الضيف التالي | DRAFT — needs owner review (check-in: back to an empty form) |
+| INVITE-STATUS | created: لم تُرسل · sent: مرسلة · checked_in: حضر · revoked: ملغاة | DRAFT — needs owner review (door-staff status chips) |
 | Seed game names | روكيت ليج · فيفا · كول أوف ديوتي · تيكن · فالورانت | candidate games (data; editable in admin) |
 | GAMES-PENDING-VOTE | الألعاب النهائية تُعتمد بعد انتهاء التصويت العام. | note under the tournaments grid |
 | COUNTDOWN-LABEL | ينطلق الحدث بعد | hero countdown (design rev 2) |

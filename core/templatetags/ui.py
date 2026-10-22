@@ -56,3 +56,9 @@ def vite_asset(entry: str) -> str:
 def static_if_exists(path: str) -> str:
     """Static URL only when the file is actually shipped (e.g. the optional 3D model)."""
     return static(path) if find(path) else ""
+
+
+@register.filter
+def lookup(mapping, key):
+    """{{ content.INVITE_STATUS|lookup:guest.status }} — dict access with a variable key."""
+    return mapping.get(key, key) if hasattr(mapping, "get") else key
