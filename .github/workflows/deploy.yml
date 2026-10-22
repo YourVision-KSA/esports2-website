@@ -85,7 +85,10 @@ jobs:
         run: |
           URL=$(gcloud run services describe "$SERVICE" --region "$REGION" --format='value(status.url)')
           curl --fail --silent --show-error --max-time 20 --retry 3 --retry-delay 5 "$URL/healthz"
-          curl --fail --silent --show-error --max-time 20 --output /dev/null "$URL/"
+          # the origin shield (CF_ORIGIN_TOKEN) rejects direct hits on everything except
+          # /healthz and /internal/ — send the same header Cloudflare adds
+          curl --fail --silent --show-error --max-time 20 --output /dev/null \
+               -H "X-Origin-Token: ${{ secrets.CF_ORIGIN_TOKEN }}" "$URL/"
           echo "Deployed $SHA to $SERVICE: $URL" >> "$GITHUB_STEP_SUMMARY"
 
       - name: How to roll back
