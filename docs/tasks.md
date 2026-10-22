@@ -46,7 +46,11 @@ Yousef (24446357ksa@aou.edu.sa — org owner on GitHub, owner-facing follow-ups)
 
 ## ⬜ Remaining — Yousef (code, with Claude) — next session starts here
 
-Checkpoint 2026-10-21: rebrand done and committed on `dev-yousef` (PR open to `main`).
+Checkpoint 2026-10-21: rebrand done and committed on `dev-yousef` (PR #2 → `main`).
+**Checkpoint 2026-10-22:** hero 3D scene done on `feat/hero-3d` (PR #3, stacked on #2).
+Restore point: branch `checkpoint/2026-10-22` + tag `checkpoint-2026-10-22` (same commit).
+To go back: `git checkout checkpoint/2026-10-22` (or branch off the tag).
+Merge order: #2 → `main`, then retarget #3 to `main` and merge.
 Order agreed — code work that does NOT wait on owner decisions:
 
 - [ ] Merge the rebrand PR after review (Hussein to glance at it)
