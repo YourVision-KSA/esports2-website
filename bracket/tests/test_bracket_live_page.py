@@ -28,16 +28,28 @@ def test_page_carries_live_hooks_and_arabic_labels(client, drawn):
     assert f'data-api="/api/bracket/{drawn.slug}.json"' in body
     assert f'data-pending="{CONTENT["MATCH_PENDING"]}"' in body
     assert "js/bracket-live.js" in body
-    assert body.count('class="match-cell"') == 15
+    assert body.count("data-match=") == 15
 
 
-def test_cells_are_in_round_then_slot_order_and_match_the_api_keys(client, drawn):
+def test_mirrored_layout_order_and_same_keys_as_the_api(client, drawn):
+    """Columns: R16 1-4 → QF 1-2 → SF 1 → final ← SF 2 ← QF 3-4 ← R16 5-8."""
     body = client.get(f"/bracket/{drawn.slug}/").content.decode()
     page_keys = re.findall(r'data-match="(\d+-\d+)"', body)
+    assert page_keys == [
+        "1-1", "1-2", "1-3", "1-4", "2-1", "2-2", "3-1",
+        "4-1",
+        "3-2", "2-3", "2-4", "1-5", "1-6", "1-7", "1-8",
+    ]  # fmt: skip
     api = client.get(f"/api/bracket/{drawn.slug}.json").json()["matches"]
-    api_keys = [f"{m['round']}-{m['slot']}" for m in api]
-    assert page_keys == api_keys
-    assert page_keys[:3] == ["1-1", "1-2", "1-3"] and page_keys[-1] == "4-1"
+    assert sorted(page_keys) == sorted(f"{m['round']}-{m['slot']}" for m in api)
+
+
+def test_undecided_slots_name_their_feeder_match(client, drawn):
+    body = client.get(f"/bracket/{drawn.slug}/").content.decode()
+    # quarter-final 1 (M9) is fed by M1 and M2; the final (M15) by M13 and M14
+    for n in (1, 2, 13, 14):
+        assert CONTENT["WINNER_OF"].replace("{n}", str(n)) in body
+    assert CONTENT["MATCH_NO"].replace("{n}", "15") in body
 
 
 def test_champion_panel_hidden_until_the_final_is_won(client, drawn):

@@ -1,0 +1,12 @@
+{% comment %}One match card. Classes drive the connectors: done = result in (lights the
+outgoing line), has1/has2 = slot filled (lights the incoming line).{% endcomment %}{% with m=c.match %}
+<div class="match-cell{% if final %} final-cell{% endif %}{% if m.status != 'pending' %} done{% endif %}{% if m.player1_id %} has1{% endif %}{% if m.player2_id %} has2{% endif %}"
+     data-match="{{ c.key }}" data-ph1="{{ c.placeholder1 }}" data-ph2="{{ c.placeholder2 }}">
+  <div class="cell-top">
+    <span class="no">{{ c.label }}</span>
+    {% if final %}<span class="final-label">{{ content.FINAL_MATCH }}</span>{% endif %}
+    <span class="st st-{{ m.status }}" data-f="status">{% if m.status == "pending" %}{{ content.MATCH_PENDING }}{% elif m.status == "forfeit" %}{{ content.MATCH_FORFEIT }}{% else %}<bdi dir="ltr">{{ m.score_text }}</bdi>{% endif %}</span>
+  </div>
+  <span class="p{% if m.winner_id and m.winner_id == m.player1_id %} win{% endif %}{% if not m.player1_id %} tbd{% endif %}" dir="auto" data-f="p1">{% if m.player1_id %}{{ m.player1.game_player_id }}{% else %}{{ c.placeholder1 }}{% endif %}</span>
+  <span class="p{% if m.winner_id and m.winner_id == m.player2_id %} win{% endif %}{% if not m.player2_id %} tbd{% endif %}" dir="auto" data-f="p2">{% if m.player2_id %}{{ m.player2.game_player_id }}{% else %}{{ c.placeholder2 }}{% endif %}</span>
+</div>{% endwith %}

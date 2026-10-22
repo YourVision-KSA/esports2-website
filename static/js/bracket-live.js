@@ -32,6 +32,22 @@
     return true;
   }
 
+  // Scores like "3–1" sit in an LTR <bdi> so the dash never flips; labels are plain RTL text.
+  function setStatus(st, status, text) {
+    if (st.textContent === text && st.className === "st st-" + status) return false;
+    st.className = "st st-" + status;
+    st.textContent = "";
+    if (status === "done") {
+      var b = document.createElement("bdi");
+      b.dir = "ltr";
+      b.textContent = text;
+      st.appendChild(b);
+    } else {
+      st.textContent = text;
+    }
+    return true;
+  }
+
   function flash(cell) {
     if (still) return;
     cell.classList.remove("updated");
@@ -52,15 +68,19 @@
       var p1 = cell.querySelector('[data-f="p1"]');
       var p2 = cell.querySelector('[data-f="p2"]');
       var st = cell.querySelector('[data-f="status"]');
-      var changed = setText(p1, m.p1 || "—");
-      changed = setText(p2, m.p2 || "—") || changed;
+      // empty slot → "winner of M<n>" placeholder rendered by the server (data-ph1/2)
+      var changed = setText(p1, m.p1 || cell.getAttribute("data-ph1") || "—");
+      changed = setText(p2, m.p2 || cell.getAttribute("data-ph2") || "—") || changed;
       p1.classList.toggle("win", !!m.winner && m.winner === m.p1);
       p2.classList.toggle("win", !!m.winner && m.winner === m.p2);
+      p1.classList.toggle("tbd", !m.p1);
+      p2.classList.toggle("tbd", !m.p2);
+      // these classes drive the bracket connectors (lit once a result / player is in)
+      cell.classList.toggle("done", m.status !== "pending");
+      cell.classList.toggle("has1", !!m.p1);
+      cell.classList.toggle("has2", !!m.p2);
       var text = m.status === "pending" ? labels.pending : m.status === "forfeit" ? labels.forfeit : m.score || "";
-      changed = setText(st, text) || changed;
-      st.className = "st st-" + m.status;
-      if (m.status === "done") st.setAttribute("dir", "ltr");
-      else st.removeAttribute("dir");
+      changed = setStatus(st, m.status, text) || changed;
       if (changed) flash(cell);
     });
     if (champion) {

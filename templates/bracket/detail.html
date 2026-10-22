@@ -3,39 +3,57 @@
 {% block title %}{{ game.name_ar }} — {{ content.BRACKET_TITLE }}{% endblock %}
 {% block funnel_tag %}LIVE BRACKET{% endblock %}
 {% block content %}
-{% comment %}Server-rendered and complete without JS (docs/routes.md). static/js/bracket-live.js
-polls /api/bracket/<slug>.json (edge-cached 10 s) and patches the cells in place; it finds
-them by data-match="<round>-<slot>". Arabic labels reach the script via data attributes.{% endcomment %}
-<div class="funnel bracket" data-bracket-live
+{% comment %}Mirrored bracket tree (layout: bracket/tree.py; idea: owner-side mock-up 2026-10-22).
+Desktop: start-side rounds → final ← end-side rounds, CSS connectors light up along winners'
+paths. Narrow screens: the same DOM restacks by round (CSS order), connectors hidden.
+Complete without JS; static/js/bracket-live.js patches cells by data-match="<round>-<slot>".{% endcomment %}
+<div class="funnel bracket" style="--g: {{ theme }};" data-bracket-live
      data-api="/api/bracket/{{ game.slug }}.json"
      data-pending="{{ content.MATCH_PENDING }}" data-forfeit="{{ content.MATCH_FORFEIT }}">
   <div class="bracket-head">
-    <h1>{{ game.name_ar }}</h1>
-    <span class="bracket-live" hidden><span class="live-dot"></span>{{ content.BRACKET_AUTO }}</span>
-  </div>
-
-  <div class="champion-panel" data-champion aria-live="polite"{% if not champion %} hidden{% endif %}>
-    <span class="t">{{ content.CHAMPION }}: <span class="num" dir="ltr" data-f="champion">{{ champion|default:"" }}</span></span>
-  </div>
-
-  {% for round_num, round_name, matches in rounds %}
-  <section class="bracket-round">
-    <div class="round-title">{{ round_name }}</div>
-    <div class="bracket-grid">
-      {% for m in matches %}
-      <div class="match-cell" data-match="{{ m.round }}-{{ m.slot }}">
-        <div class="row">
-          <span class="p{% if m.winner_id and m.winner_id == m.player1_id %} win{% endif %}" dir="ltr" data-f="p1">{{ m.player1.game_player_id|default:"—" }}</span>
-        </div>
-        <div class="row">
-          <span class="p{% if m.winner_id and m.winner_id == m.player2_id %} win{% endif %}" dir="ltr" data-f="p2">{{ m.player2.game_player_id|default:"—" }}</span>
-          <span class="st st-{{ m.status }}" data-f="status"{% if m.status == "done" %} dir="ltr"{% endif %}>{% if m.status == "pending" %}{{ content.MATCH_PENDING }}{% elif m.status == "forfeit" %}{{ content.MATCH_FORFEIT }}{% else %}{{ m.score_text }}{% endif %}</span>
-        </div>
-      </div>
-      {% endfor %}
+    <div class="bracket-title">
+      <h1>{{ game.name_ar }}</h1>
+      {% if game.name_en %}<span class="en" dir="ltr">{{ game.name_en|upper }}</span>{% endif %}
     </div>
-  </section>
-  {% endfor %}
+    <div class="bracket-meta">
+      <span>{{ meta }}</span>
+      <span class="bracket-live" hidden><span class="live-dot"></span>{{ content.BRACKET_AUTO }}</span>
+    </div>
+  </div>
+
+  <div class="tree">
+    {% for col in columns %}
+    <section class="col col-r{{ col.round }} side-{{ col.side }}">
+      <header class="col-head">
+        <span class="round">{{ col.title }}</span>
+        {% if col.day %}<span class="day">{{ col.day }}</span>{% endif %}
+      </header>
+      <div class="col-body">
+        {% if col.side == "center" %}
+        <div class="final-stage">
+          <svg class="trophy" viewBox="0 0 64 64" aria-hidden="true">
+            <path d="M18 8h28v10a14 14 0 0 1-28 0z" fill="#E9C15C"/>
+            <path d="M18 12H9a9 9 0 0 0 9 12M46 12h9a9 9 0 0 1-9 12" fill="none" stroke="#D9A441" stroke-width="3" stroke-linecap="round"/>
+            <path d="M28 32h8v8h-8z" fill="#D9A441"/>
+            <path d="M21 44h22l2 8H19z" fill="#E9C15C"/>
+          </svg>
+          {% for group in col.groups %}{% for c in group %}{% include "bracket/_cell.html" with final=True %}{% endfor %}{% endfor %}
+          <div class="champ" data-champion aria-live="polite"{% if not champion %} hidden{% endif %}>
+            <span class="champ-label" dir="ltr">CHAMPION</span>
+            <span class="champ-name" dir="ltr" data-f="champion">{{ champion|default:"" }}</span>
+          </div>
+        </div>
+        {% else %}
+        {% for group in col.groups %}
+        <div class="{% if group|length == 2 %}pair{% else %}single{% endif %}">
+          {% for c in group %}{% include "bracket/_cell.html" %}{% endfor %}
+        </div>
+        {% endfor %}
+        {% endif %}
+      </div>
+    </section>
+    {% endfor %}
+  </div>
 </div>
 <script src="{% static 'js/bracket-live.js' %}" defer></script>
 {% endblock %}

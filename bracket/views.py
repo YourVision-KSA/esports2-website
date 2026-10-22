@@ -15,7 +15,7 @@ from django.views.decorators.cache import cache_control, never_cache
 from core.models import Game
 from core.phases import Phase, current_phase
 
-from . import services
+from . import services, tree
 from .models import Match
 
 
@@ -37,24 +37,40 @@ def overview(request):
 
 @cache_control(public=True, max_age=30, s_maxage=30)
 def detail(request, slug):
+    """One game's bracket as a mirrored tree (bracket/tree.py). Complete without JS;
+    static/js/bracket-live.js keeps it current during the event."""
     if not _event_visible():
         return render(request, "core/closed.html", {"message_key": "PHASE_SOON"})
     from core.content import CONTENT
+    from core.templatetags.ui import accent
 
     game = get_object_or_404(Game, slug=slug, status=Game.Status.CONFIRMED)
-    by_round: dict[int, list[Match]] = {}
-    for match in game.matches.select_related("player1", "player2", "winner").order_by(
-        "round", "slot"
-    ):
-        by_round.setdefault(match.round, []).append(match)
-    rounds = [
-        (num, CONTENT["ROUND_NAMES"].get(num, f"R{num}"), matches)
-        for num, matches in sorted(by_round.items())
-    ]
-    final = by_round.get(4, [None])[0]
+    matches = list(
+        game.matches.select_related("player1", "player2", "winner").order_by("round", "slot")
+    )
+    final = next((m for m in matches if m.round == tree.FINAL_ROUND), None)
     champion = _tag(final.winner) if final and final.winner else None
+    confirmed = list(
+        Game.objects.filter(status=Game.Status.CONFIRMED)
+        .order_by("display_order", "pk")
+        .values_list("pk", flat=True)
+    )
+    players = len({p for m in matches for p in (m.player1_id, m.player2_id) if p})
+    meta = (
+        CONTENT["BRACKET_META"]
+        .replace("{players}", str(players))
+        .replace("{matches}", str(len(matches)))
+    )
     return render(
-        request, "bracket/detail.html", {"game": game, "rounds": rounds, "champion": champion}
+        request,
+        "bracket/detail.html",
+        {
+            "game": game,
+            "columns": tree.build(matches),
+            "champion": champion,
+            "meta": meta,
+            "theme": accent(confirmed.index(game.pk) if game.pk in confirmed else 0),
+        },
     )
 
 
