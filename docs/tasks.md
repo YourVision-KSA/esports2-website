@@ -96,7 +96,10 @@ Order agreed — code work that does NOT wait on owner decisions:
       moved from under the scene to a faint footer line (owner request 2026-10-22) —
       it must not be removed entirely (CC BY 4.0 condition).
       ⚠️ Tell Hussein the hero scene is done (it was on his list).
-- [ ] Tier beacon endpoint (count-only, no PII) for the WebGL fallback-rate metric
+- [x] **Tier beacon** (2026-10-22, branch `feat/tier-beacon`): `POST /beacon/3d` count-only
+      (no PII, no cookie, ≤ 1 per tab session via sendBeacon) → `TierStat` daily counters,
+      race-safe; `manage.py tier_report` shows the fallback share per device; admin
+      read-only list. Ops: add `/beacon/*` to the Cloudflare BYPASS + rate-limit rules. 11 tests.
 - [ ] Trophy 3D scene (cut-list item 2 — static image acceptable)
 
 ## ⬜ Remaining — Hussein (with Claude)

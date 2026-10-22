@@ -18,6 +18,7 @@ urlpatterns = [
     path("healthz", core_views.healthz, name="healthz"),
     path("credits/", core_views.credits, name="credits"),
     path("privacy/", core_views.privacy, name="privacy"),
+    path("beacon/3d", core_views.beacon_tier, name="beacon-tier"),
     path("vote/", include("voting.urls")),
     path("register/", include("registration.urls")),
     path("r/", include("registration.manage_urls")),

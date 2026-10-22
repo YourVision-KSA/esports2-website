@@ -7,7 +7,7 @@ from django.forms.models import model_to_dict
 from django.http import HttpResponse
 
 from . import audit
-from .models import AuditLog, Game, OutboxEmail, SiteConfig
+from .models import AuditLog, Game, OutboxEmail, SiteConfig, TierStat
 
 
 def export_csv_action(fields, description="Export selected to CSV (audit-logged)"):
@@ -89,3 +89,18 @@ class OutboxEmailAdmin(admin.ModelAdmin):
     list_display = ("to_email", "subject", "status", "attempts", "next_attempt_at", "created_at")
     list_filter = ("status",)
     readonly_fields = ("attempts", "last_error", "created_at", "updated_at")
+
+
+@admin.register(TierStat)
+class TierStatAdmin(admin.ModelAdmin):
+    """Read-only view of the 3D tier counters (no PII). Trend: manage.py tier_report."""
+
+    list_display = ("day", "device", "outcome", "count")
+    list_filter = ("device", "outcome", "day")
+    date_hierarchy = "day"
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False

@@ -8,7 +8,7 @@ from django.conf import settings
 from django.db import connection
 from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
 from django.shortcuts import render
-from django.views.decorators.cache import cache_control
+from django.views.decorators.cache import cache_control, never_cache
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
@@ -89,3 +89,27 @@ def error_403(request, exception=None):
 
 def error_500(request):
     return render(request, "core/500.html", status=500)
+
+
+@csrf_exempt
+@never_cache
+def beacon_tier(request):
+    """POST /beacon/3d — one count for the hero 3D outcome (core/beacon.py).
+
+    CSRF-exempt by necessity: it is fired with navigator.sendBeacon from the edge-cached
+    home page, which carries no CSRF token (rule 8). That is safe here because the only
+    effect is +1 on an anonymous counter, values come from fixed lists, the body is capped,
+    and Cloudflare rate-limits the path (docs/operations.md)."""
+    from urllib.parse import parse_qs
+
+    from django.http import HttpResponseNotAllowed
+
+    from .beacon import record_tier
+
+    if request.method != "POST":
+        return HttpResponseNotAllowed(["POST"])
+    if len(request.body) > 200:
+        return HttpResponse(status=413)
+    data = parse_qs(request.body.decode("utf-8", "ignore"))
+    ok = record_tier(data.get("o", [""])[0], data.get("d", [""])[0])
+    return HttpResponse(status=204 if ok else 400)

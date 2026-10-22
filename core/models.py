@@ -112,3 +112,36 @@ class OutboxEmail(models.Model):
 
     def __str__(self):
         return f"{self.to_email}: {self.subject} [{self.status}]"
+
+
+class TierStat(models.Model):
+    """Daily COUNT of how the hero 3D scene ended up on visitors' devices — the "WebGL
+    fallback rate" metric (docs/frontend.md → Quality tiers, docs/operations.md).
+
+    Aggregated only: no IP, no user agent, no cookie, no visitor id — one row per
+    (day, outcome, device class) with a counter. Written by core.beacon.record_tier()."""
+
+    class Outcome(models.TextChoices):
+        HIGH = "high", "3D high"
+        MID = "mid", "3D mid"
+        LOW = "low", "Poster (slow device)"
+        FALLBACK = "fallback", "Poster (WebGL/bundle failed)"
+        REDUCED = "reduced", "Poster (reduced motion)"
+
+    class Device(models.TextChoices):
+        MOBILE = "mobile", "Mobile"
+        DESKTOP = "desktop", "Desktop"
+
+    day = models.DateField()
+    outcome = models.CharField(max_length=10, choices=Outcome.choices)
+    device = models.CharField(max_length=8, choices=Device.choices)
+    count = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ["-day", "device", "outcome"]
+        constraints = [
+            models.UniqueConstraint(fields=["day", "outcome", "device"], name="tierstat_unique_day")
+        ]
+
+    def __str__(self):
+        return f"{self.day} {self.device} {self.outcome}: {self.count}"
