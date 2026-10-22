@@ -78,3 +78,13 @@ def test_invitation_mark_sent_queues_outbox(admin_user):
     assert invitation.status == Invitation.Status.SENT
     email = OutboxEmail.objects.get()
     assert invitation.token in email.body_text
+
+
+def test_invite_page_renders_qr_for_a_valid_invitation(client, db):
+    """Regression: valid invitations returned 500 (PNG QR needed Pillow, not installed)."""
+    invitation = make_invitation()
+    response = client.get(f"/invite/{invitation.token}/")
+    assert response.status_code == 200
+    body = response.content.decode()
+    assert "<svg" in body and "<path" in body
+    assert invitation.guest_name in body
