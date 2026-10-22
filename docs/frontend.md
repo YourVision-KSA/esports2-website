@@ -145,9 +145,19 @@ Engineering requirements (apply to whatever the design specifies):
 |---|---|---|
 | Loader (~1 KB gzip) | `frontend/src/hero.js` | No three.js inside. Keeps the poster when: reduced motion, saved LOW tier, `deviceMemory ≤ 2`, no model shipped. Otherwise waits for **window `load` → idle (`requestIdleCallback`) → scene within 600 px of the viewport**, then dynamic-imports the scene. |
 | Scene (~165 KB gzip, lazy chunk) | `frontend/src/scene.js` | three.js (tree-shaken) + GLTFLoader + meshopt decoder. Controller on a pedestal with two thin brand rings; drag to rotate (horizontal drag rotates, vertical swipe still scrolls: `touch-action: pan-y`), mouse parallax, slow idle spin, gentle float. Pauses off-screen and on hidden tab. 3 s FPS probe adjusts the tier and saves it. Canvas fades in over the poster after its first frame. |
-| Model | `static/models/controller.glb` (built by `npm run model -- <raw file>`) | Simplified with meshoptimizer, EXT_meshopt_compression, WebP textures ≤ 1024 px. |
+| Model | `static/models/controller.glb` (built by `npm run model -- <raw scene.gltf>`) | Reproducible pipeline `frontend/scripts/optimize-model.mjs`: removes the PlayStation-logo button mesh and erases the △○✕□ glyphs (trademarks), recolours to the palette (silver body, navy dark parts, cyan light bar), drops unused UVs/tangents, opaque materials, simplify → 20.7k triangles, meshopt compression, WebP ≤ 1024 px. **21 MB → 362 KB.** Geometry decoded in a worker. |
+| Poster | `static/img/hero-poster.webp` (13 KB) | Render of the scene at rest pose (`/#hero-still` freezes it for capture). LOW/FALLBACK tiers and reduced-motion users see only this. |
 | Django | `{% vite_asset "hero.js" %}`, `{% static_if_exists %}` (core/templatetags/ui.py) | Reads `static/dist/.vite/manifest.json`. No bundle or no model → no script, no `data-model`: the page is unchanged (tests: `core/tests/test_hero_3d.py`). |
 | Build | `frontend/` (Vite 6.4.4, three 0.186.1) → `static/dist/` | Built in CI (job `frontend`) and in the Dockerfile's node stage; `npm run budget` fails the build if the bundle > 250 KB gzip or the model > 1.5 MB. |
+
+Start-up is split into steps with a yield between each (model → environment (64 px) →
+`compileAsync` shaders → one texture upload per step → first frame) so no single task
+blocks input. **Measured 2026-10-22** (local, Chromium; mobile = Pixel 7 profile with 4×
+CPU slowdown): LCP 0.33 s desktop / 0.66 s mobile — unaffected by 3D; longest main-thread
+task during 3D start-up ≈ 75 ms desktop / ≈ 145 ms mobile (was 704 ms before the split);
+reduced-motion: only the 13 KB poster is fetched, no long tasks. Idle motion is a slow
+sway (face stays visible); drag rotates fully; `performance.mark("es2:*")` marks remain
+for future diagnostics.
 
 Deliberate deviations, with reasons:
 - **Textures are WebP, not KTX2.** WebP is the documented fallback format; for one small

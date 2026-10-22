@@ -193,16 +193,17 @@ section { scroll-margin-block-start: 76px; }
   display: flex; align-items: center; justify-content: center; overflow: hidden;
   box-shadow: var(--glow-accent-2);
 }
-.scene-frame svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.scene-frame svg, .scene-poster { position: absolute; inset: 0; width: 100%; height: 100%; }
+.scene-poster { object-fit: cover; }
 /* the WebGL canvas fades in over the poster once its first frame is drawn (frontend/src/scene.js) */
 .scene-canvas {
   position: absolute; inset: 0; width: 100%; height: 100%; display: block;
   opacity: 0; transition: opacity 0.6s ease; cursor: grab; touch-action: pan-y;
 }
 .scene-canvas:active { cursor: grabbing; }
-.scene-frame > svg { transition: opacity 0.6s ease; }
+.scene-poster { transition: opacity 0.6s ease; }
 .scene-frame.has-3d .scene-canvas { opacity: 1; }
-.scene-frame.has-3d > svg { opacity: 0; }
+.scene-frame.has-3d .scene-poster { opacity: 0; }
 .scene-badge, .scene-hint { z-index: 1; pointer-events: none; }
 .scene-badge {
   position: absolute; top: 14px; inset-inline-start: 14px;
@@ -216,6 +217,8 @@ section { scroll-margin-block-start: 76px; }
   font-family: var(--num); font-size: 11px; letter-spacing: 0.2em;
   color: var(--muted); direction: ltr;
 }
+.scene-credit { margin-block-start: 8px; font-family: var(--num); font-size: 10px; letter-spacing: 0.02em; color: var(--muted); opacity: 0.75; }
+.scene-credit a { color: inherit; }
 .scene-hint { position: absolute; inset-block-end: 12px; inset-inline-start: 14px; font-size: 13px; color: var(--muted); }
 
 /* ---- ticker marquee -------------------------------------------------------- */

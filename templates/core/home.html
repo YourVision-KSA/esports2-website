@@ -71,24 +71,13 @@
       {% static_if_exists "models/controller.glb" as hero_model %}
       <div class="scene" id="hero-scene"{% if hero_model %} data-model="{{ hero_model }}"{% endif %}>
         <div class="scene-frame">
-          <svg viewBox="0 0 400 300" aria-hidden="true">
-            <g stroke="#1F2D45" stroke-width="1">
-              <line x1="0" y1="250" x2="400" y2="250"></line>
-              <line x1="40" y1="300" x2="120" y2="200"></line>
-              <line x1="260" y1="300" x2="210" y2="200"></line>
-              <line x1="60" y1="265" x2="340" y2="265"></line>
-            </g>
-            <ellipse cx="200" cy="225" rx="95" ry="16" fill="none" stroke="#3CD6E0" stroke-width="2"></ellipse>
-            <ellipse cx="200" cy="232" rx="120" ry="20" fill="none" stroke="#D15EB9" stroke-width="1.5" opacity="0.7"></ellipse>
-            <g transform="translate(130,110)" fill="none" stroke="#8E9CB3" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M20 40 C 8 40 2 28 6 16 C 9 7 18 4 28 8 C 36 2 104 2 112 8 C 122 4 131 7 134 16 C 138 28 132 40 120 40 C 112 48 96 50 86 42 L 54 42 C 44 50 28 48 20 40 Z"></path>
-              <circle cx="42" cy="22" r="9" stroke="#D15EB9"></circle>
-              <circle cx="98" cy="22" r="9" stroke="#3CD6E0"></circle>
-            </g>
-          </svg>
+          <img class="scene-poster" src="{% static 'img/hero-poster.webp' %}" alt="" aria-hidden="true"
+               width="780" height="660" decoding="async" fetchpriority="low">
           <div class="scene-badge"><i></i><span dir="ltr">3D INTERACTIVE SCENE</span></div>
           <div class="scene-hint">{{ content.HERO_3D_HINT }}</div>
         </div>
+        {# CC BY 4.0 requires credit + noting changes (frontend/scripts/optimize-model.mjs) #}
+        <p class="scene-credit" dir="ltr">3D model: <a href="https://sketchfab.com/3d-models/dualsense-14a6fa6d7078463380cc72fe0bc5acb0" rel="noopener" target="_blank">“Dualsense”</a> by <a href="https://sketchfab.com/mishel1337" rel="noopener" target="_blank">miwaVV</a> · <a href="https://creativecommons.org/licenses/by/4.0/" rel="noopener license" target="_blank">CC BY 4.0</a> · modified</p>
       </div>
     </div>
   </div>
