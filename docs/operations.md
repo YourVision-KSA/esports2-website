@@ -60,10 +60,67 @@ registrations and brackets continuously from first deploy.
 
 ## Deploy pipeline
 
-GitHub Actions on push to `main`: ruff + pytest (Postgres service) → build image → push to
-Artifact Registry → deploy new Cloud Run revision at 100% → smoke test `/healthz` + `/`.
-**Rollback** = `gcloud run services update-traffic esports --to-revisions PREV=100` (keep the
-command in this file, rehearse it once).
+`.github/workflows/deploy.yml` — runs when **CI succeeds on `main`** (or manually: Actions →
+Deploy → *Run workflow* → staging/production):
+
+checkout the commit CI tested → keyless auth (Workload Identity Federation) → build image →
+push to Artifact Registry → `gcloud run jobs update/execute <service>-migrate` (migrations as a
+job, never at boot) → `gcloud run deploy <service> --image …` (only the image changes) → smoke
+test `/healthz` and `/` → on failure the job summary prints the exact rollback command:
+
+```
+gcloud run services update-traffic esports --region me-central2 --to-revisions PREV=100
+```
+
+The workflow is **dormant until `GCP_PROJECT_ID` is set** (all jobs skipped). Rehearse one
+rollback on staging before the vote opens.
+
+### Deploy setup (one time, after DEC-05 — ~30 min)
+
+Variables used below: `P=esports2-prod`, `R=me-central2`, `ORG=YourVision-KSA`,
+`REPO=esports2-website`, `N=$(gcloud projects describe $P --format='value(projectNumber)')`.
+
+1. **Artifact Registry**: `gcloud artifacts repositories create esports --repository-format=docker --location=$R`
+2. **Service accounts**
+   - runtime: `gcloud iam service-accounts create esports-run` → roles `roles/cloudsql.client`,
+     `roles/secretmanager.secretAccessor`
+   - deployer: `gcloud iam service-accounts create esports-deploy` → roles `roles/run.admin`,
+     `roles/artifactregistry.writer`, and `roles/iam.serviceAccountUser` **on esports-run only**
+3. **Secrets** (Secret Manager): `secret-key`, `database-url`, `signals-salt`, `turnstile-secret`,
+   `internal-token`, `email-host-password` — generated once, never in the repo or image.
+4. **Service** (first deploy by hand, from any built image; later deploys only swap the image):
+   ```
+   gcloud run deploy esports --region $R --image $R-docker.pkg.dev/$P/esports/web:<sha> \
+     --service-account esports-run@$P.iam.gserviceaccount.com \
+     --add-cloudsql-instances $P:$R:esports-db \
+     --set-secrets SECRET_KEY=secret-key:latest,DATABASE_URL=database-url:latest,SIGNALS_SALT=signals-salt:latest,TURNSTILE_SECRET=turnstile-secret:latest,INTERNAL_TOKEN=internal-token:latest,EMAIL_HOST_PASSWORD=email-host-password:latest \
+     --set-env-vars ALLOWED_HOSTS=<domain>,<service>.run.app,CSRF_TRUSTED_ORIGINS=https://<domain>,SITE_BASE_URL=https://<domain>,TURNSTILE_SITE_KEY=<key>,EMAIL_HOST=<smtp>,EMAIL_HOST_USER=<user>,DEFAULT_FROM_EMAIL=<from> \
+     --min-instances 0 --max-instances 4 --concurrency 40 --cpu 1 --memory 512Mi --allow-unauthenticated
+   ```
+   `ALLOWED_HOSTS` **must include the `*.run.app` host** or the smoke test gets 400. Add the
+   startup probe on `/healthz` (console → Edit → Container → Health checks).
+5. **Migration job** (same image, same secrets/SQL/SA as the service):
+   `gcloud run jobs create esports-migrate --region $R --image <same> --command python --args manage.py,migrate,--noinput`
+   + the same `--service-account`, `--set-cloudsql-instances`, `--set-secrets`, `--set-env-vars`.
+6. **Workload Identity Federation** (keyless GitHub → GCP):
+   ```
+   gcloud iam workload-identity-pools create github --location=global
+   gcloud iam workload-identity-pools providers create-oidc github-oidc --location=global \
+     --workload-identity-pool=github --issuer-uri=https://token.actions.githubusercontent.com \
+     --attribute-mapping=google.subject=assertion.sub,attribute.repository=assertion.repository \
+     --attribute-condition="assertion.repository=='$ORG/$REPO'"
+   gcloud iam service-accounts add-iam-policy-binding esports-deploy@$P.iam.gserviceaccount.com \
+     --role=roles/iam.workloadIdentityUser \
+     --member="principalSet://iam.googleapis.com/projects/$N/locations/global/workloadIdentityPools/github/attribute.repository/$ORG/$REPO"
+   ```
+7. **GitHub** (repo → Settings → Secrets and variables → Actions → *Variables*; no secrets needed):
+   `GCP_PROJECT_ID=$P` · `GCP_WIF_PROVIDER=projects/$N/locations/global/workloadIdentityPools/github/providers/github-oidc`
+   · `GCP_DEPLOY_SA=esports-deploy@$P.iam.gserviceaccount.com`.
+   Environments → create `production` (add required reviewers = manual approval gate) and `staging`.
+8. **Staging**: repeat 4–5 as `esports-staging` / `esports-staging-migrate` against the staging
+   database; deploy it with *Run workflow → staging*.
+9. **Verify**: push a docs-only commit to `main` → CI → Deploy → green smoke test; then rehearse
+   the rollback command on staging.
 
 ## Monitoring & alerts (GCP built-ins only)
 

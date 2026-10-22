@@ -88,7 +88,13 @@ Order agreed — code work that does NOT wait on owner decisions:
 - [x] **Bug fixed: VIP invitation page returned 500 for every valid invitation** (QR PNG needed
       Pillow, not installed) → inline SVG QR; PR #6 straight to `main`, regression test.
 - [x] CI job 3: `npm run build` + size budgets (`frontend` job, 2026-10-22)
-- [ ] Deploy workflow (GitHub Actions → Cloud Run), written now, enabled after DEC-04/05
+- [x] **Deploy workflow** (2026-10-22, branch `ci/deploy-cloud-run`): `.github/workflows/deploy.yml`
+      — after CI on `main`: build → Artifact Registry → migrate job → new revision → smoke test →
+      rollback hint; keyless WIF, actions pinned to SHAs, `production` approval gate, staging via
+      manual run. **Dormant until `GCP_PROJECT_ID` is set.** One-time setup commands:
+      docs/operations.md → *Deploy setup*. Production `collectstatic` verified with the Vite
+      bundles; Vite assets now cached 1 year by WhiteNoise.
+- [ ] → after DEC-05: run the *Deploy setup* checklist (≈30 min), then rehearse a rollback on staging
 - [x] **Hero 3D scene** — Yousef, 2026-10-22, branch `feat/hero-3d` (PR stacked on the
       rebrand PR). CC-BY "Dualsense" model cleaned (no PS logo/symbols), recoloured,
       21 MB → 362 KB; lazy loader, tiers, worker decode, chunked start-up (longest task
@@ -104,11 +110,13 @@ Order agreed — code work that does NOT wait on owner decisions:
 
 ## ⬜ Remaining — Hussein (with Claude)
 
-- [ ] Upload the org avatar: Desktop `yourvision-avatar-dark.png` → GitHub org settings → profile picture
+- [x] Upload the org avatar (verified 2026-10-22: Your Vision logo is live on the org)
 - [x] Verify staff 2FA enrollment flow end-to-end (left over from W1) — gap found and
       fixed 2026-10-21: new `enroll_totp` management command + 4 tests (59 total green)
 - [ ] GCP + Cloudflare setup per `docs/operations.md` (~Oct 29; needs DEC-04/05 from Yousef first)
-- [ ] Vote-page counting-rules content (needs DEC-03)
+      — deploy workflow + step-by-step *Deploy setup* commands are ready (PR #9)
+- [~] Vote-page counting-rules content — VOTE-RULES draft is already shown on `/vote/`;
+      only owner approval of the text is left (DEC-03)
 - [x] Hero 3D scene → done by Yousef 2026-10-22 (see Yousef's list)
 - [ ] Trophy 3D scene (W5; cut-list fallback: static image)
 - [ ] Monitoring + uptime alert before G1 (vote opens ~Nov 2)
