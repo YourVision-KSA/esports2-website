@@ -61,6 +61,8 @@ lockup = emblem + LOGO-TITLE + gold "2" badge + LOGO-SUB (`templates/partials/br
 Also the favicon. **Placeholder photos** were hue-regraded to cyan/magenta (gold untouched);
 production photography follows the same treatment.
 
+**Status:** colours approved in principle by the owner (2026-10-22); photography and game imagery will be replaced later.
+
 **Superseded:** rev 3.1 tokens (`--volt #D8F24A`, `--purple #8C5CFF`, ground `#07080F`).
 The design artifact (DEC-15 link above) still shows rev 3.1 colours — layout reference only.
 
