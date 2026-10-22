@@ -267,6 +267,11 @@ Note for owner: «أفضل لاعب في اليوم» may need rewording for a 3
 | FINAL-MATCH | المباراة النهائية | DRAFT — centre card of the bracket |
 | BRACKET-META | {players} لاعبًا · {matches} مباراة | DRAFT — bracket header line |
 | ROUND-DAYS | R16: اليوم الأول · QF: اليوم الثاني · SF: اليوم الثاني · Final: اليوم الثالث · الجامعة | DRAFT — from the bracket mock-up; **depends on DEC-01** (final dates/venue) |
+| STAFF-SCAN-START | مسح رمز الدعوة بالكاميرا | DRAFT — needs owner review (check-in scanner button) |
+| STAFF-SCAN-STOP | إيقاف الكاميرا | DRAFT — needs owner review |
+| STAFF-SCAN-HINT | وجّه الكاميرا نحو رمز QR في الدعوة | DRAFT — needs owner review |
+| STAFF-SCAN-ERROR | تعذّر تشغيل الكاميرا — استخدم إدخال الرمز أو البحث بالاسم | DRAFT — needs owner review (camera denied/unavailable) |
+| STAFF-OR | أو | DRAFT — divider between scanner and manual entry |
 | INVITE-STATUS | created: لم تُرسل · sent: مرسلة · checked_in: حضر · revoked: ملغاة | DRAFT — needs owner review (door-staff status chips) |
 | Seed game names | روكيت ليج · فيفا · كول أوف ديوتي · تيكن · فالورانت | candidate games (data; editable in admin) |
 | GAMES-PENDING-VOTE | الألعاب النهائية تُعتمد بعد انتهاء التصويت العام. | note under the tournaments grid |

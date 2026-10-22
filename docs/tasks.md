@@ -79,7 +79,14 @@ Order agreed — code work that does NOT wait on owner decisions:
       winners' paths** (live); per-game theme colour from the approved palette. Phones: same
       DOM restacked by round, two cards per row. Layout logic in `bracket/tree.py`. Round→day
       labels are DRAFT pending DEC-01. 7 tests.
-- [ ] Camera QR scanner on `/staff/checkin/` (manual entry stays as fallback)
+- [x] **Camera QR scanner** on `/staff/checkin/` (2026-10-22, branch `feat/qr-scanner`):
+      native BarcodeDetector where available, else jsQR in a Web Worker (iOS Safari; loaded
+      only then). Scan → lookup (nothing written) → ID check → confirm; camera off while a
+      guest awaits confirmation, auto-restarts for the next guest, ignores the code just
+      handled for 6 s, released on hidden tab. Verified with a fake camera on both paths
+      (native 2.9 s, worker 0.8 s). Scanner JS 1.3 KB + worker 46 KB gzip (budget 60 KB).
+- [x] **Bug fixed: VIP invitation page returned 500 for every valid invitation** (QR PNG needed
+      Pillow, not installed) → inline SVG QR; PR #6 straight to `main`, regression test.
 - [x] CI job 3: `npm run build` + size budgets (`frontend` job, 2026-10-22)
 - [ ] Deploy workflow (GitHub Actions → Cloud Run), written now, enabled after DEC-04/05
 - [x] **Hero 3D scene** — Yousef, 2026-10-22, branch `feat/hero-3d` (PR stacked on the

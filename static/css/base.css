@@ -665,6 +665,45 @@ button[type="submit"].btn-secondary-sm:hover { background: var(--surface); borde
 .guest-invalid { border-color: var(--error); background: rgb(255 180 174 / 0.06); }
 .guest-invalid .guest-state { color: var(--error); font-size: 20px; }
 
+/* camera scanner (frontend/src/scanner.js) */
+.scanner { display: flex; flex-direction: column; gap: 10px; }
+.scanner[hidden] { display: none; }
+.scanner-view {
+  position: relative; display: none; aspect-ratio: 1 / 1; width: 100%; max-width: 420px; margin-inline: auto;
+  background: #000; overflow: hidden; border: 1px solid var(--line-strong);
+}
+.scanner.live .scanner-view { display: block; }
+.scanner-view video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.scanner-frame {
+  position: absolute; inset: 18%; pointer-events: none;
+  background:
+    linear-gradient(var(--accent), var(--accent)) top left / 28px 3px no-repeat,
+    linear-gradient(var(--accent), var(--accent)) top left / 3px 28px no-repeat,
+    linear-gradient(var(--accent), var(--accent)) top right / 28px 3px no-repeat,
+    linear-gradient(var(--accent), var(--accent)) top right / 3px 28px no-repeat,
+    linear-gradient(var(--accent), var(--accent)) bottom left / 28px 3px no-repeat,
+    linear-gradient(var(--accent), var(--accent)) bottom left / 3px 28px no-repeat,
+    linear-gradient(var(--accent), var(--accent)) bottom right / 28px 3px no-repeat,
+    linear-gradient(var(--accent), var(--accent)) bottom right / 3px 28px no-repeat;
+  box-shadow: 0 0 0 100vmax rgb(0 0 0 / 0.35);
+}
+.scanner.found .scanner-frame { box-shadow: 0 0 0 100vmax rgb(var(--accent-rgb) / 0.25); }
+.scanner-hint {
+  position: absolute; inset-inline: 0; inset-block-end: 10px; text-align: center;
+  font-size: 13px; font-weight: 600; color: #FFFFFF; text-shadow: 0 1px 4px #000;
+}
+.btn-scan {
+  width: 100%; cursor: pointer; padding: 15px 0; font-family: var(--display); font-weight: 700; font-size: 17px;
+  background: var(--accent); color: var(--ink); border: 0;
+  clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
+}
+.btn-scan[hidden] { display: none; }
+.btn-scan-stop { background: var(--surface-2); color: var(--text); clip-path: none; border: 1px solid var(--line-strong); }
+.scanner-error { color: var(--error); font-weight: 600; font-size: 14px; }
+.scanner-or { display: flex; align-items: center; gap: 12px; color: var(--muted); font-size: 13px; margin: 4px 0 0; }
+.scanner-or::before, .scanner-or::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+@media (prefers-reduced-motion: reduce) { .scanner.found .scanner-frame { box-shadow: 0 0 0 100vmax rgb(0 0 0 / 0.35); } }
+
 .staff-search label { display: block; margin-block-end: 8px; }
 .search-row { display: flex; gap: 8px; }
 .search-row input { flex: 1; min-width: 0; background: var(--bg-2); border: 1px solid var(--line-strong); color: var(--text); padding: 12px 14px; font-size: 15px; font-family: var(--sans); }
@@ -719,3 +758,7 @@ button[type="submit"].btn-secondary-sm:hover { background: var(--surface); borde
   .reveal { opacity: 1; transform: none; transition: none; }
   .btn, .game-card, .game-card .media img { transition: none; }
 }
+
+/* VIP invitation QR (inline SVG from invitations/views.py) */
+.invite-qr { width: 170px; height: 170px; }
+.invite-qr svg { display: block; width: 100%; height: 100%; }
