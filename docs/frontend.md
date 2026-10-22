@@ -154,7 +154,7 @@ Start-up is split into steps with a yield between each (model → environment (6
 `compileAsync` shaders → one texture upload per step → first frame) so no single task
 blocks input. **Measured 2026-10-22** (local, Chromium; mobile = Pixel 7 profile with 4×
 CPU slowdown): LCP 0.33 s desktop / 0.66 s mobile — unaffected by 3D; longest main-thread
-task during 3D start-up ≈ 75 ms desktop / ≈ 145 ms mobile (was 704 ms before the split);
+task during 3D start-up ≈ 75 ms desktop / ≈ 130 ms mobile (was 704 ms before the split);
 reduced-motion: only the 13 KB poster is fetched, no long tasks. Idle motion is a slow
 sway (face stays visible); drag rotates fully; `performance.mark("es2:*")` marks remain
 for future diagnostics.
@@ -169,6 +169,9 @@ Deliberate deviations, with reasons:
 - **Hero model source:** "Dualsense" by miwaVV on Sketchfab, **CC BY 4.0** — credit shown in the footer of
   the page; modified (simplified, recoloured, logos removed). The owner's first pick
   (HQ3DMOD, editorial licence, not downloadable) could not be used on a commercial site.
+  History (2026-10-22): a code-built controller briefly replaced this model to avoid any credit
+  line; the owner preferred the realistic model and accepted the faint footer credit. Do not
+  remove the credit while this model ships — use a CC0/no-credit asset instead if that changes.
 
 ## Quality tiers (FIXED; decided at runtime, re-evaluated once after 3 s)
 

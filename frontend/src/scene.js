@@ -125,6 +125,7 @@ export async function start(mount, { tier, modelUrl, tierKey }) {
   const loader = new GLTFLoader();
   MeshoptDecoder.useWorkers(1); // geometry decompression off the main thread
   loader.setMeshoptDecoder(MeshoptDecoder);
+  await yieldToMain(); // WebGL context creation and model parsing in separate tasks
   performance.mark("es2:load-start");
   const gltf = await loader.loadAsync(modelUrl);
   performance.mark("es2:model");
