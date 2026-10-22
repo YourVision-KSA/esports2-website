@@ -59,11 +59,20 @@ def test_home_with_bundle_stays_cacheable(client, built_bundle):
     assert "max-age=60" in response.headers["Cache-Control"]
 
 
-def test_model_credit_in_footer_only_and_no_template_leaks(client, built_bundle):
-    """CC BY 4.0 credit stays on the page (footer), and no raw template syntax leaks
-    (Django's {# #} comments are single-line only — multi-line ones render as text)."""
+def test_model_credit_not_on_home_but_linked_and_no_template_leaks(client, built_bundle):
+    """Owner wants no credit text on the page: the CC BY 4.0 credit lives on /credits/,
+    linked from the 3D badge. Also: no raw template syntax leaks ({# #} is single-line)."""
     set_phase(Phase.PRE)
     body = client.get("/").content.decode()
-    assert body.count("miwaVV") == 1
-    assert "scene-credit" not in body
+    assert "miwaVV" not in body and "CC BY" not in body
+    assert 'href="/credits/"' in body
     assert "{#" not in body and "{%" not in body
+
+
+def test_credits_page_carries_the_licence_notice(client):
+    response = client.get("/credits/")
+    assert response.status_code == 200
+    body = response.content.decode()
+    assert "miwaVV" in body and "CC BY 4.0" in body and "Changes:" in body
+    assert "Set-Cookie" not in response.headers  # edge-cached page (rule 8)
+    assert "max-age=3600" in response.headers["Cache-Control"]

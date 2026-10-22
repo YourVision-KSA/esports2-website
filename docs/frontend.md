@@ -166,12 +166,15 @@ Deliberate deviations, with reasons:
 - **No bloom/post-processing, even on HIGH.** The owner asked for no neon beams (rev 4);
   HIGH only raises DPR to 2 and enables MSAA.
 - **Tier beacon endpoint not built yet** (needs a route + table): tracked in docs/tasks.md.
-- **Hero model source:** "Dualsense" by miwaVV on Sketchfab, **CC BY 4.0** — credit shown in the footer of
-  the page; modified (simplified, recoloured, logos removed). The owner's first pick
-  (HQ3DMOD, editorial licence, not downloadable) could not be used on a commercial site.
-  History (2026-10-22): a code-built controller briefly replaced this model to avoid any credit
-  line; the owner preferred the realistic model and accepted the faint footer credit. Do not
-  remove the credit while this model ships — use a CC0/no-credit asset instead if that changes.
+- **Hero model source:** "Dualsense" by miwaVV on Sketchfab, **CC BY 4.0**; modified
+  (simplified, recoloured, logos removed). **Credit lives on `/credits/`**, linked from the
+  hero's "3D INTERACTIVE SCENE" badge — the owner wants no credit text on the page, and CC BY
+  accepts attribution on a linked credits page. The owner's first pick (HQ3DMOD, editorial
+  licence, not downloadable) could not be used on a commercial site.
+  History (2026-10-22): credit under the scene → faint footer line → code-built controller
+  (reverted; owner preferred the realistic model) → linked credits page. **Do not remove the
+  badge link or /credits/ while this model ships** — that would breach the licence; switch to
+  a CC0/no-credit asset instead.
 
 ## Quality tiers (FIXED; decided at runtime, re-evaluated once after 3 s)
 

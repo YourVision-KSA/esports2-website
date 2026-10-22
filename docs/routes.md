@@ -24,6 +24,7 @@ Cache column = Cloudflare edge behavior (configured as cache rules, see docs/ope
 | `/api/bracket/<game-slug>.json` | GET | event..archive | **10 s** | Flat match list for polling. The ONLY JSON endpoint. No PII beyond player display names/gamer tags. |
 | `/invite/<token>/` | GET | all | BYPASS | Guest view: name, date, venue, QR code rendered client-side or as inline SVG. 404 for unknown/revoked tokens (uniform response, no token-validity oracle beyond this). |
 | `/healthz` | GET | all | BYPASS | 200 + DB ping. Used by uptime checks. |
+| `/credits/` | GET | all | 1 h | Licence notices for third-party assets (CC BY 4.0 hero model). Linked from the hero's "3D INTERACTIVE SCENE" badge. English legal text. No forms. |
 
 Phase-gated POST outside its window → 403 with the Arabic closed message. GET → closed-state
 page. Both enforced in the view via `current_phase()`, regardless of what links exist.

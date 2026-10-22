@@ -42,6 +42,14 @@ def home(request):
     return render(request, "core/home.html", {"games": games, "live_match": live_match})
 
 
+@cache_control(public=True, max_age=3600, s_maxage=3600)
+def credits(request):
+    """Third-party asset credits (licence notices). Static, edge-cached, no forms.
+    Linked from the home page's 3D scene badge — CC BY 4.0 accepts attribution on a
+    linked credits page (docs/frontend.md)."""
+    return render(request, "core/credits.html")
+
+
 def healthz(request):
     """Uptime check: 200 + DB ping (docs/routes.md)."""
     with connection.cursor() as cursor:

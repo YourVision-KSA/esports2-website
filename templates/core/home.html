@@ -73,7 +73,8 @@
         <div class="scene-frame">
           <img class="scene-poster" src="{% static 'img/hero-poster.webp' %}" alt="" aria-hidden="true"
                width="780" height="660" decoding="async" fetchpriority="low">
-          <div class="scene-badge"><i></i><span dir="ltr">3D INTERACTIVE SCENE</span></div>
+          {# badge doubles as the licence-credit link (CC BY 4.0 — see /credits/) #}
+          <a class="scene-badge scene-badge-link" href="/credits/" title="3D model credits"><i></i><span dir="ltr">3D INTERACTIVE SCENE</span></a>
           <div class="scene-hint">{{ content.HERO_3D_HINT }}</div>
         </div>
       </div>
@@ -315,10 +316,4 @@
 
 {% vite_asset "hero.js" as hero_js %}
 {% if hero_js %}<script type="module" src="{{ hero_js }}"></script>{% endif %}
-{% endblock %}
-
-{% block footer_credit %}
-{% comment %}CC BY 4.0 requires crediting the hero model's author (kept low-key in the footer,
-per owner request 2026-10-22); changes are listed in frontend/scripts/optimize-model.mjs{% endcomment %}
-<p class="footer-credit wrap" dir="ltr">3D model “<a href="https://sketchfab.com/3d-models/dualsense-14a6fa6d7078463380cc72fe0bc5acb0" rel="noopener" target="_blank">Dualsense</a>” by miwaVV · <a href="https://creativecommons.org/licenses/by/4.0/" rel="noopener license" target="_blank">CC BY 4.0</a> · modified</p>
 {% endblock %}
