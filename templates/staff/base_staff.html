@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% comment %}Shared layout for referee / door-staff pages: phone-first, compact header with
+who is signed in + logout, no public footer. Every staff page is BYPASS (never cached).{% endcomment %}
+
+{% block header %}
+<div class="funnel-head staff-head">
+  <div class="wrap">
+    {% include "partials/brand.html" %}
+    <form method="post" action="/staff/logout/" class="staff-user">
+      {% csrf_token %}
+      <span>{{ content.STAFF_SIGNED_IN|cut:"{user}" }}<b dir="auto">{{ request.user.get_username }}</b></span>
+      <button type="submit" class="btn-link">{{ content.STAFF_LOGOUT }}</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block footer %}{% endblock %}

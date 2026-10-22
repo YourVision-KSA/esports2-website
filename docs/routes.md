@@ -20,10 +20,13 @@ Cache column = Cloudflare edge behavior (configured as cache rules, see docs/ope
 | `/r/<manage_token>/` | GET | registration..event | BYPASS | Player status page: game, confirmed/waitlist position, schedule of their matches. |
 | `/r/<manage_token>/withdraw/` | POST | registration | BYPASS | Withdraw (confirm step). Triggers waitlist promotion. |
 | `/bracket/` | GET | event..archive | 30 s | Overview of all confirmed games' brackets (server-rendered). |
-| `/bracket/<game-slug>/` | GET | event..archive | 30 s | Full tree for one game. Progressive page: works without JS; with JS polls the JSON endpoint. |
+| `/bracket/<game-slug>/` | GET | event..archive | 30 s | Full tree for one game. Progressive page: works without JS; with JS (`static/js/bracket-live.js`) polls the JSON endpoint every 15 s while visible (back-off on errors, 60 s after the final) and patches cells by `data-match="<round>-<slot>"`. |
 | `/api/bracket/<game-slug>.json` | GET | event..archive | **10 s** | Flat match list for polling. The ONLY JSON endpoint. No PII beyond player display names/gamer tags. |
 | `/invite/<token>/` | GET | all | BYPASS | Guest view: name, date, venue, QR code rendered client-side or as inline SVG. 404 for unknown/revoked tokens (uniform response, no token-validity oracle beyond this). |
 | `/healthz` | GET | all | BYPASS | 200 + DB ping. Used by uptime checks. |
+| `/beacon/3d` | POST | all | **BYPASS** | Count-only hero-3D outcome beacon (`navigator.sendBeacon` from the home page, ≤ 1 per tab session): `o` ∈ high/mid/low/fallback/reduced, `d` ∈ mobile/desktop → +1 on `TierStat`. CSRF-exempt (sent from an edge-cached page without a token); body ≤ 200 B; 204 / 400; rate-limited at the edge. No PII, no cookie. |
+| `/privacy/` | GET | all | 60 s | Privacy notice (DEC-08, PDPL). Static content from core/content.py (PRIVACY_*). Linked from the registration consent checkbox (new tab), the vote page and the footer. No forms. Must be final before G2. |
+| `/credits/` | GET | all | 1 h | Licence notices for third-party assets (CC BY 4.0 hero model). Linked from the hero's "3D INTERACTIVE SCENE" badge. English legal text. No forms. |
 
 Phase-gated POST outside its window → 403 with the Arabic closed message. GET → closed-state
 page. Both enforced in the view via `current_phase()`, regardless of what links exist.
@@ -40,8 +43,8 @@ page. Both enforced in the view via `current_phase()`, regardless of what links 
 | Route | Role | Notes |
 |---|---|---|
 | `/staff/` | per-model perms | Django admin: Games, SiteConfig (admin only), Ballots (hold/invalidate actions), Players/Registrations (remove, promote shown), Invitations (create, mark sent, revoke, CSV export), OutboxEmail, AuditLog (read-only). CSV exports admin-only + audit-logged. |
-| `/staff/results/` | referee, admin | Mobile-friendly result entry: list of `pending` matches for today → tap → enter winner + score. Thin wrapper over the result-entry transaction. (Cut-list item: fall back to Django admin.) |
-| `/staff/checkin/` | door, admin | Camera QR scanner (getUserMedia + a small JS decoder) → shows guest name/org → confirm button → atomic check-in. Manual token entry fallback + searchable guest list. (Cut-list item: list page only.) |
+| `/staff/results/` | referee, admin | Mobile-friendly result entry: playable `pending` matches (optional `?game=<slug>` filter) → tap winner → optional score → save (POST/redirect/GET with a confirmation message). Thin wrapper over the result-entry transaction; a second phone entering the same match gets an Arabic error, first entry kept. (Cut-list item: fall back to Django admin.) |
+| `/staff/checkin/` | door, admin | Camera QR scanner (`frontend/src/scanner.js`: getUserMedia + native BarcodeDetector, jsQR worker fallback) → **lookup** shows guest name/org (nothing written) → staff check ID → **confirm** → atomic check-in. Manual token/URL entry + searchable guest list feed the same lookup. (Cut-list item: list page only.) |
 
 Admin path note: serve Django admin at `/staff/` (not `/admin/`) and rate-limit login at the
 edge. Door/referee users get is_staff with narrow model permissions via groups.

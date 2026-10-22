@@ -1,0 +1,99 @@
+# Deploy to Cloud Run (docs/operations.md → Deploy pipeline).
+#
+#   CI green on main ──► build image ──► push to Artifact Registry ──► migrate (Cloud Run job)
+#                       ──► new revision at 100 % ──► smoke test /healthz and /
+#
+# DORMANT until the GCP project exists (DEC-05): every job is skipped while the repository
+# variable GCP_PROJECT_ID is empty. One-time setup (service, job, secrets, Workload Identity
+# Federation, variables) is the "Deploy setup" checklist in docs/operations.md.
+#
+# Auth is keyless (Workload Identity Federation) — no service-account key is stored in GitHub.
+# Third-party actions are pinned to commit SHAs because this workflow holds cloud credentials.
+name: Deploy
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Where to deploy"
+        type: choice
+        options: [staging, production]
+        default: staging
+
+permissions:
+  contents: read
+  id-token: write # Workload Identity Federation
+
+concurrency:
+  group: deploy-${{ inputs.target || 'production' }}
+  cancel-in-progress: false # never interrupt a half-done deploy
+
+jobs:
+  deploy:
+    if: >-
+      vars.GCP_PROJECT_ID != '' &&
+      (github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success')
+    runs-on: ubuntu-latest
+    # GitHub environments: add required reviewers to "production" for a manual approval gate.
+    environment: ${{ inputs.target || 'production' }}
+    env:
+      REGION: me-central2
+      SERVICE: ${{ inputs.target == 'staging' && 'esports-staging' || 'esports' }}
+      SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+    steps:
+      - name: Checkout the commit CI tested
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ env.SHA }}
+
+      - name: Authenticate to Google Cloud (keyless)
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
+        with:
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOY_SA }}
+
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3.0.1
+
+      - name: Build and push the image
+        run: |
+          IMAGE="$REGION-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/esports/web:$SHA"
+          echo "IMAGE=$IMAGE" >> "$GITHUB_ENV"
+          gcloud auth configure-docker "$REGION-docker.pkg.dev" --quiet
+          docker build -t "$IMAGE" .
+          docker push "$IMAGE"
+
+      - name: Run migrations (Cloud Run job, same image — never at container boot)
+        run: |
+          gcloud run jobs update "$SERVICE-migrate" --image "$IMAGE" --region "$REGION" --quiet
+          gcloud run jobs execute "$SERVICE-migrate" --region "$REGION" --wait
+
+      - name: Deploy the new revision (100 % traffic)
+        run: |
+          # Remember the current revision so the rollback command below is exact.
+          PREV=$(gcloud run services describe "$SERVICE" --region "$REGION" \
+                   --format='value(status.traffic[0].revisionName)')
+          echo "PREV=$PREV" >> "$GITHUB_ENV"
+          # Only the image changes; scaling, secrets and Cloud SQL stay as configured in setup.
+          gcloud run deploy "$SERVICE" --image "$IMAGE" --region "$REGION" --quiet
+
+      - name: Smoke test
+        run: |
+          URL=$(gcloud run services describe "$SERVICE" --region "$REGION" --format='value(status.url)')
+          curl --fail --silent --show-error --max-time 20 --retry 3 --retry-delay 5 "$URL/healthz"
+          curl --fail --silent --show-error --max-time 20 --output /dev/null "$URL/"
+          echo "Deployed $SHA to $SERVICE: $URL" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: How to roll back
+        if: failure() && env.PREV != ''
+        run: |
+          {
+            echo "### Deploy failed — roll back with:"
+            echo '```'
+            echo "gcloud run services update-traffic $SERVICE --region $REGION --to-revisions $PREV=100"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

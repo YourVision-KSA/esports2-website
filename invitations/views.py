@@ -44,22 +44,45 @@ def invite(request, token):
     )
 
 
+def _token_from(raw: str) -> str:
+    """Accept a bare token or the full invite URL (what a QR code contains)."""
+    return raw.strip().rstrip("/").split("/")[-1]
+
+
 @never_cache
 @permission_required("invitations.change_invitation", raise_exception=True)
 def staff_checkin(request):
-    """Door-staff page: manual token entry + guest search. (Camera scanner is
-    cut-list item 1; this page is its fallback and ships first.)"""
+    """Door-staff page (docs/routes.md /staff/checkin/). Two steps, so staff can check
+    the guest's ID before anything is recorded:
+
+      1. look up — POST action=lookup (typed/scanned token) or pick from the search list
+         → shows the guest card (name, organisation, status); nothing is written
+      2. confirm — POST action=confirm → services.check_in (atomic, single-use, audited)
+
+    (The camera scanner, cut-list item 1, will feed step 1; this page works without it.)"""
     result = guest = None
     if request.method == "POST":
-        token = request.POST.get("token", "").strip().rstrip("/").split("/")[-1]
-        result, guest = services.check_in(token, request.user)
+        token = _token_from(request.POST.get("token", ""))
+        if request.POST.get("action") == "confirm":
+            result, guest = services.check_in(token, request.user)
+        else:
+            guest = Invitation.objects.filter(token=token).first() if token else None
+            if guest is None or guest.status in (
+                Invitation.Status.CREATED,
+                Invitation.Status.REVOKED,
+            ):
+                result, guest = services.CheckInResult.INVALID, None
+            elif guest.status == Invitation.Status.CHECKED_IN:
+                result = services.CheckInResult.ALREADY
+            else:
+                result = "lookup"  # sent → show the card with the confirm button
 
     query = request.GET.get("q", "").strip()
     guests = Invitation.objects.none()
     if query:
         guests = Invitation.objects.filter(
             Q(guest_name__icontains=query) | Q(organization__icontains=query)
-        )[:20]
+        ).order_by("guest_name")[:20]
     return render(
         request,
         "staff/checkin.html",

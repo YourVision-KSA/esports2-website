@@ -46,27 +46,78 @@ Yousef (24446357ksa@aou.edu.sa — org owner on GitHub, owner-facing follow-ups)
 
 ## ⬜ Remaining — Yousef (code, with Claude) — next session starts here
 
-Checkpoint 2026-10-21: rebrand done and committed on `dev-yousef` (PR open to `main`).
+Checkpoint 2026-10-21: rebrand done and committed on `dev-yousef` (PR #2 → `main`).
+**Checkpoint 2026-10-22:** hero 3D scene done on `feat/hero-3d` (PR #3, stacked on #2).
+Restore point: branch `checkpoint/2026-10-22` + tag `checkpoint-2026-10-22` (same commit).
+To go back: `git checkout checkpoint/2026-10-22` (or branch off the tag).
+Merge order: #2 → `main`, then retarget #3 to `main` and merge.
 Order agreed — code work that does NOT wait on owner decisions:
 
 - [ ] Merge the rebrand PR after review (Hussein to glance at it)
-- [ ] Staff pages polish for phones: `/staff/results/` (wrong button label — uses REG_SUBMIT)
-      and `/staff/checkin/` layout
-- [ ] Privacy notice page + consent checkbox wiring (Arabic as DRAFT until DEC-08)
-- [ ] Live bracket polling JS on `/bracket/<slug>/` (endpoint already exists)
-- [ ] Camera QR scanner on `/staff/checkin/` (manual entry stays as fallback)
-- [ ] CI job 3: `npm run build` + 3D bundle size budget (after the Vite bundle exists)
-- [ ] Deploy workflow (GitHub Actions → Cloud Run), written now, enabled after DEC-04/05
-- [ ] Coordinate with Hussein: who builds the 3D hero/trophy scenes (listed under Hussein)
+- [x] **Staff pages for phones** (2026-10-22, branch `feat/staff-pages`): shared staff layout
+      (who's signed in + logout, no public footer); results = Arabic round names, big
+      winner cards (✓ + dim the other), score field, PRG + confirmation, game filter,
+      Arabic errors; check-in = **look up → check ID → confirm** (nothing written on
+      lookup), distinct ok/already/invalid cards, Arabic status chips, card list search.
+      15 new tests. 20 new strings in content-ar.md are DRAFT (owner review).
+- [x] **Privacy notice page** `/privacy/` (2026-10-22, branch `feat/staff-pages`): 10 sections,
+      facts matched to the implementation (14-day voter cookie, HMAC-only IP/UA, gamer tags
+      only in public, no national ID/payments); linked from the consent checkbox (new tab),
+      the vote page and the footer; 4 tests. **All text DRAFT.**
+- [ ] → Yousef: fill the [placeholders] in the privacy notice before registration opens
+      (G2): data controller (Your Vision vs. university), contact email, hosting
+      confirmation, retention days (DEC-08), under-18 policy (DEC-09), publish date.
+      Ideally a quick legal read.
+- [x] **Live bracket** (2026-10-22, branch `feat/bracket-live`): `static/js/bracket-live.js`
+      polls the 10 s edge-cached JSON every 15 s (paused on hidden tab, back-off 30→120 s on
+      errors, 60 s after the final), patches cells in place with a short highlight, reveals
+      the champion; matches now ordered round→slot (were unordered). Verified end-to-end:
+      a result entered elsewhere appeared after ~14 s with no reload. 4 tests.
+- [x] **Bracket redesign — mirrored tree** (2026-10-22, from Yousef's bracket mock-up): R16 →
+      QF → SF → **final in the centre** ← SF ← QF ← R16; match numbers م1–م15; «فائز م{n}»
+      in undecided slots; trophy + CHAMPION; pure-CSS connectors that **light up along the
+      winners' paths** (live); per-game theme colour from the approved palette. Phones: same
+      DOM restacked by round, two cards per row. Layout logic in `bracket/tree.py`. Round→day
+      labels are DRAFT pending DEC-01. 7 tests.
+- [x] **Camera QR scanner** on `/staff/checkin/` (2026-10-22, branch `feat/qr-scanner`):
+      native BarcodeDetector where available, else jsQR in a Web Worker (iOS Safari; loaded
+      only then). Scan → lookup (nothing written) → ID check → confirm; camera off while a
+      guest awaits confirmation, auto-restarts for the next guest, ignores the code just
+      handled for 6 s, released on hidden tab. Verified with a fake camera on both paths
+      (native 2.9 s, worker 0.8 s). Scanner JS 1.3 KB + worker 46 KB gzip (budget 60 KB).
+- [x] **Bug fixed: VIP invitation page returned 500 for every valid invitation** (QR PNG needed
+      Pillow, not installed) → inline SVG QR; PR #6 straight to `main`, regression test.
+- [x] CI job 3: `npm run build` + size budgets (`frontend` job, 2026-10-22)
+- [x] **Deploy workflow** (2026-10-22, branch `ci/deploy-cloud-run`): `.github/workflows/deploy.yml`
+      — after CI on `main`: build → Artifact Registry → migrate job → new revision → smoke test →
+      rollback hint; keyless WIF, actions pinned to SHAs, `production` approval gate, staging via
+      manual run. **Dormant until `GCP_PROJECT_ID` is set.** One-time setup commands:
+      docs/operations.md → *Deploy setup*. Production `collectstatic` verified with the Vite
+      bundles; Vite assets now cached 1 year by WhiteNoise.
+- [ ] → after DEC-05: run the *Deploy setup* checklist (≈30 min), then rehearse a rollback on staging
+- [x] **Hero 3D scene** — Yousef, 2026-10-22, branch `feat/hero-3d` (PR stacked on the
+      rebrand PR). CC-BY "Dualsense" model cleaned (no PS logo/symbols), recoloured,
+      21 MB → 362 KB; lazy loader, tiers, worker decode, chunked start-up (longest task
+      ≈ 145 ms on a 4×-slowed phone), poster WebP 13 KB, budgets in CI. Licence credit
+      moved from under the scene to a faint footer line (owner request 2026-10-22) —
+      it must not be removed entirely (CC BY 4.0 condition).
+      ⚠️ Tell Hussein the hero scene is done (it was on his list).
+- [x] **Tier beacon** (2026-10-22, branch `feat/tier-beacon`): `POST /beacon/3d` count-only
+      (no PII, no cookie, ≤ 1 per tab session via sendBeacon) → `TierStat` daily counters,
+      race-safe; `manage.py tier_report` shows the fallback share per device; admin
+      read-only list. Ops: add `/beacon/*` to the Cloudflare BYPASS + rate-limit rules. 11 tests.
+- [ ] Trophy 3D scene (cut-list item 2 — static image acceptable)
 
 ## ⬜ Remaining — Hussein (with Claude)
 
-- [ ] Upload the org avatar: Desktop `yourvision-avatar-dark.png` → GitHub org settings → profile picture
+- [x] Upload the org avatar (verified 2026-10-22: Your Vision logo is live on the org)
 - [x] Verify staff 2FA enrollment flow end-to-end (left over from W1) — gap found and
       fixed 2026-10-21: new `enroll_totp` management command + 4 tests (59 total green)
 - [ ] GCP + Cloudflare setup per `docs/operations.md` (~Oct 29; needs DEC-04/05 from Yousef first)
-- [ ] Vote-page counting-rules content (needs DEC-03)
-- [ ] Hero 3D scene: Vite + Three.js bundle (W3 — not started, no `package.json` yet)
+      — deploy workflow + step-by-step *Deploy setup* commands are ready (PR #9)
+- [~] Vote-page counting-rules content — VOTE-RULES draft is already shown on `/vote/`;
+      only owner approval of the text is left (DEC-03)
+- [x] Hero 3D scene → done by Yousef 2026-10-22 (see Yousef's list)
 - [ ] Trophy 3D scene (W5; cut-list fallback: static image)
 - [ ] Monitoring + uptime alert before G1 (vote opens ~Nov 2)
 - [ ] Staging cache + abuse rehearsal (W2)

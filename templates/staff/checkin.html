@@ -1,47 +1,96 @@
-{% extends "base.html" %}
-{% block title %}Check-in{% endblock %}
+{% extends "staff/base_staff.html" %}
+{% load ui %}
+{% block title %}{{ content.STAFF_CHECKIN_TITLE }}{% endblock %}
 {% block content %}
-<section>
-  <h2>{{ content.STAFF_CHECKIN_TITLE }}</h2>
+<div class="staff">
+  <h1>{{ content.STAFF_CHECKIN_TITLE }}</h1>
 
-  {% if result == "ok" %}
-    <p class="error">{{ content.CHECKIN_OK }} — <strong>{{ guest.guest_name }}</strong>
-       {% if guest.organization %}({{ guest.organization }}){% endif %}</p>
-  {% elif result == "already" %}
-    <p class="error">{{ content.CHECKIN_ALREADY|cut:"{time}" }}
-       <span dir="ltr">{{ guest.checked_in_at|date:"H:i" }}</span>
-       — {{ guest.checked_in_by }}</p>
-  {% elif result == "invalid" %}
-    <p class="error">{{ content.CHECKIN_INVALID }}</p>
+  {% if result %}
+  {# ---- guest card: the result of a lookup or a confirmation ---- #}
+  <section class="guest-card guest-{{ result }}" role="status">
+    {% if result == "invalid" %}
+      <p class="guest-state">{{ content.CHECKIN_INVALID }}</p>
+    {% else %}
+      {% if result == "ok" %}<p class="guest-state">{{ content.CHECKIN_OK }}</p>{% endif %}
+      {% if result == "already" %}
+      <p class="guest-state">{{ content.CHECKIN_ALREADY|cut:" ({time})" }}
+        <span dir="ltr">{{ guest.checked_in_at|date:"H:i" }}</span>
+        {% if guest.checked_in_by %}· {{ content.STAFF_CHECKED_BY|cut:"{user}" }}<b dir="auto">{{ guest.checked_in_by.get_username }}</b>{% endif %}
+      </p>
+      {% endif %}
+      <p class="guest-name">{{ guest.guest_name }}</p>
+      {% if guest.organization %}<p class="guest-org">{{ guest.organization }}</p>{% endif %}
+      {% if result == "lookup" %}
+      <p class="guest-verify">{{ content.STAFF_VERIFY_ID }}</p>
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="token" value="{{ guest.token }}">
+        <input type="hidden" name="action" value="confirm">
+        <button type="submit">{{ content.STAFF_CONFIRM_CHECKIN }}</button>
+      </form>
+      {% endif %}
+    {% endif %}
+    {% if result != "lookup" %}<a class="btn-link" href="{{ request.path }}">{{ content.STAFF_NEXT_GUEST }}</a>{% endif %}
+  </section>
   {% endif %}
 
-  <form method="post">
+  {# ---- step 1a: camera scanner (progressive: hidden until frontend/src/scanner.js runs) ---- #}
+  <section class="scanner" data-scanner data-autostart="{% if result == 'lookup' %}0{% else %}1{% endif %}" hidden>
+    <div class="scanner-view">
+      <video muted playsinline aria-hidden="true"></video>
+      <span class="scanner-frame" aria-hidden="true"></span>
+      <span class="scanner-hint">{{ content.STAFF_SCAN_HINT }}</span>
+    </div>
+    <p class="scanner-error" data-error role="alert" hidden>{{ content.STAFF_SCAN_ERROR }}</p>
+    <button type="button" class="btn-scan" data-start>{{ content.STAFF_SCAN_START }}</button>
+    <button type="button" class="btn-scan btn-scan-stop" data-stop hidden>{{ content.STAFF_SCAN_STOP }}</button>
+    <p class="scanner-or"><span>{{ content.STAFF_OR }}</span></p>
+  </section>
+
+  {# ---- step 1b: typed token (the scanner submits this same form) ---- #}
+  <form method="post" class="staff-panel" id="lookup-form">
     {% csrf_token %}
-    <p><input type="text" name="token" dir="ltr" placeholder="invite token / URL" required></p>
-    <button type="submit">{{ content.CHECKIN_OK }}</button>
+    <input type="hidden" name="action" value="lookup">
+    <p>
+      <label for="token">{{ content.STAFF_TOKEN }}</label>
+      <input type="text" id="token" name="token" dir="ltr" autocomplete="off" autocapitalize="off" spellcheck="false" required>
+    </p>
+    <button type="submit">{{ content.STAFF_LOOKUP }}</button>
   </form>
 
-  <h3>{{ content.STAFF_SEARCH }}</h3>
-  <form method="get">
-    <p><input type="text" name="q" value="{{ query }}"></p>
-    <button type="submit">{{ content.STAFF_SEARCH }}</button>
+  {# ---- step 1c: search the guest list ---- #}
+  <form method="get" class="staff-panel staff-search" role="search">
+    <label for="q">{{ content.STAFF_SEARCH_HINT }}</label>
+    <div class="search-row">
+      <input type="search" id="q" name="q" value="{{ query }}" autocomplete="off">
+      <button type="submit" class="btn-secondary-sm">{{ content.STAFF_SEARCH }}</button>
+    </div>
   </form>
-  {% if guests %}
-  <table>
+
+  {% if query %}
+  <ul class="guest-list">
     {% for g in guests %}
-    <tr>
-      <td>{{ g.guest_name }}</td><td>{{ g.organization }}</td><td>{{ g.get_status_display }}</td>
-      <td>
-        {% if g.status == "sent" %}
-        <form method="post">{% csrf_token %}
-          <input type="hidden" name="token" value="{{ g.token }}">
-          <button type="submit">{{ content.CHECKIN_OK }}</button>
-        </form>
-        {% endif %}
-      </td>
-    </tr>
+    <li>
+      <div class="who">
+        <span class="name">{{ g.guest_name }}</span>
+        {% if g.organization %}<span class="org">{{ g.organization }}</span>{% endif %}
+      </div>
+      <span class="chip status-{{ g.status }}">{{ content.INVITE_STATUS|lookup:g.status }}</span>
+      {% if g.status == "sent" %}
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="lookup">
+        <input type="hidden" name="token" value="{{ g.token }}">
+        <button type="submit" class="btn-secondary-sm">{{ content.STAFF_SELECT }}</button>
+      </form>
+      {% endif %}
+    </li>
+    {% empty %}
+    <li class="staff-empty">{{ content.STAFF_NO_RESULTS }}</li>
     {% endfor %}
-  </table>
+  </ul>
   {% endif %}
-</section>
+</div>
+{% vite_asset "scanner.js" as scanner_js %}
+{% if scanner_js %}<script type="module" src="{{ scanner_js }}"></script>{% endif %}
 {% endblock %}

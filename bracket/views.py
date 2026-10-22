@@ -4,6 +4,8 @@ endpoint (cached 10s), and the referee results page (staff, BYPASS).
 Public display uses gamer tags (game_player_id), never real names.
 """
 
+from urllib.parse import urlencode
+
 from django.contrib.auth.decorators import permission_required
 from django.core.exceptions import ValidationError
 from django.http import JsonResponse
@@ -13,7 +15,7 @@ from django.views.decorators.cache import cache_control, never_cache
 from core.models import Game
 from core.phases import Phase, current_phase
 
-from . import services
+from . import services, tree
 from .models import Match
 
 
@@ -35,22 +37,40 @@ def overview(request):
 
 @cache_control(public=True, max_age=30, s_maxage=30)
 def detail(request, slug):
+    """One game's bracket as a mirrored tree (bracket/tree.py). Complete without JS;
+    static/js/bracket-live.js keeps it current during the event."""
     if not _event_visible():
         return render(request, "core/closed.html", {"message_key": "PHASE_SOON"})
     from core.content import CONTENT
+    from core.templatetags.ui import accent
 
     game = get_object_or_404(Game, slug=slug, status=Game.Status.CONFIRMED)
-    by_round: dict[int, list[Match]] = {}
-    for match in game.matches.select_related("player1", "player2", "winner"):
-        by_round.setdefault(match.round, []).append(match)
-    rounds = [
-        (num, CONTENT["ROUND_NAMES"].get(num, f"R{num}"), matches)
-        for num, matches in sorted(by_round.items())
-    ]
-    final = by_round.get(4, [None])[0]
+    matches = list(
+        game.matches.select_related("player1", "player2", "winner").order_by("round", "slot")
+    )
+    final = next((m for m in matches if m.round == tree.FINAL_ROUND), None)
     champion = _tag(final.winner) if final and final.winner else None
+    confirmed = list(
+        Game.objects.filter(status=Game.Status.CONFIRMED)
+        .order_by("display_order", "pk")
+        .values_list("pk", flat=True)
+    )
+    players = len({p for m in matches for p in (m.player1_id, m.player2_id) if p})
+    meta = (
+        CONTENT["BRACKET_META"]
+        .replace("{players}", str(players))
+        .replace("{matches}", str(len(matches)))
+    )
     return render(
-        request, "bracket/detail.html", {"game": game, "rounds": rounds, "champion": champion}
+        request,
+        "bracket/detail.html",
+        {
+            "game": game,
+            "columns": tree.build(matches),
+            "champion": champion,
+            "meta": meta,
+            "theme": accent(confirmed.index(game.pk) if game.pk in confirmed else 0),
+        },
     )
 
 
@@ -70,42 +90,80 @@ def api_bracket(request, slug):
             "score": m.score_text,
             "status": m.status,
         }
-        for m in game.matches.select_related("player1", "player2", "winner")
+        for m in game.matches.select_related("player1", "player2", "winner").order_by(
+            "round", "slot"
+        )
     ]
     return JsonResponse({"game": game.slug, "matches": matches})
+
+
+SCORE_MAX = Match._meta.get_field("score_text").max_length
 
 
 @never_cache
 @permission_required("bracket.change_match", raise_exception=True)
 def staff_results(request):
-    """Mobile-friendly result entry for referees (docs/routes.md /staff/results/)."""
+    """Mobile-friendly result entry for referees (docs/routes.md /staff/results/).
+
+    GET lists playable matches (both players known, still pending), optionally filtered
+    by ?game=<slug>. POST enters one result through services.enter_result (locked,
+    audited) and redirects back (POST/redirect/GET) with a confirmation message."""
+    from django.contrib import messages
+
+    from core.content import CONTENT
+
+    game_slug = request.GET.get("game") or request.POST.get("game") or ""
+    back = redirect(request.path + (f"?{urlencode({'game': game_slug})}" if game_slug else ""))
+
     if request.method == "POST":
         match = get_object_or_404(Match, pk=request.POST.get("match_id"))
-        winner_id = request.POST.get("winner_id")
         participants = {str(match.player1_id): match.player1, str(match.player2_id): match.player2}
-        winner = participants.get(winner_id)
+        winner = participants.get(request.POST.get("winner_id", ""))
         if winner is None:
-            return render(
-                request,
-                "staff/results.html",
-                {"pending": _pending(), "error": "invalid winner"},
-                status=400,
-            )
+            messages.error(request, CONTENT["STAFF_ERR_WINNER"])
+            return back
         try:
-            services.enter_result(match, winner, request.POST.get("score", ""), actor=request.user)
-        except ValidationError as exc:
-            return render(
-                request,
-                "staff/results.html",
-                {"pending": _pending(), "error": str(exc)},
-                status=400,
+            services.enter_result(
+                match, winner, request.POST.get("score", "").strip()[:SCORE_MAX], actor=request.user
             )
-        return redirect("staff-results")
-    return render(request, "staff/results.html", {"pending": _pending()})
+        except ValidationError:
+            # e.g. the match was entered meanwhile from another phone (match no longer pending)
+            messages.error(request, CONTENT["STAFF_ERR_SAVE"])
+            return back
+        messages.success(
+            request, CONTENT["STAFF_RESULT_SAVED"].replace("{winner}", winner.game_player_id)
+        )
+        return back
+
+    pending = _pending()
+    games = Game.objects.filter(status=Game.Status.CONFIRMED).order_by("display_order")
+    counts = {g.slug: 0 for g in games}
+    for m in pending:
+        counts[m.game.slug] = counts.get(m.game.slug, 0) + 1
+    if game_slug:
+        pending = [m for m in pending if m.game.slug == game_slug]
+    matches = [
+        {
+            "obj": m,
+            "round_name": CONTENT["ROUND_NAMES"].get(m.round, f"R{m.round}"),
+            "label": CONTENT["STAFF_MATCH"].replace("{n}", str(m.slot)),
+        }
+        for m in pending
+    ]
+    return render(
+        request,
+        "staff/results.html",
+        {
+            "matches": matches,
+            "games": [(g, counts.get(g.slug, 0)) for g in games],
+            "active_game": game_slug,
+            "total_pending": sum(counts.values()),
+        },
+    )
 
 
 def _pending():
-    return (
+    return list(
         Match.objects.filter(
             status=Match.Status.PENDING, player1__isnull=False, player2__isnull=False
         )
