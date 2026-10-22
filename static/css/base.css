@@ -466,6 +466,18 @@ th { color: var(--muted); font-weight: 600; }
 }
 .champion-panel .t { font-family: var(--display); font-weight: 700; font-size: 17px; color: var(--gold); }
 
+/* ---- legal pages (privacy notice) — long-form reading ---------------------------------------- */
+.legal { max-width: 720px; gap: 28px; }
+.legal header { display: flex; flex-direction: column; gap: 10px; border-block-end: 1px solid var(--line); padding-block-end: 20px; }
+.legal-updated { font-size: 13px; color: var(--muted); }
+.legal-intro { font-size: 17px; color: var(--body); line-height: 1.9; }
+.legal section { display: flex; flex-direction: column; gap: 8px; }
+.legal h2 { font-size: 20px; font-weight: 700; color: #FFFFFF; }
+.legal section h2::before { content: ""; display: inline-block; width: 18px; height: 3px; background: var(--accent); transform: skewX(-12deg); margin-inline-end: 10px; vertical-align: middle; }
+.legal section p { color: var(--body); line-height: 1.95; max-width: 68ch; }
+.footer-link { color: var(--muted); }
+.footer-link:hover { color: var(--accent); }
+
 /* ---- staff pages (referee results, door check-in) — phone-first, big tap targets ---------------- */
 .staff-head .wrap { gap: 12px; }
 .staff-head .brand-title { font-size: 15px; }

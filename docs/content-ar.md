@@ -274,6 +274,49 @@ Note for owner: «أفضل لاعب في اليوم» may need rewording for a 3
 | LIVE-NOW | مباشر الآن | live match bar (event days only) |
 | LIVE-WATCH | تابع البث | live match bar stream link |
 
+## Privacy notice (`/privacy/`) — DEC-08
+
+All rows DRAFT — needs owner review (and ideally a legal check). Text in [square brackets] is a
+placeholder that must be filled before registration opens (G2): controller (Your Vision vs.
+university), contact email, hosting confirmation (DEC-05/06), retention period (DEC-08),
+under-18 policy (DEC-09), last-updated date. Facts stated match the implementation:
+voter cookie 14 days (voting/views.py), HMAC-only IP/UA (docs/voting.md), signals stripped
+14 days after close, gamer tags only in public brackets, no national ID, no payments.
+
+| Key | Text | Status |
+|---|---|---|
+| PRIVACY-TITLE | سياسة الخصوصية | DRAFT — needs owner review |
+| PRIVACY-INTRO | توضّح هذه السياسة البيانات التي نجمعها عبر هذا الموقع، وسبب جمعها، ومدة الاحتفاظ بها، وحقوقك المتعلقة بها، وفق نظام حماية البيانات الشخصية في المملكة العربية السعودية. | DRAFT — needs owner review |
+| PRIVACY-UPDATED | آخر تحديث: [التاريخ] | DRAFT — date filled at publication |
+| PRIVACY-S1-TITLE | الجهة المسؤولة عن البيانات | DRAFT — needs owner review |
+| PRIVACY-S1-P1 | [يُحدَّد: Your Vision KSA أو الجامعة العربية المفتوحة] هي الجهة المسؤولة عن البيانات التي تُجمع عبر هذا الموقع. للتواصل في أي شأن يخص بياناتك: [البريد الإلكتروني للتواصل]. | DRAFT — needs owner review |
+| PRIVACY-S2-TITLE | البيانات التي نجمعها | DRAFT — needs owner review |
+| PRIVACY-S2-P1 | عند التسجيل في البطولات: الاسم الكامل، ورقم الجوال، ومعرّف اللاعب في اللعبة، والبريد الإلكتروني إن أدخلته (اختياري). | DRAFT — needs owner review |
+| PRIVACY-S2-P2 | عند التصويت: لا نطلب منك أي بيانات شخصية. نحتفظ ببصمة مشفّرة لا يمكن عكسها لعنوان الشبكة ونوع المتصفح، للحدّ من التصويت المتكرر، ولا نحفظ عنوان الشبكة نفسه. | DRAFT — needs owner review |
+| PRIVACY-S2-P3 | لضيوف الدعوات الخاصة: الاسم والجهة ووسيلة التواصل التي تزوّدنا بها الجهة المنظِّمة. | DRAFT — needs owner review |
+| PRIVACY-S2-P4 | لا نطلب رقم الهوية الوطنية أو الإقامة، ولا نجمع أي بيانات دفع. | DRAFT — needs owner review |
+| PRIVACY-S3-TITLE | لماذا نجمعها | DRAFT — needs owner review |
+| PRIVACY-S3-P1 | لتنظيم البطولات وإدارة المقاعد وقائمة الانتظار، والتواصل معك بشأن مشاركتك، وتنظيم دخول الضيوف، وحماية التصويت من التلاعب. | DRAFT — needs owner review |
+| PRIVACY-S3-P2 | لا نستخدم بياناتك في التسويق، ولا نبيعها لأي جهة. | DRAFT — needs owner review |
+| PRIVACY-S4-TITLE | ما يظهر للعامة | DRAFT — needs owner review |
+| PRIVACY-S4-P1 | تعرض جداول المباريات ونتائجها اسم اللاعب في اللعبة (Gamer Tag) فقط، ولا يظهر اسمك الكامل أو رقم جوالك. | DRAFT — needs owner review |
+| PRIVACY-S5-TITLE | ملفات تعريف الارتباط (الكوكيز) | DRAFT — needs owner review |
+| PRIVACY-S5-P1 | تستخدم صفحة التصويت ملف تعريف ارتباط واحدًا لمنع تكرار التصويت من المتصفح نفسه، وتنتهي صلاحيته بعد 14 يومًا. وتستخدم الصفحة أداة Cloudflare Turnstile للتحقق من أن المصوّت ليس برنامجًا آليًا. | DRAFT — needs owner review |
+| PRIVACY-S5-P2 | لا نستخدم ملفات تتبّع أو أدوات إعلانية. | DRAFT — needs owner review |
+| PRIVACY-S6-TITLE | أين تُحفظ البيانات ومن يطّلع عليها | DRAFT — needs owner review |
+| PRIVACY-S6-P1 | تُحفظ البيانات على خوادم داخل المملكة العربية السعودية [يُؤكَّد بعد اعتماد الاستضافة]، ويمر الاتصال بالموقع عبر خدمة Cloudflare لحمايته وتسريعه. | DRAFT — needs owner review |
+| PRIVACY-S6-P2 | يطّلع على بيانات التسجيل فريق التنظيم المخوَّل فقط، وقد نشارك قوائم المشاركين والنتائج مع الاتحاد السعودي للرياضات الإلكترونية لأغراض تنظيم الفعالية دون غيرها. | DRAFT — needs owner review |
+| PRIVACY-S7-TITLE | مدة الاحتفاظ بالبيانات | DRAFT — needs owner review |
+| PRIVACY-S7-P1 | نحذف بيانات اللاعبين والضيوف خلال [30–90] يومًا من انتهاء الفعالية. | DRAFT — needs owner review |
+| PRIVACY-S7-P2 | نحذف البيانات المؤقتة المرتبطة بالتصويت بعد 14 يومًا من إغلاقه، وتصبح البصمات المتبقية غير قابلة للربط بأي شخص عند انتهاء المشروع. | DRAFT — needs owner review |
+| PRIVACY-S8-TITLE | حقوقك | DRAFT — needs owner review |
+| PRIVACY-S8-P1 | يحق لك الاطلاع على بياناتك، وطلب تصحيحها أو حذفها، وسحب موافقتك في أي وقت. | DRAFT — needs owner review |
+| PRIVACY-S8-P2 | يمكنك الانسحاب من البطولة عبر رابط الإدارة الخاص بك، ولأي طلب آخر راسلنا على [البريد الإلكتروني للتواصل]. | DRAFT — needs owner review |
+| PRIVACY-S9-TITLE | المشاركون دون 18 عامًا | DRAFT — needs owner review |
+| PRIVACY-S9-P1 | [يُحدَّد بعد اعتماد سياسة مشاركة من هم دون 18 عامًا وموافقة ولي الأمر.] | DRAFT — needs owner review |
+| PRIVACY-S10-TITLE | تحديث هذه السياسة | DRAFT — needs owner review |
+| PRIVACY-S10-P1 | قد نحدّث هذه السياسة عند الحاجة، ويظهر تاريخ آخر تحديث أعلى هذه الصفحة. | DRAFT — needs owner review |
+
 ## System / errors (all DRAFT)
 
 | Key | Text |
