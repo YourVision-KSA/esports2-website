@@ -2,7 +2,7 @@
 
    Performance rules implemented here (all FIXED in docs/frontend.md):
    - imports only the three.js parts used (tree-shaken)
-   - the controller is built in code (controller.js): no model download, no textures
+   - model is glTF with meshopt geometry + WebP textures (scripts/optimize-model.mjs)
    - DPR capped per tier (HIGH 2.0, MID 1.5), MSAA on both; no post-processing (owner asked for
      no neon beams, so bloom is not used even on HIGH)
    - render loop pauses when off-screen and when the tab is hidden
@@ -10,7 +10,7 @@
      > 50 on MID → HIGH; the result is saved so revisits skip the probe
    - the canvas fades in over the poster only after the first real frame
    - start-up work is split into small steps with a yield between each (environment,
-     shader compile via compileAsync) so no single task
+     shader compile via compileAsync, one texture upload per step) so no single task
      blocks scrolling or taps — measured: no long task > 200 ms on a 4×-slowed phone */
 
 import {
@@ -33,8 +33,9 @@ import {
   Vector3,
   WebGLRenderer,
 } from "three";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { MeshoptDecoder } from "three/examples/jsm/libs/meshopt_decoder.module.js";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
-import { buildController } from "./controller.js";
 
 // Brand colours (docs/frontend.md rev 4) — keep in sync with static/css/base.css :root.
 const CYAN = 0x3cd6e0;
@@ -42,11 +43,11 @@ const MAGENTA = 0xd15eb9;
 const NAVY = 0x050a14;
 
 const DPR_CAP = { high: 2, mid: 1.5 };
-const MODEL_WIDTH = 2.6; // world units the controller is scaled to fit
-// Rest pose (radians): face toward the camera, top tipped back.
-const MODEL_REST = { x: -0.4, y: 0, z: 0 };
+const MODEL_WIDTH = 2.5; // world units the controller is scaled to fit
+// Rest pose (radians), tuned to the model file: face toward the camera, top tipped back.
+const MODEL_REST = { x: -0.35, y: 0, z: 0 };
 // Idle motion: a slow sway that keeps the face visible (a full spin mostly shows the side).
-const SWAY = { amp: 0.42, period: 7000, still: 0.34 }; // `still` = 3/4 pose for the poster
+const SWAY = { amp: 0.42, period: 7000 };
 const IDLE_AFTER_DRAG = 2500; // ms before the sway takes over again
 
 // Give the browser a breather between heavy start-up steps (input, scrolling, paint).
@@ -63,7 +64,7 @@ function saveTier(key, tier) {
   }
 }
 
-export async function start(mount, { tier, tierKey }) {
+export async function start(mount, { tier, modelUrl, tierKey }) {
   const frame = mount.querySelector(".scene-frame") || mount;
 
   // --- renderer (failure here = FALLBACK tier: poster stays) ---------------------
@@ -88,8 +89,8 @@ export async function start(mount, { tier, tierKey }) {
   camera.position.set(0, 1.4, 7.4);
   camera.lookAt(0, -0.4, 0);
 
-  scene.add(new HemisphereLight(0xdfe9f5, NAVY, 0.35));
-  const key = new DirectionalLight(0xffffff, 1.1);
+  scene.add(new HemisphereLight(0xdfe9f5, NAVY, 0.6));
+  const key = new DirectionalLight(0xffffff, 1.6);
   key.position.set(2.5, 4, 3);
   scene.add(key);
   const rimCyan = new PointLight(CYAN, 18, 9, 2);
@@ -101,7 +102,7 @@ export async function start(mount, { tier, tierKey }) {
 
   // pedestal: dark metal disc + two thin brand rings (soft, not neon)
   const pedestal = new Group();
-  pedestal.position.y = -1.3;
+  pedestal.position.y = -1.2;
   const disc = new Mesh(
     new CylinderGeometry(1.45, 1.6, 0.22, 64),
     new MeshStandardMaterial({ color: 0x0a1220, metalness: 0.35, roughness: 0.75 }),
@@ -120,10 +121,12 @@ export async function start(mount, { tier, tierKey }) {
   pedestal.add(ringB);
   scene.add(pedestal);
 
-  // --- controller (built in code) --------------------------------------------------
-  await yieldToMain(); // WebGL context creation and geometry building in separate tasks
-  performance.mark("es2:build-start");
-  const model = buildController();
+  // --- model ----------------------------------------------------------------------
+  const loader = new GLTFLoader();
+  MeshoptDecoder.useWorkers(1); // geometry decompression off the main thread
+  loader.setMeshoptDecoder(MeshoptDecoder);
+  performance.mark("es2:load-start");
+  const gltf = await loader.loadAsync(modelUrl);
   performance.mark("es2:model");
   await yieldToMain();
 
@@ -133,6 +136,7 @@ export async function start(mount, { tier, tierKey }) {
   pmrem.dispose();
   performance.mark("es2:env");
   await yieldToMain();
+  const model = gltf.scene;
   // normalise: centre at origin, scale to MODEL_WIDTH
   const box = new Box3().setFromObject(model);
   const size = box.getSize(new Vector3());
@@ -147,7 +151,7 @@ export async function start(mount, { tier, tierKey }) {
   scene.add(spin);
 
   // --- interaction: drag to rotate, pointer parallax -----------------------------
-  const state = { rotY: location.hash === "#hero-still" ? SWAY.still : 0, rotX: 0, velY: 0, dragging: false, lastDrag: -1e9, lastX: 0, lastY: 0, tiltX: 0, tiltY: 0 };
+  const state = { rotY: 0, rotX: 0, velY: 0, dragging: false, lastDrag: -1e9, lastX: 0, lastY: 0, tiltX: 0, tiltY: 0 };
   const still = location.hash === "#hero-still"; // debug: freeze at the rest pose (screenshots)
   canvas.addEventListener("pointerdown", (e) => {
     state.dragging = true;
@@ -268,12 +272,23 @@ export async function start(mount, { tier, tierKey }) {
   }).observe(frame);
   document.addEventListener("visibilitychange", () => (document.hidden ? pause() : play()));
 
-  // warm-up off the critical path: compile shaders without blocking (KHR_parallel_shader_compile)
+  // warm-up off the critical path: compile shaders without blocking (KHR_parallel_shader_compile),
+  // then upload textures to the GPU one per step instead of all inside the first frame
   await renderer.compileAsync(scene, camera);
   performance.mark("es2:compiled");
   await yieldToMain();
+  const textures = new Set();
+  scene.traverse((o) => {
+    if (!o.material) return;
+    for (const v of Object.values(o.material)) if (v && v.isTexture) textures.add(v);
+  });
+  for (const t of textures) {
+    renderer.initTexture(t);
+    await yieldToMain();
+  }
 
   // first frame, then reveal (CSS fades the canvas in and the poster out)
+  performance.mark("es2:textures");
   frame.appendChild(canvas);
   spin.position.y = 0.12;
   renderer.render(scene, camera);

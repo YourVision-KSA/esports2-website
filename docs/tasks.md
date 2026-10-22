@@ -57,10 +57,12 @@ Order agreed — code work that does NOT wait on owner decisions:
 - [ ] Camera QR scanner on `/staff/checkin/` (manual entry stays as fallback)
 - [x] CI job 3: `npm run build` + size budgets (`frontend` job, 2026-10-22)
 - [ ] Deploy workflow (GitHub Actions → Cloud Run), written now, enabled after DEC-04/05
-- [x] **Hero 3D scene** — Yousef, 2026-10-22, branch `feat/hero-3d` (PR #3, stacked on
-      #2). Controller **built in code** (no model file, no licence/credit, no trademarks —
-      owner refused any credit line), logo palette, lazy loader, tiers, chunked start-up
-      (longest task ≈ 135 ms on a 4×-slowed phone), 13 KB poster, bundle 142 KB gzip.
+- [x] **Hero 3D scene** — Yousef, 2026-10-22, branch `feat/hero-3d` (PR stacked on the
+      rebrand PR). CC-BY "Dualsense" model cleaned (no PS logo/symbols), recoloured,
+      21 MB → 362 KB; lazy loader, tiers, worker decode, chunked start-up (longest task
+      ≈ 145 ms on a 4×-slowed phone), poster WebP 13 KB, budgets in CI. Licence credit
+      moved from under the scene to a faint footer line (owner request 2026-10-22) —
+      it must not be removed entirely (CC BY 4.0 condition).
       ⚠️ Tell Hussein the hero scene is done (it was on his list).
 - [ ] Tier beacon endpoint (count-only, no PII) for the WebGL fallback-rate metric
 - [ ] Trophy 3D scene (cut-list item 2 — static image acceptable)

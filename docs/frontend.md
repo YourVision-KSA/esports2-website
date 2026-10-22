@@ -143,31 +143,32 @@ Engineering requirements (apply to whatever the design specifies):
 
 | Piece | Where | What it does |
 |---|---|---|
-| Loader (~1 KB gzip) | `frontend/src/hero.js` | No three.js inside. Keeps the poster when: reduced motion, saved LOW tier, `deviceMemory ≤ 2`. Otherwise waits for **window `load` → idle (`requestIdleCallback`) → scene within 600 px of the viewport**, then dynamic-imports the scene. |
-| Scene (~142 KB gzip, lazy chunk) | `frontend/src/scene.js` | three.js (tree-shaken). Controller over a pedestal with two thin brand rings; drag to rotate (horizontal drag rotates, vertical swipe still scrolls: `touch-action: pan-y`), mouse parallax, slow sway that keeps the face visible, gentle float. Pauses off-screen and on hidden tab. 3 s FPS probe adjusts the tier and saves it. Canvas fades in over the poster after its first frame. |
-| Controller | `frontend/src/controller.js` | **Built in code** — extruded/bevelled body outline, D-pad, face buttons, sticks, shoulders, light strips. Logo palette: silver body, cyan D-pad, magenta buttons, navy sticks. **No model file, no textures, no third-party licence, no brand marks.** |
-| Poster | `static/img/hero-poster.webp` (13 KB) | Render of the scene at a 3/4 rest pose (`/#hero-still` freezes it for capture). LOW/FALLBACK tiers and reduced-motion users see only this. |
-| Django | `{% vite_asset "hero.js" %}` (core/templatetags/ui.py) | Reads `static/dist/.vite/manifest.json`. No bundle → no script: the page is unchanged (tests: `core/tests/test_hero_3d.py`). |
-| Build | `frontend/` (Vite 6.4.4, three 0.186.1) → `static/dist/` | Built in CI (job `frontend`) and in the Dockerfile's node stage; `npm run budget` fails the build if the bundle > 250 KB gzip. |
+| Loader (~1 KB gzip) | `frontend/src/hero.js` | No three.js inside. Keeps the poster when: reduced motion, saved LOW tier, `deviceMemory ≤ 2`, no model shipped. Otherwise waits for **window `load` → idle (`requestIdleCallback`) → scene within 600 px of the viewport**, then dynamic-imports the scene. |
+| Scene (~165 KB gzip, lazy chunk) | `frontend/src/scene.js` | three.js (tree-shaken) + GLTFLoader + meshopt decoder. Controller on a pedestal with two thin brand rings; drag to rotate (horizontal drag rotates, vertical swipe still scrolls: `touch-action: pan-y`), mouse parallax, slow idle spin, gentle float. Pauses off-screen and on hidden tab. 3 s FPS probe adjusts the tier and saves it. Canvas fades in over the poster after its first frame. |
+| Model | `static/models/controller.glb` (built by `npm run model -- <raw scene.gltf>`) | Reproducible pipeline `frontend/scripts/optimize-model.mjs`: removes the PlayStation-logo button mesh and erases the △○✕□ glyphs (trademarks), recolours to the palette (silver body, navy dark parts, cyan light bar), drops unused UVs/tangents, opaque materials, simplify → 20.7k triangles, meshopt compression, WebP ≤ 1024 px. **21 MB → 362 KB.** Geometry decoded in a worker. |
+| Poster | `static/img/hero-poster.webp` (13 KB) | Render of the scene at rest pose (`/#hero-still` freezes it for capture). LOW/FALLBACK tiers and reduced-motion users see only this. |
+| Django | `{% vite_asset "hero.js" %}`, `{% static_if_exists %}` (core/templatetags/ui.py) | Reads `static/dist/.vite/manifest.json`. No bundle or no model → no script, no `data-model`: the page is unchanged (tests: `core/tests/test_hero_3d.py`). |
+| Build | `frontend/` (Vite 6.4.4, three 0.186.1) → `static/dist/` | Built in CI (job `frontend`) and in the Dockerfile's node stage; `npm run budget` fails the build if the bundle > 250 KB gzip or the model > 1.5 MB. |
 
-Start-up is split into steps with a yield between each (WebGL context → build geometry →
-64 px environment → `compileAsync` shaders → first frame) so no single task blocks input.
-**Measured 2026-10-22** (local Chromium; mobile = Pixel 7 profile with 4× CPU slowdown):
-LCP ≈ 0.26–0.56 s desktop / ≈ 0.56 s mobile — unaffected by 3D; longest main-thread task
-during 3D start-up ≈ 60 ms desktop / ≈ 135 ms mobile; reduced motion: only the 13 KB poster
-is fetched, no long tasks. `performance.mark("es2:*")` marks remain for diagnostics.
+Start-up is split into steps with a yield between each (model → environment (64 px) →
+`compileAsync` shaders → one texture upload per step → first frame) so no single task
+blocks input. **Measured 2026-10-22** (local, Chromium; mobile = Pixel 7 profile with 4×
+CPU slowdown): LCP 0.33 s desktop / 0.66 s mobile — unaffected by 3D; longest main-thread
+task during 3D start-up ≈ 75 ms desktop / ≈ 145 ms mobile (was 704 ms before the split);
+reduced-motion: only the 13 KB poster is fetched, no long tasks. Idle motion is a slow
+sway (face stays visible); drag rotates fully; `performance.mark("es2:*")` marks remain
+for future diagnostics.
 
 Deliberate deviations, with reasons:
-- **The controller is procedural, not a glTF model.** The owner rejected any credit line on
-  the page; every suitable downloadable model was CC-BY (credit mandatory) or low quality,
-  and real controllers carry Sony/Microsoft trade dress. Building it in code removes the
-  licence, the trademarks and the model download (–362 KB) in one step. History: a cleaned
-  CC-BY "Dualsense" model was shipped and then replaced the same day.
+- **Textures are WebP, not KTX2.** WebP is the documented fallback format; for one small
+  model the KTX2/Basis transcoder (~250 KB of wasm/JS) costs more bandwidth than it saves.
+  Revisit if a second heavy scene is added.
 - **No bloom/post-processing, even on HIGH.** The owner asked for no neon beams (rev 4);
-  HIGH only raises DPR to 2.
-- **glTF/KTX2 pipeline not needed** while the only scene is procedural; if a real model is
-  added later (e.g. the trophy), use glTF + meshopt + WebP and add it to the budget script.
+  HIGH only raises DPR to 2 and enables MSAA.
 - **Tier beacon endpoint not built yet** (needs a route + table): tracked in docs/tasks.md.
+- **Hero model source:** "Dualsense" by miwaVV on Sketchfab, **CC BY 4.0** — credit shown in the footer of
+  the page; modified (simplified, recoloured, logos removed). The owner's first pick
+  (HQ3DMOD, editorial licence, not downloadable) could not be used on a commercial site.
 
 ## Quality tiers (FIXED; decided at runtime, re-evaluated once after 3 s)
 
