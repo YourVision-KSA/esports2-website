@@ -1,0 +1,14 @@
+# Keep the production image small and free of local state (Dockerfile).
+.git
+.github
+.venv
+**/__pycache__
+**/node_modules
+static/dist
+staticfiles
+.env
+.pytest_cache
+.ruff_cache
+docs
+reference
+*.md

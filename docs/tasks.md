@@ -55,9 +55,15 @@ Order agreed — code work that does NOT wait on owner decisions:
 - [ ] Privacy notice page + consent checkbox wiring (Arabic as DRAFT until DEC-08)
 - [ ] Live bracket polling JS on `/bracket/<slug>/` (endpoint already exists)
 - [ ] Camera QR scanner on `/staff/checkin/` (manual entry stays as fallback)
-- [ ] CI job 3: `npm run build` + 3D bundle size budget (after the Vite bundle exists)
+- [x] CI job 3: `npm run build` + size budgets (`frontend` job, 2026-10-22)
 - [ ] Deploy workflow (GitHub Actions → Cloud Run), written now, enabled after DEC-04/05
-- [ ] Coordinate with Hussein: who builds the 3D hero/trophy scenes (listed under Hussein)
+- [~] **Hero 3D scene** — Yousef took it over 2026-10-22 (branch `feat/hero-3d`; tell Hussein).
+      Done: Vite + three.js bundle, lazy loader, tiers + FPS probe, pause off-screen,
+      Django manifest tag, Docker node stage, CI budget job, tests. Waiting on: the CC-BY
+      "Dualsense" model download (Yousef, Sketchfab account) → `npm run model`, recolour,
+      remove logos, poster WebP, credit line.
+- [ ] Tier beacon endpoint (count-only, no PII) for the WebGL fallback-rate metric
+- [ ] Trophy 3D scene (cut-list item 2 — static image acceptable)
 
 ## ⬜ Remaining — Hussein (with Claude)
 
@@ -66,7 +72,7 @@ Order agreed — code work that does NOT wait on owner decisions:
       fixed 2026-10-21: new `enroll_totp` management command + 4 tests (59 total green)
 - [ ] GCP + Cloudflare setup per `docs/operations.md` (~Oct 29; needs DEC-04/05 from Yousef first)
 - [ ] Vote-page counting-rules content (needs DEC-03)
-- [ ] Hero 3D scene: Vite + Three.js bundle (W3 — not started, no `package.json` yet)
+- [~] Hero 3D scene → taken over by Yousef (see Yousef's list)
 - [ ] Trophy 3D scene (W5; cut-list fallback: static image)
 - [ ] Monitoring + uptime alert before G1 (vote opens ~Nov 2)
 - [ ] Staging cache + abuse rehearsal (W2)

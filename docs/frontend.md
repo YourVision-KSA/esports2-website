@@ -139,6 +139,27 @@ Engineering requirements (apply to whatever the design specifies):
 - `prefers-reduced-motion` → do not start the render loop; show the poster.
 - A secondary scene is **lazy-loaded on scroll approach** (rootMargin ~600px).
 
+### Implementation (2026-10-22) — how the hero scene loads without slowing the page
+
+| Piece | Where | What it does |
+|---|---|---|
+| Loader (~1 KB gzip) | `frontend/src/hero.js` | No three.js inside. Keeps the poster when: reduced motion, saved LOW tier, `deviceMemory ≤ 2`, no model shipped. Otherwise waits for **window `load` → idle (`requestIdleCallback`) → scene within 600 px of the viewport**, then dynamic-imports the scene. |
+| Scene (~165 KB gzip, lazy chunk) | `frontend/src/scene.js` | three.js (tree-shaken) + GLTFLoader + meshopt decoder. Controller on a pedestal with two thin brand rings; drag to rotate (horizontal drag rotates, vertical swipe still scrolls: `touch-action: pan-y`), mouse parallax, slow idle spin, gentle float. Pauses off-screen and on hidden tab. 3 s FPS probe adjusts the tier and saves it. Canvas fades in over the poster after its first frame. |
+| Model | `static/models/controller.glb` (built by `npm run model -- <raw file>`) | Simplified with meshoptimizer, EXT_meshopt_compression, WebP textures ≤ 1024 px. |
+| Django | `{% vite_asset "hero.js" %}`, `{% static_if_exists %}` (core/templatetags/ui.py) | Reads `static/dist/.vite/manifest.json`. No bundle or no model → no script, no `data-model`: the page is unchanged (tests: `core/tests/test_hero_3d.py`). |
+| Build | `frontend/` (Vite 6.4.4, three 0.186.1) → `static/dist/` | Built in CI (job `frontend`) and in the Dockerfile's node stage; `npm run budget` fails the build if the bundle > 250 KB gzip or the model > 1.5 MB. |
+
+Deliberate deviations, with reasons:
+- **Textures are WebP, not KTX2.** WebP is the documented fallback format; for one small
+  model the KTX2/Basis transcoder (~250 KB of wasm/JS) costs more bandwidth than it saves.
+  Revisit if a second heavy scene is added.
+- **No bloom/post-processing, even on HIGH.** The owner asked for no neon beams (rev 4);
+  HIGH only raises DPR to 2 and enables MSAA.
+- **Tier beacon endpoint not built yet** (needs a route + table): tracked in docs/tasks.md.
+- **Hero model source:** "Dualsense" by miwaVV on Sketchfab, **CC BY 4.0** — credit shown on
+  the page; modified (simplified, recoloured, logos removed). The owner's first pick
+  (HQ3DMOD, editorial licence, not downloadable) could not be used on a commercial site.
+
 ## Quality tiers (FIXED; decided at runtime, re-evaluated once after 3 s)
 
 | Tier | Trigger | Settings |

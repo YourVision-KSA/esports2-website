@@ -66,8 +66,10 @@
         </div>
       </div>
 
-      <!-- 3D hero scene (Three.js mounts here; this frame is the LOW/FALLBACK poster) -->
-      <div class="scene" id="hero-scene">
+      <!-- 3D hero scene (Three.js mounts here; this frame is the LOW/FALLBACK poster).
+           frontend/src/hero.js loads the scene only after page load + idle + near viewport. -->
+      {% static_if_exists "models/controller.glb" as hero_model %}
+      <div class="scene" id="hero-scene"{% if hero_model %} data-model="{{ hero_model }}"{% endif %}>
         <div class="scene-frame">
           <svg viewBox="0 0 400 300" aria-hidden="true">
             <g stroke="#1F2D45" stroke-width="1">
@@ -324,4 +326,6 @@
   </div>
 </div>
 
+{% vite_asset "hero.js" as hero_js %}
+{% if hero_js %}<script type="module" src="{{ hero_js }}"></script>{% endif %}
 {% endblock %}

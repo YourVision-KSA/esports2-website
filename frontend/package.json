@@ -1,0 +1,19 @@
+{
+  "name": "esports2-frontend",
+  "private": true,
+  "type": "module",
+  "description": "Vite bundle for the 3D scenes (docs/frontend.md). Output: static/dist/ (gitignored, built in CI/Docker).",
+  "scripts": {
+    "build": "vite build",
+    "watch": "vite build --watch --mode development",
+    "budget": "node scripts/budget.mjs",
+    "model": "node scripts/optimize-model.mjs"
+  },
+  "dependencies": {
+    "three": "0.186.1"
+  },
+  "devDependencies": {
+    "@gltf-transform/cli": "4.5.1",
+    "vite": "6.4.4"
+  }
+}
