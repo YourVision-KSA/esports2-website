@@ -39,6 +39,8 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    # Rejects requests that bypassed Cloudflare (active only when CF_ORIGIN_TOKEN is set)
+    "core.middleware.CloudflareOriginMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -149,6 +151,12 @@ TURNSTILE_SECRET = env("TURNSTILE_SECRET", default="")
 
 # Shared secret for scheduler-called endpoints (/internal/...).
 INTERNAL_TOKEN = env("INTERNAL_TOKEN", default="")
+
+# Secret header a Cloudflare Transform Rule adds to every proxied request
+# (docs/operations.md → Cloudflare checklist). When set, requests that did not come
+# through Cloudflare are rejected (core/middleware.py) and CF-Connecting-IP becomes
+# trustworthy (core/security.py). Empty = disabled (local dev; pre-Cloudflare).
+CF_ORIGIN_TOKEN = env("CF_ORIGIN_TOKEN", default="")
 
 # Outbox retry policy (docs/data-model.md).
 OUTBOX_MAX_ATTEMPTS = 5

@@ -51,9 +51,22 @@ registrations and brackets continuously from first deploy.
 3. **Rate limiting**: POST `/vote/` 10/min/IP → managed challenge; `/staff/` login 5/min/IP → block 10 min;
    POST `/beacon/*` 6/min/IP → block (keeps the anonymous 3D counters honest).
 4. **Turnstile**: create widget, put the site key in templates, secret in Secret Manager.
-5. Verify with `curl -I`: `cf-cache-status: HIT` on static + content pages, `BYPASS`/`DYNAMIC`
-   on forms; **no `Set-Cookie` on cached responses**.
-6. Residency note: Cloudflare terminates TLS and proxies form submissions → it is a data
+5. **Origin shield** (security review 2026-10-22, M1): generate a secret (`openssl rand -hex 32`)
+   → Transform Rule (Modify Request Header) adding `X-Origin-Token: <value>` to **all** proxied
+   requests → store the same value as Secret Manager secret `cf-origin-token`, set it on the
+   service as `CF_ORIGIN_TOKEN`, and add it as GitHub Actions secret `CF_ORIGIN_TOKEN` (the
+   deploy smoke test sends it). From then on direct hits on the `*.run.app` URL get 403
+   (core/middleware.py) — except `/healthz` and `/internal/` — and CF-Connecting-IP becomes
+   trustworthy for the vote's per-IP limits.
+6. **Security headers** (Response Header Transform Rule) — set
+   `Content-Security-Policy: default-src 'self'; script-src 'self' https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; worker-src 'self' blob:; base-uri 'none'; frame-ancestors 'none'`.
+   All site scripts are external files, so `script-src 'self'` holds; `'unsafe-inline'` styles
+   are required by the current templates; `worker-src blob:` is for the meshopt decoder worker;
+   Turnstile needs the two cloudflare.com entries.
+7. Verify with `curl -I`: `cf-cache-status: HIT` on static + content pages, `BYPASS`/`DYNAMIC`
+   on forms; **no `Set-Cookie` on cached responses**; a request to the `*.run.app` URL
+   (not via the domain) returns 403.
+8. Residency note: Cloudflare terminates TLS and proxies form submissions → it is a data
    processor. Acceptable under the current assumption; if strict localization is confirmed,
    move the BYPASS (personal-data) routes to a direct in-region path and keep Cloudflare for
    static only.
@@ -107,16 +120,20 @@ Variables used below: `P=esports2-prod`, `R=me-central2`, `ORG=YourVision-KSA`,
    gcloud iam workload-identity-pools create github --location=global
    gcloud iam workload-identity-pools providers create-oidc github-oidc --location=global \
      --workload-identity-pool=github --issuer-uri=https://token.actions.githubusercontent.com \
-     --attribute-mapping=google.subject=assertion.sub,attribute.repository=assertion.repository \
-     --attribute-condition="assertion.repository=='$ORG/$REPO'"
+     --attribute-mapping=google.subject=assertion.sub,attribute.repository=assertion.repository,attribute.ref=assertion.ref \
+     --attribute-condition="assertion.repository=='$ORG/$REPO' && assertion.ref=='refs/heads/main'"
    gcloud iam service-accounts add-iam-policy-binding esports-deploy@$P.iam.gserviceaccount.com \
      --role=roles/iam.workloadIdentityUser \
      --member="principalSet://iam.googleapis.com/projects/$N/locations/global/workloadIdentityPools/github/attribute.repository/$ORG/$REPO"
    ```
-7. **GitHub** (repo → Settings → Secrets and variables → Actions → *Variables*; no secrets needed):
+7. **GitHub** (repo → Settings → Secrets and variables → Actions → *Variables*):
    `GCP_PROJECT_ID=$P` · `GCP_WIF_PROVIDER=projects/$N/locations/global/workloadIdentityPools/github/providers/github-oidc`
    · `GCP_DEPLOY_SA=esports-deploy@$P.iam.gserviceaccount.com`.
-   Environments → create `production` (add required reviewers = manual approval gate) and `staging`.
+   Secrets: `CF_ORIGIN_TOKEN` (same value as the origin shield, Cloudflare checklist step 5).
+   Environments → create `production` **with required reviewers** (the manual approval gate is
+   NOT optional — without it a `workflow_dispatch` ships to production unreviewed; security
+   review 2026-10-22, M2) and `staging`. The WIF condition above (main-only) is the second
+   half of that control: tokens are only issued to workflows running on `main`.
 8. **Staging**: repeat 4–5 as `esports-staging` / `esports-staging-migrate` against the staging
    database; deploy it with *Run workflow → staging*.
 9. **Verify**: push a docs-only commit to `main` → CI → Deploy → green smoke test; then rehearse
@@ -125,8 +142,14 @@ Variables used below: `P=esports2-prod`, `R=me-central2`, `ORG=YourVision-KSA`,
 ## Monitoring & alerts (GCP built-ins only)
 
 - Uptime check on `/healthz` every minute → email alert to the team.
+- **Error Reporting** (enable the API — zero code, parses Python tracebacks from Cloud Run
+  logs automatically) + a log-based alert on `severity>=ERROR` → email. This catches
+  unhandled 500s and permanently-failed outbox emails (core/outbox.py logs those at ERROR)
+  the moment they happen, before any threshold trips.
 - Alerts: 5xx rate > 2% over 5 min; p95 latency > 2 s on `/vote/` or `/register/`;
   Cloud SQL connections > 80%; Cloud Run instance count at max for > 10 min.
+- Daily during active phases: admin → Outbox emails filtered on `failed` (VIP invitations
+  and manage-link emails that gave up after 5 attempts need manual follow-up).
 - Dashboards open during launch hours: requests, 5xx, DB connections, held-vote share
   (`manage.py vote_report`), CF cache hit rate, CF analytics on `/static/*` (if the 3D files
   stop HITting, bandwidth becomes the top cost — fix the rule immediately).

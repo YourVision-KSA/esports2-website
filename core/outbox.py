@@ -45,12 +45,22 @@ def send_due(limit: int = 50) -> int:
                 )
             except Exception as exc:  # noqa: BLE001 — any SMTP failure is retryable
                 email.last_error = str(exc)[:1000]
+                # Log the row id only — recipient addresses (and SMTP errors quoting
+                # them) stay out of the logs; details live in last_error (admin).
                 if email.attempts >= settings.OUTBOX_MAX_ATTEMPTS:
                     email.status = OutboxEmail.Status.FAILED
+                    # ERROR so the log-based alert fires (docs/operations.md → Monitoring)
+                    log.error(
+                        "outbox email %s permanently failed after %s attempts",
+                        email.pk,
+                        email.attempts,
+                    )
                 else:
                     # Backoff: 5 min * attempts
                     email.next_attempt_at = now + timedelta(minutes=5 * email.attempts)
-                log.warning("outbox send failed to=%s err=%s", email.to_email, exc)
+                    log.warning(
+                        "outbox email %s failed (attempt %s), will retry", email.pk, email.attempts
+                    )
             else:
                 email.status = OutboxEmail.Status.SENT
                 sent += 1

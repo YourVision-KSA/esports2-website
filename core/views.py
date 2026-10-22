@@ -4,6 +4,8 @@ Cache policy follows docs/routes.md: edge-cached pages must carry no per-visitor
 state — no CSRF token, no Set-Cookie (CLAUDE.md hard rule 8).
 """
 
+import hmac
+
 from django.conf import settings
 from django.db import connection
 from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
@@ -74,7 +76,8 @@ def phase_closed(request, message_key: str = "PHASE_SOON"):
 def internal_outbox(request):
     """Scheduler tick: deliver due outbox emails (docs/operations.md)."""
     token = request.headers.get("X-Internal-Token", "")
-    if not settings.INTERNAL_TOKEN or token != settings.INTERNAL_TOKEN:
+    # constant-time compare: no timing oracle on the shared secret
+    if not settings.INTERNAL_TOKEN or not hmac.compare_digest(token, settings.INTERNAL_TOKEN):
         return HttpResponseForbidden()
     return JsonResponse({"sent": send_due()})
 

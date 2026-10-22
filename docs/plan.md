@@ -46,6 +46,14 @@ earlier than needed). Dates shift with DEC-01; the **sequence and gates are fixe
 - **2026-10-22** — **Owner approved the logo colours in principle** (rev 4 palette, PR #2 →
   unblocked). Photography and the game list/imagery **will change later** — keep images
   swappable (`static/img/`, `static/img/games/<slug>.jpg`) and game names data-driven.
+- **2026-10-22 (security review)** — All of Yousef's branches merged to `main` (PRs #2–#10);
+  full security review: no critical findings; 105/105 tests green on real PostgreSQL.
+  Hardening applied: Cloudflare origin shield (`CF_ORIGIN_TOKEN`, core/middleware.py — M1),
+  WIF restricted to `main` + required reviewers called out (M2), constant-time internal-token
+  compare, 12 h staff sessions, CI actions pinned to SHAs, outbox failures log at ERROR
+  without recipient PII, Error Reporting added to the monitoring checklist. Docs updated:
+  operations.md (CF checklist 5–6, WIF, GitHub step 7, monitoring), voting.md (cookie 14 d),
+  architecture.md (beacon clarification).
 
 ## Timeline
 

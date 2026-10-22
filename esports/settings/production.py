@@ -19,6 +19,10 @@ CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[])
 SECURE_HSTS_SECONDS = 60 * 60 * 24 * 30
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 
+# Sessions exist only for staff (public pages set no cookies — CLAUDE.md rule 8).
+# 12 h instead of Django's 2-week default limits a stolen admin session's lifetime.
+SESSION_COOKIE_AGE = 60 * 60 * 12
+
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
 # 2FA is mandatory for staff in production (CLAUDE.md hard rule 4).

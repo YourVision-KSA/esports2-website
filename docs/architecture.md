@@ -97,6 +97,11 @@ seeding algorithms beyond a random draw · English locale.
 
 Adding any of these requires a stated requirement and an update to this file.
 
+Clarification (2026-10-22): the count-only hero-3D tier beacon (`TierStat` daily counters —
+no visitor identifiers, docs/frontend.md) is a frontend health metric serving the stated
+"WebGL fallback rate" requirement, **not** an analytics stack; nothing third-party, nothing
+per-visitor.
+
 ## Standing risks (top 3)
 
 1. Vote manipulation degrading the result's legitimacy (residual risk in docs/voting.md).

@@ -21,5 +21,9 @@ def token_hash(value: str) -> str:
 
 
 def client_ip(request) -> str:
-    """Original client IP. Behind Cloudflare, CF-Connecting-IP is authoritative."""
-    return request.META.get("HTTP_CF_CONNECTING_IP") or request.META.get("REMOTE_ADDR", "")
+    """Original client IP. CF-Connecting-IP is authoritative ONLY while requests are
+    forced through Cloudflare (CF_ORIGIN_TOKEN set → core/middleware.py rejects direct
+    origin hits); otherwise the header is attacker-controlled, so use the socket address."""
+    if settings.CF_ORIGIN_TOKEN:
+        return request.META.get("HTTP_CF_CONNECTING_IP") or request.META.get("REMOTE_ADDR", "")
+    return request.META.get("REMOTE_ADDR", "")

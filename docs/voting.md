@@ -7,8 +7,10 @@ detectable, never claim it is a verified election.
 ## Ballot flow
 
 1. GET `/vote/`: if the browser has no voter-token cookie, generate one (128-bit random),
-   set as a **signed, HttpOnly, Secure, SameSite=Lax cookie** (Django signing), expiry = vote
-   close + 7 days. Render the form (candidate games, pick `CHOICES_PER_BALLOT`) + Turnstile.
+   set as a **signed, HttpOnly, Secure, SameSite=Lax cookie** (Django signing), expiry =
+   14 days — covers the ≤7-day window plus margin (`COOKIE_MAX_AGE` in voting/views.py;
+   the privacy notice states the same 14 days). Render the form (candidate games, pick
+   `CHOICES_PER_BALLOT`) + Turnstile.
 2. POST: verify in this order, cheapest first:
    a. phase == vote (else 403);
    b. form valid (exact number of choices, all `candidate` games);
