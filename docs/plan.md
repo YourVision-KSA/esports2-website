@@ -43,6 +43,9 @@ earlier than needed). Dates shift with DEC-01; the **sequence and gates are fixe
   the owner's direction, while Yousef received the logo the same day with a request to apply
   its colours; his rev 4 "logo palette" (PR #2) + hero 3D (PR #3) are therefore **held for
   owner confirmation** before merging to `main`.
+- **2026-10-22** — **Owner approved the logo colours in principle** (rev 4 palette, PR #2 →
+  unblocked). Photography and the game list/imagery **will change later** — keep images
+  swappable (`static/img/`, `static/img/games/<slug>.jpg`) and game names data-driven.
 
 ## Timeline
 
