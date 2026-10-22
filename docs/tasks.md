@@ -46,7 +46,11 @@ Yousef (24446357ksa@aou.edu.sa — org owner on GitHub, owner-facing follow-ups)
 
 ## ⬜ Remaining — Yousef (code, with Claude) — next session starts here
 
-Checkpoint 2026-10-21: rebrand done and committed on `dev-yousef` (PR open to `main`).
+Checkpoint 2026-10-21: rebrand done and committed on `dev-yousef` (PR #2 → `main`).
+**Checkpoint 2026-10-22:** hero 3D scene done on `feat/hero-3d` (PR #3, stacked on #2).
+Restore point: branch `checkpoint/2026-10-22` + tag `checkpoint-2026-10-22` (same commit).
+To go back: `git checkout checkpoint/2026-10-22` (or branch off the tag).
+Merge order: #2 → `main`, then retarget #3 to `main` and merge.
 Order agreed — code work that does NOT wait on owner decisions:
 
 - [ ] Merge the rebrand PR after review (Hussein to glance at it)
@@ -55,9 +59,17 @@ Order agreed — code work that does NOT wait on owner decisions:
 - [ ] Privacy notice page + consent checkbox wiring (Arabic as DRAFT until DEC-08)
 - [ ] Live bracket polling JS on `/bracket/<slug>/` (endpoint already exists)
 - [ ] Camera QR scanner on `/staff/checkin/` (manual entry stays as fallback)
-- [ ] CI job 3: `npm run build` + 3D bundle size budget (after the Vite bundle exists)
+- [x] CI job 3: `npm run build` + size budgets (`frontend` job, 2026-10-22)
 - [ ] Deploy workflow (GitHub Actions → Cloud Run), written now, enabled after DEC-04/05
-- [ ] Coordinate with Hussein: who builds the 3D hero/trophy scenes (listed under Hussein)
+- [x] **Hero 3D scene** — Yousef, 2026-10-22, branch `feat/hero-3d` (PR stacked on the
+      rebrand PR). CC-BY "Dualsense" model cleaned (no PS logo/symbols), recoloured,
+      21 MB → 362 KB; lazy loader, tiers, worker decode, chunked start-up (longest task
+      ≈ 145 ms on a 4×-slowed phone), poster WebP 13 KB, budgets in CI. Licence credit
+      moved from under the scene to a faint footer line (owner request 2026-10-22) —
+      it must not be removed entirely (CC BY 4.0 condition).
+      ⚠️ Tell Hussein the hero scene is done (it was on his list).
+- [ ] Tier beacon endpoint (count-only, no PII) for the WebGL fallback-rate metric
+- [ ] Trophy 3D scene (cut-list item 2 — static image acceptable)
 
 ## ⬜ Remaining — Hussein (with Claude)
 
@@ -66,7 +78,7 @@ Order agreed — code work that does NOT wait on owner decisions:
       fixed 2026-10-21: new `enroll_totp` management command + 4 tests (59 total green)
 - [ ] GCP + Cloudflare setup per `docs/operations.md` (~Oct 29; needs DEC-04/05 from Yousef first)
 - [ ] Vote-page counting-rules content (needs DEC-03)
-- [ ] Hero 3D scene: Vite + Three.js bundle (W3 — not started, no `package.json` yet)
+- [x] Hero 3D scene → done by Yousef 2026-10-22 (see Yousef's list)
 - [ ] Trophy 3D scene (W5; cut-list fallback: static image)
 - [ ] Monitoring + uptime alert before G1 (vote opens ~Nov 2)
 - [ ] Staging cache + abuse rehearsal (W2)
