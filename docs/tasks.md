@@ -54,9 +54,20 @@ Merge order: #2 → `main`, then retarget #3 to `main` and merge.
 Order agreed — code work that does NOT wait on owner decisions:
 
 - [ ] Merge the rebrand PR after review (Hussein to glance at it)
-- [ ] Staff pages polish for phones: `/staff/results/` (wrong button label — uses REG_SUBMIT)
-      and `/staff/checkin/` layout
-- [ ] Privacy notice page + consent checkbox wiring (Arabic as DRAFT until DEC-08)
+- [x] **Staff pages for phones** (2026-10-22, branch `feat/staff-pages`): shared staff layout
+      (who's signed in + logout, no public footer); results = Arabic round names, big
+      winner cards (✓ + dim the other), score field, PRG + confirmation, game filter,
+      Arabic errors; check-in = **look up → check ID → confirm** (nothing written on
+      lookup), distinct ok/already/invalid cards, Arabic status chips, card list search.
+      15 new tests. 20 new strings in content-ar.md are DRAFT (owner review).
+- [x] **Privacy notice page** `/privacy/` (2026-10-22, branch `feat/staff-pages`): 10 sections,
+      facts matched to the implementation (14-day voter cookie, HMAC-only IP/UA, gamer tags
+      only in public, no national ID/payments); linked from the consent checkbox (new tab),
+      the vote page and the footer; 4 tests. **All text DRAFT.**
+- [ ] → Yousef: fill the [placeholders] in the privacy notice before registration opens
+      (G2): data controller (Your Vision vs. university), contact email, hosting
+      confirmation, retention days (DEC-08), under-18 policy (DEC-09), publish date.
+      Ideally a quick legal read.
 - [ ] Live bracket polling JS on `/bracket/<slug>/` (endpoint already exists)
 - [ ] Camera QR scanner on `/staff/checkin/` (manual entry stays as fallback)
 - [x] CI job 3: `npm run build` + size budgets (`frontend` job, 2026-10-22)

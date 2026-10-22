@@ -2,10 +2,23 @@
 
 from django import forms
 from django.core.exceptions import ValidationError
+from django.utils.html import format_html
 
 from core.content import CONTENT
 
 from .models import normalize_phone
+
+
+def _consent_label():
+    """REG-CONSENT exactly as written, with «سياسة الخصوصية» linked to /privacy/
+    (new tab, so a half-filled form is not lost)."""
+    text, link = CONTENT["REG_CONSENT"], CONTENT["PRIVACY_TITLE"]
+    if link not in text:
+        return text
+    before, after = text.split(link, 1)
+    return format_html(
+        '{}<a href="/privacy/" target="_blank" rel="noopener">{}</a>{}', before, link, after
+    )
 
 
 class RegistrationForm(forms.Form):
@@ -17,6 +30,7 @@ class RegistrationForm(forms.Form):
 
     def __init__(self, *args, game=None, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields["consent"].label = _consent_label()
         if game and game.player_id_label_ar:
             self.fields["game_player_id"].label = game.player_id_label_ar
         else:

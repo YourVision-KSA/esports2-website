@@ -466,6 +466,115 @@ th { color: var(--muted); font-weight: 600; }
 }
 .champion-panel .t { font-family: var(--display); font-weight: 700; font-size: 17px; color: var(--gold); }
 
+/* ---- legal pages (privacy notice) — long-form reading ---------------------------------------- */
+.legal { max-width: 720px; gap: 28px; }
+.legal header { display: flex; flex-direction: column; gap: 10px; border-block-end: 1px solid var(--line); padding-block-end: 20px; }
+.legal-updated { font-size: 13px; color: var(--muted); }
+.legal-intro { font-size: 17px; color: var(--body); line-height: 1.9; }
+.legal section { display: flex; flex-direction: column; gap: 8px; }
+.legal h2 { font-size: 20px; font-weight: 700; color: #FFFFFF; }
+.legal section h2::before { content: ""; display: inline-block; width: 18px; height: 3px; background: var(--accent); transform: skewX(-12deg); margin-inline-end: 10px; vertical-align: middle; }
+.legal section p { color: var(--body); line-height: 1.95; max-width: 68ch; }
+.footer-link { color: var(--muted); }
+.footer-link:hover { color: var(--accent); }
+
+/* ---- staff pages (referee results, door check-in) — phone-first, big tap targets ---------------- */
+.staff-head .wrap { gap: 12px; }
+.staff-head .brand-title { font-size: 15px; }
+.staff-head .brand-sub { display: none; }
+.staff-head .brand-emblem { width: 40px; }
+.staff-user { display: flex; align-items: center; gap: 10px; margin: 0; font-size: 13px; color: var(--muted); }
+.staff-user b { color: var(--text); font-weight: 600; margin-inline-start: 4px; }
+.staff-user > span, .staff-user .btn-link { white-space: nowrap; }
+@media (max-width: 480px) {
+  .staff-head .brand-words { display: none; } /* emblem only: room for who's signed in */
+}
+button[type="submit"].btn-link, .btn-link {
+  width: auto; background: none; box-shadow: none; clip-path: none; padding: 6px 0;
+  font-family: var(--sans); font-size: 13px; font-weight: 600; color: var(--accent);
+  text-decoration: underline; text-underline-offset: 3px; cursor: pointer; border: 0;
+}
+button[type="submit"].btn-secondary-sm, .btn-secondary-sm {
+  width: auto; clip-path: none; box-shadow: none; padding: 10px 18px; font-size: 15px;
+  background: var(--surface-2); color: var(--text); border: 1px solid var(--line-strong);
+}
+button[type="submit"].btn-secondary-sm:hover { background: var(--surface); border-color: var(--accent); }
+
+.staff { max-width: 560px; margin: 0 auto; padding: 20px 16px 48px; display: flex; flex-direction: column; gap: 16px; }
+.staff h1 { font-size: 26px; }
+.staff-empty { color: var(--muted); text-align: center; padding: 28px 12px; border: 1px dashed var(--line-strong); list-style: none; }
+.staff-panel { background: var(--surface); border: 1px solid var(--line); padding: 16px; margin: 0; }
+.staff-panel p { margin-block-end: 12px; }
+
+.notice { padding: 14px 16px; font-weight: 600; border: 1px solid; }
+.notice-success { border-color: var(--accent); color: var(--text); background: rgb(var(--accent-rgb) / 0.10); }
+.notice-error { border-color: var(--error); color: var(--error); background: rgb(255 180 174 / 0.06); }
+
+.staff-tabs { display: flex; gap: 8px; overflow-x: auto; padding-block-end: 4px; scrollbar-width: none; }
+.staff-tabs a {
+  flex-shrink: 0; padding: 8px 14px; border: 1px solid var(--line-strong); color: var(--muted);
+  text-decoration: none; font-size: 14px; font-weight: 600; white-space: nowrap;
+}
+.staff-tabs a b { font-family: var(--num); margin-inline-start: 6px; color: var(--text); }
+.staff-tabs a.active { background: var(--accent); border-color: var(--accent); color: var(--ink); }
+.staff-tabs a.active b { color: var(--ink); }
+
+.match-entry { background: var(--surface); border: 1px solid var(--line); padding: 16px; display: flex; flex-direction: column; gap: 14px; margin: 0; }
+.match-entry-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.match-entry-head .game { font-family: var(--display); font-weight: 700; font-size: 17px; }
+.match-entry-head .round { font-size: 13px; color: var(--accent); font-weight: 600; }
+.winner-pick { border: 0; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr auto 1fr; align-items: stretch; gap: 8px; }
+.winner-pick legend { font-size: 13px; color: var(--muted); font-weight: 600; margin-block-end: 8px; padding: 0; }
+.vs { align-self: center; font-family: var(--num); font-size: 12px; font-weight: 700; color: var(--muted); }
+.player-option {
+  position: relative; display: flex; align-items: center; justify-content: center; text-align: center;
+  min-height: 64px; padding: 10px; border: 1px solid var(--line-strong); background: var(--bg-2);
+  font-family: var(--num); font-weight: 700; font-size: 16px; cursor: pointer; overflow-wrap: anywhere;
+  transition: border-color 0.15s, background 0.15s;
+}
+.player-option input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.player-option:has(input:checked) { border: 2px solid var(--accent); background: rgb(var(--accent-rgb) / 0.12); color: #FFFFFF; }
+.player-option:has(input:focus-visible) { outline: 2px solid var(--gold); outline-offset: 2px; }
+/* make the pick unmistakable in a busy hall: tick on the winner, dim the other player */
+.player-option:has(input:checked)::after {
+  content: "✓"; position: absolute; top: 4px; inset-inline-end: 8px;
+  font-family: var(--sans); font-size: 14px; color: var(--accent);
+}
+.winner-pick:has(input:checked) .player-option:not(:has(input:checked)) { opacity: 0.45; }
+.score-field { margin: 0; }
+.score-field input { font-family: var(--num); font-size: 18px; }
+
+.guest-card { border: 2px solid var(--line-strong); background: var(--surface); padding: 20px 18px; display: flex; flex-direction: column; gap: 8px; }
+.guest-card .guest-state { font-weight: 700; font-size: 16px; }
+.guest-card .guest-name { font-family: var(--display); font-weight: 800; font-size: 28px; line-height: 1.3; color: #FFFFFF; }
+.guest-card .guest-org { color: var(--body); font-size: 16px; }
+.guest-card .guest-verify { color: var(--gold); font-weight: 600; font-size: 14px; margin-block: 6px 4px; }
+.guest-card form { margin: 0; }
+.guest-lookup { border-color: var(--accent); }
+.guest-ok { border-color: var(--accent); background: rgb(var(--accent-rgb) / 0.12); }
+.guest-ok .guest-state { color: var(--accent); }
+.guest-already { border-color: var(--gold); background: rgb(var(--gold-rgb) / 0.08); }
+.guest-already .guest-state { color: var(--gold); }
+.guest-invalid { border-color: var(--error); background: rgb(255 180 174 / 0.06); }
+.guest-invalid .guest-state { color: var(--error); font-size: 20px; }
+
+.staff-search label { display: block; margin-block-end: 8px; }
+.search-row { display: flex; gap: 8px; }
+.search-row input { flex: 1; min-width: 0; background: var(--bg-2); border: 1px solid var(--line-strong); color: var(--text); padding: 12px 14px; font-size: 15px; font-family: var(--sans); }
+.guest-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.guest-list li:not(.staff-empty) {
+  display: grid; grid-template-columns: 1fr auto; grid-template-areas: "who chip" "who act";
+  align-items: center; gap: 8px 12px; background: var(--surface); border: 1px solid var(--line); padding: 12px 14px;
+}
+.guest-list .who { grid-area: who; display: flex; flex-direction: column; min-width: 0; }
+.guest-list .name { font-weight: 600; }
+.guest-list .org { font-size: 13px; color: var(--muted); }
+.guest-list .chip { grid-area: chip; justify-self: end; }
+.guest-list form { grid-area: act; justify-self: end; margin: 0; }
+.chip.status-sent { color: var(--accent); }
+.chip.status-checked_in { color: var(--gold); }
+.chip.status-revoked, .chip.status-created { color: var(--muted); }
+
 /* ---- reveal + count-up (JS adds .in / .counted) ----------------------------------------------------- */
 .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }
 .reveal.in { opacity: 1; transform: none; }

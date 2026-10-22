@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% comment %}Privacy notice (DEC-08). All text from core/content.py (PRIVACY_*), DRAFT until
+the owner approves; [bracketed] parts are placeholders to fill before registration opens.{% endcomment %}
+{% block title %}{{ content.PRIVACY_TITLE }}{% endblock %}
+{% block funnel_tag %}PRIVACY{% endblock %}
+{% block content %}
+<article class="funnel legal">
+  <header>
+    <h1>{{ content.PRIVACY_TITLE }}</h1>
+    <p class="legal-updated">{{ content.PRIVACY_UPDATED }}</p>
+    <p class="legal-intro">{{ content.PRIVACY_INTRO }}</p>
+  </header>
+  {% for title, paragraphs in content.PRIVACY_SECTIONS %}
+  <section>
+    <h2>{{ title }}</h2>
+    {% for p in paragraphs %}<p>{{ p }}</p>{% endfor %}
+  </section>
+  {% endfor %}
+</article>
+{% endblock %}

@@ -24,6 +24,7 @@ Cache column = Cloudflare edge behavior (configured as cache rules, see docs/ope
 | `/api/bracket/<game-slug>.json` | GET | event..archive | **10 s** | Flat match list for polling. The ONLY JSON endpoint. No PII beyond player display names/gamer tags. |
 | `/invite/<token>/` | GET | all | BYPASS | Guest view: name, date, venue, QR code rendered client-side or as inline SVG. 404 for unknown/revoked tokens (uniform response, no token-validity oracle beyond this). |
 | `/healthz` | GET | all | BYPASS | 200 + DB ping. Used by uptime checks. |
+| `/privacy/` | GET | all | 60 s | Privacy notice (DEC-08, PDPL). Static content from core/content.py (PRIVACY_*). Linked from the registration consent checkbox (new tab), the vote page and the footer. No forms. Must be final before G2. |
 | `/credits/` | GET | all | 1 h | Licence notices for third-party assets (CC BY 4.0 hero model). Linked from the hero's "3D INTERACTIVE SCENE" badge. English legal text. No forms. |
 
 Phase-gated POST outside its window → 403 with the Arabic closed message. GET → closed-state
@@ -41,7 +42,7 @@ page. Both enforced in the view via `current_phase()`, regardless of what links 
 | Route | Role | Notes |
 |---|---|---|
 | `/staff/` | per-model perms | Django admin: Games, SiteConfig (admin only), Ballots (hold/invalidate actions), Players/Registrations (remove, promote shown), Invitations (create, mark sent, revoke, CSV export), OutboxEmail, AuditLog (read-only). CSV exports admin-only + audit-logged. |
-| `/staff/results/` | referee, admin | Mobile-friendly result entry: list of `pending` matches for today → tap → enter winner + score. Thin wrapper over the result-entry transaction. (Cut-list item: fall back to Django admin.) |
+| `/staff/results/` | referee, admin | Mobile-friendly result entry: playable `pending` matches (optional `?game=<slug>` filter) → tap winner → optional score → save (POST/redirect/GET with a confirmation message). Thin wrapper over the result-entry transaction; a second phone entering the same match gets an Arabic error, first entry kept. (Cut-list item: fall back to Django admin.) |
 | `/staff/checkin/` | door, admin | Camera QR scanner (getUserMedia + a small JS decoder) → shows guest name/org → confirm button → atomic check-in. Manual token entry fallback + searchable guest list. (Cut-list item: list page only.) |
 
 Admin path note: serve Django admin at `/staff/` (not `/admin/`) and rate-limit login at the

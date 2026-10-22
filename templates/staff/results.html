@@ -1,25 +1,55 @@
-{% extends "base.html" %}
-{% block title %}Results{% endblock %}
+{% extends "staff/base_staff.html" %}
+{% block title %}{{ content.STAFF_RESULTS_TITLE }}{% endblock %}
 {% block content %}
-<section>
-  <h2>{{ content.STAFF_RESULTS_TITLE }}</h2>
-  {% if error %}<p class="error" dir="ltr">{{ error }}</p>{% endif %}
-  {% for m in pending %}
-  <form method="post" class="card">
-    {% csrf_token %}
-    <input type="hidden" name="match_id" value="{{ m.pk }}">
-    <h3>{{ m.game.name_ar }} — R{{ m.round }} #{{ m.slot }}</h3>
-    <p>
-      <label><input type="radio" name="winner_id" value="{{ m.player1_id }}" required>
-        <span dir="ltr">{{ m.player1.game_player_id }}</span></label>
-      <label><input type="radio" name="winner_id" value="{{ m.player2_id }}">
-        <span dir="ltr">{{ m.player2.game_player_id }}</span></label>
-    </p>
-    <p><input type="text" name="score" placeholder="3–1" dir="ltr"></p>
-    <button type="submit">{{ content.REG_SUBMIT }}</button>
-  </form>
-  {% empty %}
-  <p>{{ content.MATCH_PENDING }}: 0</p>
+<div class="staff">
+  <h1>{{ content.STAFF_RESULTS_TITLE }}</h1>
+
+  {% for message in messages %}
+  <p class="notice notice-{{ message.tags }}" role="status">{{ message }}</p>
   {% endfor %}
-</section>
+
+  {% if games|length > 1 %}
+  <nav class="staff-tabs" aria-label="{{ content.STAFF_ALL_GAMES }}">
+    <a href="?" class="{% if not active_game %}active{% endif %}">{{ content.STAFF_ALL_GAMES }} <b dir="ltr">{{ total_pending }}</b></a>
+    {% for game, count in games %}
+    <a href="?game={{ game.slug }}" class="{% if active_game == game.slug %}active{% endif %}">{{ game.name_ar }} <b dir="ltr">{{ count }}</b></a>
+    {% endfor %}
+  </nav>
+  {% endif %}
+
+  {% for m in matches %}
+  {% with match=m.obj %}
+  <form method="post" class="match-entry">
+    {% csrf_token %}
+    <input type="hidden" name="match_id" value="{{ match.pk }}">
+    <input type="hidden" name="game" value="{{ active_game }}">
+    <div class="match-entry-head">
+      <span class="game">{{ match.game.name_ar }}</span>
+      <span class="round">{{ m.round_name }} · {{ m.label }}</span>
+    </div>
+
+    <fieldset class="winner-pick">
+      <legend>{{ content.STAFF_PICK_WINNER }}</legend>
+      <label class="player-option">
+        <input type="radio" name="winner_id" value="{{ match.player1_id }}" required>
+        <span dir="ltr">{{ match.player1.game_player_id }}</span>
+      </label>
+      <span class="vs" dir="ltr">VS</span>
+      <label class="player-option">
+        <input type="radio" name="winner_id" value="{{ match.player2_id }}">
+        <span dir="ltr">{{ match.player2.game_player_id }}</span>
+      </label>
+    </fieldset>
+
+    <p class="score-field">
+      <label for="score-{{ match.pk }}">{{ content.STAFF_SCORE }}</label>
+      <input type="text" id="score-{{ match.pk }}" name="score" maxlength="40" dir="ltr" inputmode="text" placeholder="3–1" autocomplete="off">
+    </p>
+    <button type="submit">{{ content.STAFF_SAVE_RESULT }}</button>
+  </form>
+  {% endwith %}
+  {% empty %}
+  <p class="staff-empty">{{ content.STAFF_NO_PENDING }}</p>
+  {% endfor %}
+</div>
 {% endblock %}

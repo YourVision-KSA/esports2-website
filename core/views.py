@@ -42,6 +42,13 @@ def home(request):
     return render(request, "core/home.html", {"games": games, "live_match": live_match})
 
 
+@cache_control(public=True, max_age=60, s_maxage=60)
+def privacy(request):
+    """Privacy notice (PDPL; DEC-08). Static content page, edge-cached, no forms.
+    Linked from the registration consent checkbox, the vote page and the footer."""
+    return render(request, "core/privacy.html")
+
+
 @cache_control(public=True, max_age=3600, s_maxage=3600)
 def credits(request):
     """Third-party asset credits (licence notices). Static, edge-cached, no forms.
