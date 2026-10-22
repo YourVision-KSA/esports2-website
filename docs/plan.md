@@ -22,11 +22,27 @@ earlier than needed). Dates shift with DEC-01; the **sequence and gates are fixe
   `/vote/`, `/register/`, `/bracket/`, `/healthz`. Execution checklist with per-person
   assignments added: `docs/tasks.md`.
 
+- **2026-10-21 — CHECKPOINT `checkpoint-2026-10-21`** (git tag; restore with
+  `git checkout checkpoint-2026-10-21`). Frozen state: W1 build complete on the Arena
+  Night rev 3.1 theme, **59/59 tests green**, ruff clean. Infrastructure this day:
+  GitHub org **YourVision-KSA** (public repo, `main` protected via ruleset: PR + CI
+  required), work branch `dev-hussein`, owner invite to Yousef pending, branded org
+  profile. New since W1 log: `enroll_totp` command (staff 2FA first-device enrollment,
+  4 tests). A full logo-driven redesign (rev 4: event-logo palette, hero 3D controller
+  scene, static logo panel) was built, then **reverted at the owner's direction** —
+  it lives in history between `2f9746e` and `fc19a91` on `dev-hussein` and can be
+  cherry-picked back selectively. Event logo source: `Downloads/UI` on the dev machine.
+  Next up: DEC answers (Yousef), GCP/Cloudflare (~Oct 29), design direction decision.
+
 - **2026-10-21** — Owner supplied the event logo and asked for the site colours to follow
   it (no neon beams, no volt green). Implemented as frontend rev 4 "logo palette": colour
   tokens only (layout/motion unchanged), clean SVG redraw of the emblem as header lockup +
   favicon, placeholder photos regraded. The logo reads «تجمع الرياضات الإلكترونية» while
   SITE-NAME/hero still read «يوم …» → **DEC-02 needs a decision** (logo wording suggests «تجمع»).
+- **2026-10-21 (Yousef)** — ⚠️ Overlaps the entry above: Hussein's rev 4 was reverted at
+  the owner's direction, while Yousef received the logo the same day with a request to apply
+  its colours; his rev 4 "logo palette" (PR #2) + hero 3D (PR #3) are therefore **held for
+  owner confirmation** before merging to `main`.
 
 ## Timeline
 
