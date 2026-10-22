@@ -213,6 +213,11 @@ CONTENT = {
     "STAFF_NO_RESULTS": "لا توجد نتائج مطابقة",
     "STAFF_SELECT": "اختيار",
     "STAFF_NEXT_GUEST": "الضيف التالي",
+    "STAFF_SCAN_START": "مسح رمز الدعوة بالكاميرا",
+    "STAFF_SCAN_STOP": "إيقاف الكاميرا",
+    "STAFF_SCAN_HINT": "وجّه الكاميرا نحو رمز QR في الدعوة",
+    "STAFF_SCAN_ERROR": "تعذّر تشغيل الكاميرا — استخدم إدخال الرمز أو البحث بالاسم",
+    "STAFF_OR": "أو",
     # invitation status labels for door staff (model choices are English for admin)
     "INVITE_STATUS": {
         "created": "لم تُرسل",

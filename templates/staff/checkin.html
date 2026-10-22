@@ -34,8 +34,21 @@
   </section>
   {% endif %}
 
-  {# ---- step 1a: typed or scanned token ---- #}
-  <form method="post" class="staff-panel">
+  {# ---- step 1a: camera scanner (progressive: hidden until frontend/src/scanner.js runs) ---- #}
+  <section class="scanner" data-scanner data-autostart="{% if result == 'lookup' %}0{% else %}1{% endif %}" hidden>
+    <div class="scanner-view">
+      <video muted playsinline aria-hidden="true"></video>
+      <span class="scanner-frame" aria-hidden="true"></span>
+      <span class="scanner-hint">{{ content.STAFF_SCAN_HINT }}</span>
+    </div>
+    <p class="scanner-error" data-error role="alert" hidden>{{ content.STAFF_SCAN_ERROR }}</p>
+    <button type="button" class="btn-scan" data-start>{{ content.STAFF_SCAN_START }}</button>
+    <button type="button" class="btn-scan btn-scan-stop" data-stop hidden>{{ content.STAFF_SCAN_STOP }}</button>
+    <p class="scanner-or"><span>{{ content.STAFF_OR }}</span></p>
+  </section>
+
+  {# ---- step 1b: typed token (the scanner submits this same form) ---- #}
+  <form method="post" class="staff-panel" id="lookup-form">
     {% csrf_token %}
     <input type="hidden" name="action" value="lookup">
     <p>
@@ -45,7 +58,7 @@
     <button type="submit">{{ content.STAFF_LOOKUP }}</button>
   </form>
 
-  {# ---- step 1b: search the guest list ---- #}
+  {# ---- step 1c: search the guest list ---- #}
   <form method="get" class="staff-panel staff-search" role="search">
     <label for="q">{{ content.STAFF_SEARCH_HINT }}</label>
     <div class="search-row">
@@ -78,4 +91,6 @@
   </ul>
   {% endif %}
 </div>
+{% vite_asset "scanner.js" as scanner_js %}
+{% if scanner_js %}<script type="module" src="{{ scanner_js }}"></script>{% endif %}
 {% endblock %}

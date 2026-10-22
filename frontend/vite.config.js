@@ -17,7 +17,12 @@ export default defineConfig({
     chunkSizeWarningLimit: 800,
     rollupOptions: {
       // hero.js is the tiny loader; three.js only arrives via its dynamic import.
-      input: { hero: resolve(import.meta.dirname, "src/hero.js") },
+      input: {
+        hero: resolve(import.meta.dirname, "src/hero.js"),
+        // door-staff QR scanner (/staff/checkin/); jsQR runs in a worker, loaded only
+        // on browsers without a native BarcodeDetector (e.g. iOS Safari)
+        scanner: resolve(import.meta.dirname, "src/scanner.js"),
+      },
     },
   },
 });

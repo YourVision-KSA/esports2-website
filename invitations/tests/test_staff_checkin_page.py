@@ -96,3 +96,23 @@ def test_requires_door_permission(client):
     User.objects.create_user("nobody", password="x", is_staff=True)
     client.login(username="nobody", password="x")
     assert client.get("/staff/checkin/").status_code == 403
+
+
+def test_scanner_markup_and_no_autostart_while_a_guest_awaits_confirmation(door_client):
+    """The camera scanner (frontend/src/scanner.js) fills the lookup form; it must not
+    auto-restart on the page that is waiting for the ID check + confirm."""
+    body = door_client.get("/staff/checkin/").content.decode()
+    assert "data-scanner" in body and 'id="lookup-form"' in body
+    assert 'data-autostart="1"' in body  # empty page: carry on scanning
+    assert CONTENT["STAFF_SCAN_START"] in body
+
+    inv = make_invitation()
+    body = door_client.post(
+        "/staff/checkin/", {"action": "lookup", "token": inv.token}
+    ).content.decode()
+    assert 'data-autostart="0"' in body
+
+    body = door_client.post(
+        "/staff/checkin/", {"action": "confirm", "token": inv.token}
+    ).content.decode()
+    assert 'data-autostart="1"' in body  # next guest

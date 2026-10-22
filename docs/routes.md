@@ -43,7 +43,7 @@ page. Both enforced in the view via `current_phase()`, regardless of what links 
 |---|---|---|
 | `/staff/` | per-model perms | Django admin: Games, SiteConfig (admin only), Ballots (hold/invalidate actions), Players/Registrations (remove, promote shown), Invitations (create, mark sent, revoke, CSV export), OutboxEmail, AuditLog (read-only). CSV exports admin-only + audit-logged. |
 | `/staff/results/` | referee, admin | Mobile-friendly result entry: playable `pending` matches (optional `?game=<slug>` filter) → tap winner → optional score → save (POST/redirect/GET with a confirmation message). Thin wrapper over the result-entry transaction; a second phone entering the same match gets an Arabic error, first entry kept. (Cut-list item: fall back to Django admin.) |
-| `/staff/checkin/` | door, admin | Camera QR scanner (getUserMedia + a small JS decoder) → shows guest name/org → confirm button → atomic check-in. Manual token entry fallback + searchable guest list. (Cut-list item: list page only.) |
+| `/staff/checkin/` | door, admin | Camera QR scanner (`frontend/src/scanner.js`: getUserMedia + native BarcodeDetector, jsQR worker fallback) → **lookup** shows guest name/org (nothing written) → staff check ID → **confirm** → atomic check-in. Manual token/URL entry + searchable guest list feed the same lookup. (Cut-list item: list page only.) |
 
 Admin path note: serve Django admin at `/staff/` (not `/admin/`) and rate-limit login at the
 edge. Door/referee users get is_staff with narrow model permissions via groups.

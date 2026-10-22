@@ -10,6 +10,7 @@
     "model": "node scripts/optimize-model.mjs"
   },
   "dependencies": {
+    "jsqr": "1.4.0",
     "three": "0.186.1"
   },
   "devDependencies": {
