@@ -30,9 +30,10 @@ Rationale: `docs/architecture.md`.
 
 ## Status (2026-10-21)
 
-W1 implementation done: all five apps, 55 tests green (incl. concurrency on PostgreSQL 16),
-ruff clean, CI + Dockerfile. DEC-15 design delivered — "Arena Night" rev 3.1 theme
-implemented (owner sign-off pending). Code lives in the GitHub org
+W1 implementation done: all five apps, 59 tests green (incl. concurrency on PostgreSQL 16),
+ruff clean, CI + Dockerfile. DEC-15 design delivered — "Arena Night" layout; colours now
+follow the owner-supplied event logo (frontend rev 4 "logo palette": cyan / magenta / silver
+on deep navy, logo lockup in the header — `docs/frontend.md`). Owner sign-off pending. Code lives in the GitHub org
 [YourVision-KSA](https://github.com/YourVision-KSA/esports2-website) (private).
 Timeline and gates: `docs/plan.md` · execution checklist per person: `docs/tasks.md`.
 Target: vote opens ~Nov 2, registration ~Nov 16, event late Nov / early Dec 2026.
@@ -51,6 +52,19 @@ python manage.py seed_demo           # candidate games + opens a 7-day vote wind
 python manage.py createsuperuser
 python manage.py runserver           # http://127.0.0.1:8000  (admin at /staff/)
 pytest                               # run all tests (needs the local Postgres)
+```
+
+### Quickstart (macOS)
+
+```bash
+brew install postgresql@16 && brew services start postgresql@16   # 15 also works locally
+createdb -h 127.0.0.1 -U postgres esports
+python3.12 -m venv .venv && .venv/bin/pip install -r requirements-dev.txt
+cp .env.example .env
+.venv/bin/python manage.py migrate && .venv/bin/python manage.py setup_roles
+.venv/bin/python manage.py seed_demo
+.venv/bin/python manage.py runserver
+.venv/bin/pytest
 ```
 
 ## Documentation map

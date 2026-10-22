@@ -34,6 +34,19 @@ earlier than needed). Dates shift with DEC-01; the **sequence and gates are fixe
   cherry-picked back selectively. Event logo source: `Downloads/UI` on the dev machine.
   Next up: DEC answers (Yousef), GCP/Cloudflare (~Oct 29), design direction decision.
 
+- **2026-10-21** — Owner supplied the event logo and asked for the site colours to follow
+  it (no neon beams, no volt green). Implemented as frontend rev 4 "logo palette": colour
+  tokens only (layout/motion unchanged), clean SVG redraw of the emblem as header lockup +
+  favicon, placeholder photos regraded. The logo reads «تجمع الرياضات الإلكترونية» while
+  SITE-NAME/hero still read «يوم …» → **DEC-02 needs a decision** (logo wording suggests «تجمع»).
+- **2026-10-21 (Yousef)** — ⚠️ Overlaps the entry above: Hussein's rev 4 was reverted at
+  the owner's direction, while Yousef received the logo the same day with a request to apply
+  its colours; his rev 4 "logo palette" (PR #2) + hero 3D (PR #3) are therefore **held for
+  owner confirmation** before merging to `main`.
+- **2026-10-22** — **Owner approved the logo colours in principle** (rev 4 palette, PR #2 →
+  unblocked). Photography and the game list/imagery **will change later** — keep images
+  swappable (`static/img/`, `static/img/games/<slug>.jpg`) and game names data-driven.
+
 ## Timeline
 
 | Week | Dates | Build focus | Milestone |

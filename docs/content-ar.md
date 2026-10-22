@@ -20,6 +20,8 @@ AI assistants: never invent or alter Arabic silently. Add new rows as DRAFT and 
 | BRAND | يوم الرياضات الإلكترونية | KEEP — prototype renders it as «يوم» + emphasized «الرياضات الإلكترونية» |
 | FOOTER-1 | يوم الرياضات الإلكترونية · الرياض | KEEP |
 | FOOTER-2 | الرعاة والشركاء: تضاف الشعارات هنا | KEEP (placeholder until sponsor logos exist) |
+| LOGO-TITLE | تجمع الرياضات الإلكترونية | DRAFT — needs owner review. Copied from the owner-supplied event logo (2026-10-21); header logo lockup. Differs from SITE-NAME → resolve with DEC-02 |
+| LOGO-SUB | الجامعة العربية المفتوحة | DRAFT — needs owner review. Copied from the event logo (the flat logo file spells it «المفتوحه»; the colour version «المفتوحة» is used) |
 
 ## Navigation
 

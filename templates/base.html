@@ -5,7 +5,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#07080F">
+<meta name="theme-color" content="#050A14">
+<link rel="icon" href="{% static 'img/brand/emblem.svg' %}" type="image/svg+xml">
 <title>{% block title %}{{ content.SITE_NAME }}{% endblock %}</title>
 <link rel="preload" href="{% static 'fonts/Alexandria-800-arabic.woff2' %}" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="{% static 'fonts/Rubik-400-arabic.woff2' %}" as="font" type="font/woff2" crossorigin>
@@ -17,7 +18,7 @@
 {% block header %}
 <div class="funnel-head">
   <div class="wrap">
-    <a class="brand" href="/"><span class="mark"></span>{{ content.SITE_NAME }}</a>
+    {% include "partials/brand.html" %}
     <span class="funnel-tag" dir="ltr">{% block funnel_tag %}E-SPORTS 2{% endblock %}</span>
   </div>
 </div>
