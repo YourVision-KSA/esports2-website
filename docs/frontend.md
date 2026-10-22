@@ -178,6 +178,17 @@ Deliberate deviations, with reasons:
   badge link or /credits/ while this model ships** — that would breach the licence; switch to
   a CC0/no-credit asset instead.
 
+### Bracket page (2026-10-22)
+
+Mirrored single-elimination tree (idea: the owner-side bracket mock-up, adapted to the
+approved palette): start-side rounds → **final in the centre** ← end-side rounds. Match
+numbers م1–م15 (R16 1–8, QF 9–12, SF 13–14, final 15), «فائز م{n}» placeholders, trophy and
+CHAMPION in the centre. Connectors are pure CSS (`.pair::before/::after` half-brackets,
+card `::before` stubs), idle `--line-strong`, lit in the game's theme colour `--g` as results
+arrive (`:has()` on `.done`/`.has1`/`.has2`, toggled live by `bracket-live.js`). Desktop
+≥ 1100 px = 7-column grid; below that the same DOM restacks by round (CSS `order`), two
+cards per row, connectors hidden. Not shown (not decided anywhere): best-of format per game.
+
 ## Quality tiers (FIXED; decided at runtime, re-evaluated once after 3 s)
 
 | Tier | Trigger | Settings |

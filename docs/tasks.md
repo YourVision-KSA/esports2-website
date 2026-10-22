@@ -68,7 +68,17 @@ Order agreed — code work that does NOT wait on owner decisions:
       (G2): data controller (Your Vision vs. university), contact email, hosting
       confirmation, retention days (DEC-08), under-18 policy (DEC-09), publish date.
       Ideally a quick legal read.
-- [ ] Live bracket polling JS on `/bracket/<slug>/` (endpoint already exists)
+- [x] **Live bracket** (2026-10-22, branch `feat/bracket-live`): `static/js/bracket-live.js`
+      polls the 10 s edge-cached JSON every 15 s (paused on hidden tab, back-off 30→120 s on
+      errors, 60 s after the final), patches cells in place with a short highlight, reveals
+      the champion; matches now ordered round→slot (were unordered). Verified end-to-end:
+      a result entered elsewhere appeared after ~14 s with no reload. 4 tests.
+- [x] **Bracket redesign — mirrored tree** (2026-10-22, from Yousef's bracket mock-up): R16 →
+      QF → SF → **final in the centre** ← SF ← QF ← R16; match numbers م1–م15; «فائز م{n}»
+      in undecided slots; trophy + CHAMPION; pure-CSS connectors that **light up along the
+      winners' paths** (live); per-game theme colour from the approved palette. Phones: same
+      DOM restacked by round, two cards per row. Layout logic in `bracket/tree.py`. Round→day
+      labels are DRAFT pending DEC-01. 7 tests.
 - [ ] Camera QR scanner on `/staff/checkin/` (manual entry stays as fallback)
 - [x] CI job 3: `npm run build` + size budgets (`frontend` job, 2026-10-22)
 - [ ] Deploy workflow (GitHub Actions → Cloud Run), written now, enabled after DEC-04/05

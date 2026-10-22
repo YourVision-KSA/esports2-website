@@ -143,6 +143,18 @@ CONTENT = {
     "MATCH_PENDING": "لم تُلعب بعد",
     "MATCH_FORFEIT": "انسحاب",
     "CHAMPION": "البطل",
+    "BRACKET_AUTO": "يتحدّث الجدول تلقائيًا",  # DRAFT — live badge on the bracket page
+    # Bracket tree (DRAFT — from Yousef's bracket mock-up, 2026-10-22; days pending DEC-01)
+    "MATCH_NO": "م{n}",
+    "WINNER_OF": "فائز م{n}",
+    "FINAL_MATCH": "المباراة النهائية",
+    "BRACKET_META": "{players} لاعبًا · {matches} مباراة",
+    "ROUND_DAYS": {
+        1: "اليوم الأول",
+        2: "اليوم الثاني",
+        3: "اليوم الثاني",
+        4: "اليوم الثالث · الجامعة",
+    },
     # Invitations / check-in -------------------------------------------------
     "INVITE_TITLE": "دعوة خاصة — تجمع الرياضات الإلكترونية",  # DRAFT
     "INVITE_BODY": "يسعدنا دعوتكم لحضور الفعالية. يُرجى إبراز رمز الدعوة عند البوابة.",  # DRAFT

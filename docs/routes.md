@@ -20,7 +20,7 @@ Cache column = Cloudflare edge behavior (configured as cache rules, see docs/ope
 | `/r/<manage_token>/` | GET | registration..event | BYPASS | Player status page: game, confirmed/waitlist position, schedule of their matches. |
 | `/r/<manage_token>/withdraw/` | POST | registration | BYPASS | Withdraw (confirm step). Triggers waitlist promotion. |
 | `/bracket/` | GET | event..archive | 30 s | Overview of all confirmed games' brackets (server-rendered). |
-| `/bracket/<game-slug>/` | GET | event..archive | 30 s | Full tree for one game. Progressive page: works without JS; with JS polls the JSON endpoint. |
+| `/bracket/<game-slug>/` | GET | event..archive | 30 s | Full tree for one game. Progressive page: works without JS; with JS (`static/js/bracket-live.js`) polls the JSON endpoint every 15 s while visible (back-off on errors, 60 s after the final) and patches cells by `data-match="<round>-<slot>"`. |
 | `/api/bracket/<game-slug>.json` | GET | event..archive | **10 s** | Flat match list for polling. The ONLY JSON endpoint. No PII beyond player display names/gamer tags. |
 | `/invite/<token>/` | GET | all | BYPASS | Guest view: name, date, venue, QR code rendered client-side or as inline SVG. 404 for unknown/revoked tokens (uniform response, no token-validity oracle beyond this). |
 | `/healthz` | GET | all | BYPASS | 200 + DB ping. Used by uptime checks. |
