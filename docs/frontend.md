@@ -166,7 +166,7 @@ Deliberate deviations, with reasons:
 - **No bloom/post-processing, even on HIGH.** The owner asked for no neon beams (rev 4);
   HIGH only raises DPR to 2 and enables MSAA.
 - **Tier beacon endpoint not built yet** (needs a route + table): tracked in docs/tasks.md.
-- **Hero model source:** "Dualsense" by miwaVV on Sketchfab, **CC BY 4.0** — credit shown on
+- **Hero model source:** "Dualsense" by miwaVV on Sketchfab, **CC BY 4.0** — credit shown in the footer of
   the page; modified (simplified, recoloured, logos removed). The owner's first pick
   (HQ3DMOD, editorial licence, not downloadable) could not be used on a commercial site.
 

@@ -217,8 +217,6 @@ section { scroll-margin-block-start: 76px; }
   font-family: var(--num); font-size: 11px; letter-spacing: 0.2em;
   color: var(--muted); direction: ltr;
 }
-.scene-credit { margin-block-start: 8px; font-family: var(--num); font-size: 10px; letter-spacing: 0.02em; color: var(--muted); opacity: 0.75; }
-.scene-credit a { color: inherit; }
 .scene-hint { position: absolute; inset-block-end: 12px; inset-inline-start: 14px; font-size: 13px; color: var(--muted); }
 
 /* ---- ticker marquee -------------------------------------------------------- */
@@ -402,6 +400,8 @@ details p { padding-block-start: 8px; font-size: 14px; color: var(--muted); max-
 .socials a:hover { border-color: var(--accent); }
 .socials svg { stroke: var(--muted); }
 .socials a:hover svg { stroke: var(--accent); }
+.footer-credit { padding-block-end: 14px; font-family: var(--num); font-size: 10px; color: var(--muted); opacity: 0.5; }
+.footer-credit a { color: inherit; text-decoration: none; }
 .footer-en { font-family: var(--num); font-size: 12px; letter-spacing: 0.12em; direction: ltr; }
 
 /* ---- forms (vote / register) --------------------------------------------------------------------- */

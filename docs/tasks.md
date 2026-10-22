@@ -60,7 +60,9 @@ Order agreed — code work that does NOT wait on owner decisions:
 - [x] **Hero 3D scene** — Yousef, 2026-10-22, branch `feat/hero-3d` (PR stacked on the
       rebrand PR). CC-BY "Dualsense" model cleaned (no PS logo/symbols), recoloured,
       21 MB → 362 KB; lazy loader, tiers, worker decode, chunked start-up (longest task
-      ≈ 145 ms on a 4×-slowed phone), poster WebP 13 KB, credit line, budgets in CI.
+      ≈ 145 ms on a 4×-slowed phone), poster WebP 13 KB, budgets in CI. Licence credit
+      moved from under the scene to a faint footer line (owner request 2026-10-22) —
+      it must not be removed entirely (CC BY 4.0 condition).
       ⚠️ Tell Hussein the hero scene is done (it was on his list).
 - [ ] Tier beacon endpoint (count-only, no PII) for the WebGL fallback-rate metric
 - [ ] Trophy 3D scene (cut-list item 2 — static image acceptable)

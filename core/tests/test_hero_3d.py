@@ -57,3 +57,13 @@ def test_home_with_bundle_stays_cacheable(client, built_bundle):
     response = client.get("/")
     assert "Set-Cookie" not in response.headers
     assert "max-age=60" in response.headers["Cache-Control"]
+
+
+def test_model_credit_in_footer_only_and_no_template_leaks(client, built_bundle):
+    """CC BY 4.0 credit stays on the page (footer), and no raw template syntax leaks
+    (Django's {# #} comments are single-line only — multi-line ones render as text)."""
+    set_phase(Phase.PRE)
+    body = client.get("/").content.decode()
+    assert body.count("miwaVV") == 1
+    assert "scene-credit" not in body
+    assert "{#" not in body and "{%" not in body

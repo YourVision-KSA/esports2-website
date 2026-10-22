@@ -76,8 +76,6 @@
           <div class="scene-badge"><i></i><span dir="ltr">3D INTERACTIVE SCENE</span></div>
           <div class="scene-hint">{{ content.HERO_3D_HINT }}</div>
         </div>
-        {# CC BY 4.0 requires credit + noting changes (frontend/scripts/optimize-model.mjs) #}
-        <p class="scene-credit" dir="ltr">3D model: <a href="https://sketchfab.com/3d-models/dualsense-14a6fa6d7078463380cc72fe0bc5acb0" rel="noopener" target="_blank">“Dualsense”</a> by <a href="https://sketchfab.com/mishel1337" rel="noopener" target="_blank">miwaVV</a> · <a href="https://creativecommons.org/licenses/by/4.0/" rel="noopener license" target="_blank">CC BY 4.0</a> · modified</p>
       </div>
     </div>
   </div>
@@ -317,4 +315,10 @@
 
 {% vite_asset "hero.js" as hero_js %}
 {% if hero_js %}<script type="module" src="{{ hero_js }}"></script>{% endif %}
+{% endblock %}
+
+{% block footer_credit %}
+{% comment %}CC BY 4.0 requires crediting the hero model's author (kept low-key in the footer,
+per owner request 2026-10-22); changes are listed in frontend/scripts/optimize-model.mjs{% endcomment %}
+<p class="footer-credit wrap" dir="ltr">3D model “<a href="https://sketchfab.com/3d-models/dualsense-14a6fa6d7078463380cc72fe0bc5acb0" rel="noopener" target="_blank">Dualsense</a>” by miwaVV · <a href="https://creativecommons.org/licenses/by/4.0/" rel="noopener license" target="_blank">CC BY 4.0</a> · modified</p>
 {% endblock %}
