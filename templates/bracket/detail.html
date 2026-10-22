@@ -1,33 +1,35 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}{{ game.name_ar }} — {{ content.BRACKET_TITLE }}{% endblock %}
 {% block funnel_tag %}LIVE BRACKET{% endblock %}
 {% block content %}
-<div class="funnel" style="max-width: 1100px;">
-  <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+{% comment %}Server-rendered and complete without JS (docs/routes.md). static/js/bracket-live.js
+polls /api/bracket/<slug>.json (edge-cached 10 s) and patches the cells in place; it finds
+them by data-match="<round>-<slot>". Arabic labels reach the script via data attributes.{% endcomment %}
+<div class="funnel bracket" data-bracket-live
+     data-api="/api/bracket/{{ game.slug }}.json"
+     data-pending="{{ content.MATCH_PENDING }}" data-forfeit="{{ content.MATCH_FORFEIT }}">
+  <div class="bracket-head">
     <h1>{{ game.name_ar }}</h1>
-    {% if champion %}
-    <div class="champion-panel" style="padding: 10px 22px;">
-      <span class="t">{{ content.CHAMPION }}: <span class="num" dir="ltr">{{ champion }}</span></span>
-    </div>
-    {% endif %}
+    <span class="bracket-live" hidden><span class="live-dot"></span>{{ content.BRACKET_AUTO }}</span>
+  </div>
+
+  <div class="champion-panel" data-champion aria-live="polite"{% if not champion %} hidden{% endif %}>
+    <span class="t">{{ content.CHAMPION }}: <span class="num" dir="ltr" data-f="champion">{{ champion|default:"" }}</span></span>
   </div>
 
   {% for round_num, round_name, matches in rounds %}
-  <section style="display: flex; flex-direction: column; gap: 10px;">
+  <section class="bracket-round">
     <div class="round-title">{{ round_name }}</div>
-    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px;">
+    <div class="bracket-grid">
       {% for m in matches %}
-      <div class="match-cell">
+      <div class="match-cell" data-match="{{ m.round }}-{{ m.slot }}">
         <div class="row">
-          <span class="p {% if m.winner_id == m.player1_id and m.winner_id %}win{% endif %}" dir="ltr">{{ m.player1.game_player_id|default:"—" }}</span>
+          <span class="p{% if m.winner_id and m.winner_id == m.player1_id %} win{% endif %}" dir="ltr" data-f="p1">{{ m.player1.game_player_id|default:"—" }}</span>
         </div>
         <div class="row">
-          <span class="p {% if m.winner_id == m.player2_id and m.winner_id %}win{% endif %}" dir="ltr">{{ m.player2.game_player_id|default:"—" }}</span>
-          <span>
-            {% if m.status == "pending" %}<span style="font-size: 11px; color: var(--muted);">{{ content.MATCH_PENDING }}</span>
-            {% elif m.status == "forfeit" %}<span style="font-size: 11px; color: var(--muted);">{{ content.MATCH_FORFEIT }}</span>
-            {% else %}<span class="s" dir="ltr">{{ m.score_text }}</span>{% endif %}
-          </span>
+          <span class="p{% if m.winner_id and m.winner_id == m.player2_id %} win{% endif %}" dir="ltr" data-f="p2">{{ m.player2.game_player_id|default:"—" }}</span>
+          <span class="st st-{{ m.status }}" data-f="status"{% if m.status == "done" %} dir="ltr"{% endif %}>{% if m.status == "pending" %}{{ content.MATCH_PENDING }}{% elif m.status == "forfeit" %}{{ content.MATCH_FORFEIT }}{% else %}{{ m.score_text }}{% endif %}</span>
         </div>
       </div>
       {% endfor %}
@@ -35,5 +37,5 @@
   </section>
   {% endfor %}
 </div>
-{# Polling enhancement: /api/bracket/<slug>.json every 15s — added with the JS bundle #}
+<script src="{% static 'js/bracket-live.js' %}" defer></script>
 {% endblock %}

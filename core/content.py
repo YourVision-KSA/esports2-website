@@ -143,6 +143,7 @@ CONTENT = {
     "MATCH_PENDING": "لم تُلعب بعد",
     "MATCH_FORFEIT": "انسحاب",
     "CHAMPION": "البطل",
+    "BRACKET_AUTO": "يتحدّث الجدول تلقائيًا",  # DRAFT — live badge on the bracket page
     # Invitations / check-in -------------------------------------------------
     "INVITE_TITLE": "دعوة خاصة — تجمع الرياضات الإلكترونية",  # DRAFT
     "INVITE_BODY": "يسعدنا دعوتكم لحضور الفعالية. يُرجى إبراز رمز الدعوة عند البوابة.",  # DRAFT

@@ -261,6 +261,7 @@ Note for owner: «أفضل لاعب في اليوم» may need rewording for a 3
 | STAFF-NO-RESULTS | لا توجد نتائج مطابقة | DRAFT — needs owner review (check-in: empty search) |
 | STAFF-SELECT | اختيار | DRAFT — needs owner review (check-in: pick a guest from the list) |
 | STAFF-NEXT-GUEST | الضيف التالي | DRAFT — needs owner review (check-in: back to an empty form) |
+| BRACKET-AUTO | يتحدّث الجدول تلقائيًا | DRAFT — needs owner review (live badge on /bracket/<game>/) |
 | INVITE-STATUS | created: لم تُرسل · sent: مرسلة · checked_in: حضر · revoked: ملغاة | DRAFT — needs owner review (door-staff status chips) |
 | Seed game names | روكيت ليج · فيفا · كول أوف ديوتي · تيكن · فالورانت | candidate games (data; editable in admin) |
 | GAMES-PENDING-VOTE | الألعاب النهائية تُعتمد بعد انتهاء التصويت العام. | note under the tournaments grid |

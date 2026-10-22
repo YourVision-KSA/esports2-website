@@ -458,7 +458,21 @@ th { color: var(--muted); font-weight: 600; }
 .match-cell .row { display: flex; justify-content: space-between; gap: 8px; }
 .match-cell .p { font-family: var(--num); direction: ltr; color: var(--muted); }
 .match-cell .p.win { color: #FFFFFF; font-weight: 700; }
-.match-cell .s { font-family: var(--num); color: var(--accent); direction: ltr; }
+.match-cell .st { font-size: 11px; color: var(--muted); }
+.match-cell .st-done { font-family: var(--num); font-size: 13px; color: var(--accent); }
+.match-cell.updated { animation: cell-updated 1.6s ease-out; }
+@keyframes cell-updated {
+  0% { border-color: var(--accent); background: rgb(var(--accent-rgb) / 0.16); }
+  100% { border-color: var(--line); background: var(--surface); }
+}
+.bracket { max-width: 1100px; }
+.bracket-head { display: flex; align-items: center; justify-content: space-between; gap: 12px 16px; flex-wrap: wrap; }
+.bracket-live { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--muted); }
+.bracket-live[hidden] { display: none; }
+.bracket-round { display: flex; flex-direction: column; gap: 10px; }
+.bracket-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+.bracket .champion-panel { flex-direction: row; justify-content: center; padding: 14px 22px; }
+.bracket .champion-panel[hidden] { display: none; }
 .round-title { font-family: var(--display); font-weight: 700; font-size: 16px; color: var(--accent); }
 .champion-panel {
   background: var(--surface); border: 1px solid var(--gold-deep); padding: 18px;
@@ -608,7 +622,7 @@ button[type="submit"].btn-secondary-sm:hover { background: var(--surface); borde
 /* ---- motion off (docs/frontend.md: FIXED rule) --------------------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .ticker-track, .live-dot { animation: none; }
+  .ticker-track, .live-dot, .match-cell.updated { animation: none; }
   .reveal { opacity: 1; transform: none; transition: none; }
   .btn, .game-card, .game-card .media img { transition: none; }
 }

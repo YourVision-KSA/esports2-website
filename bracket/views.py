@@ -43,7 +43,9 @@ def detail(request, slug):
 
     game = get_object_or_404(Game, slug=slug, status=Game.Status.CONFIRMED)
     by_round: dict[int, list[Match]] = {}
-    for match in game.matches.select_related("player1", "player2", "winner"):
+    for match in game.matches.select_related("player1", "player2", "winner").order_by(
+        "round", "slot"
+    ):
         by_round.setdefault(match.round, []).append(match)
     rounds = [
         (num, CONTENT["ROUND_NAMES"].get(num, f"R{num}"), matches)
@@ -72,7 +74,9 @@ def api_bracket(request, slug):
             "score": m.score_text,
             "status": m.status,
         }
-        for m in game.matches.select_related("player1", "player2", "winner")
+        for m in game.matches.select_related("player1", "player2", "winner").order_by(
+            "round", "slot"
+        )
     ]
     return JsonResponse({"game": game.slug, "matches": matches})
 
