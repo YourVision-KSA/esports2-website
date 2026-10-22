@@ -88,7 +88,13 @@ Order agreed — code work that does NOT wait on owner decisions:
 - [x] **Bug fixed: VIP invitation page returned 500 for every valid invitation** (QR PNG needed
       Pillow, not installed) → inline SVG QR; PR #6 straight to `main`, regression test.
 - [x] CI job 3: `npm run build` + size budgets (`frontend` job, 2026-10-22)
-- [ ] Deploy workflow (GitHub Actions → Cloud Run), written now, enabled after DEC-04/05
+- [x] **Deploy workflow** (2026-10-22, branch `ci/deploy-cloud-run`): `.github/workflows/deploy.yml`
+      — after CI on `main`: build → Artifact Registry → migrate job → new revision → smoke test →
+      rollback hint; keyless WIF, actions pinned to SHAs, `production` approval gate, staging via
+      manual run. **Dormant until `GCP_PROJECT_ID` is set.** One-time setup commands:
+      docs/operations.md → *Deploy setup*. Production `collectstatic` verified with the Vite
+      bundles; Vite assets now cached 1 year by WhiteNoise.
+- [ ] → after DEC-05: run the *Deploy setup* checklist (≈30 min), then rehearse a rollback on staging
 - [x] **Hero 3D scene** — Yousef, 2026-10-22, branch `feat/hero-3d` (PR stacked on the
       rebrand PR). CC-BY "Dualsense" model cleaned (no PS logo/symbols), recoloured,
       21 MB → 362 KB; lazy loader, tiers, worker decode, chunked start-up (longest task

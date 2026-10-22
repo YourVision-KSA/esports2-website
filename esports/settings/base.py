@@ -99,6 +99,19 @@ USE_TZ = True
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
+
+
+def _immutable_static(path: str, url: str) -> bool:
+    """Files WhiteNoise may cache for a year (docs/routes.md → Static assets).
+    Django's hashed copies (name.<12 hex>.ext) plus Vite's output in /static/dist/assets/,
+    whose names are already content-hashed (name-<hash>.js) and are imported by those
+    exact names from other chunks, so they must stay unrenamed."""
+    import re
+
+    return url.startswith(STATIC_URL + "dist/assets/") or bool(re.search(r"\.[0-9a-f]{12}\.", url))
+
+
+WHITENOISE_IMMUTABLE_FILE_TEST = _immutable_static
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
     # Hashed filenames so /static/* can be cached for 1 year (docs/routes.md)
