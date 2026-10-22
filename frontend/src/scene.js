@@ -64,7 +64,7 @@ function saveTier(key, tier) {
   }
 }
 
-export async function start(mount, { tier, modelUrl, tierKey }) {
+export async function start(mount, { tier, modelUrl, tierKey, onSettled = () => {} }) {
   const frame = mount.querySelector(".scene-frame") || mount;
 
   // --- renderer (failure here = FALLBACK tier: poster stays) ---------------------
@@ -257,6 +257,7 @@ export async function start(mount, { tier, modelUrl, tierKey }) {
       } else {
         saveTier(tierKey, "low");
         teardown(); // LOW: poster only
+        onSettled("low");
         return;
       }
     } else if (fps > 50 && tier === "mid") {
@@ -265,6 +266,7 @@ export async function start(mount, { tier, modelUrl, tierKey }) {
       resize();
     }
     saveTier(tierKey, tier);
+    onSettled(tier); // "high" | "mid" — reported once the FPS probe has decided
   }
 
   new IntersectionObserver((entries) => {

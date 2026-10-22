@@ -44,11 +44,12 @@ registrations and brackets continuously from first deploy.
 1. Domain on Cloudflare (final domain BEFORE the vote opens — DEC-04), DNS proxied, Full
    (strict) TLS.
 2. **Cache rules** (order matters):
-   - BYPASS: `/vote*`, `/register*`, `/r/*`, `/invite/*`, `/staff*`, `/healthz`, `/internal/*`
+   - BYPASS: `/vote*`, `/register*`, `/r/*`, `/invite/*`, `/staff*`, `/healthz`, `/internal/*`, `/beacon/*`
    - Cache 1 y immutable: `/static/*` — explicitly include `.glb .ktx2 .woff2` (not cached by default)
    - Edge TTL 10 s: `/api/bracket/*`
    - Edge TTL 60 s: `/` and other content pages (respect origin Cache-Control)
-3. **Rate limiting**: POST `/vote/` 10/min/IP → managed challenge; `/staff/` login 5/min/IP → block 10 min.
+3. **Rate limiting**: POST `/vote/` 10/min/IP → managed challenge; `/staff/` login 5/min/IP → block 10 min;
+   POST `/beacon/*` 6/min/IP → block (keeps the anonymous 3D counters honest).
 4. **Turnstile**: create widget, put the site key in templates, secret in Secret Manager.
 5. Verify with `curl -I`: `cf-cache-status: HIT` on static + content pages, `BYPASS`/`DYNAMIC`
    on forms; **no `Set-Cookie` on cached responses**.
@@ -72,8 +73,9 @@ command in this file, rehearse it once).
 - Dashboards open during launch hours: requests, 5xx, DB connections, held-vote share
   (`manage.py vote_report`), CF cache hit rate, CF analytics on `/static/*` (if the 3D files
   stop HITting, bandwidth becomes the top cost — fix the rule immediately).
-- Client beacon: tier/fallback counts (frontend.md) — check daily; a rising FALLBACK rate on
-  mobile = 3D regression.
+- Client beacon: tier/fallback counts (frontend.md) — check daily with `python manage.py
+  tier_report [--days 7]` (or admin → Tier stats); a rising FALLBACK rate on mobile = 3D
+  regression. Counts only — no visitor data.
 
 ## Window runbooks
 

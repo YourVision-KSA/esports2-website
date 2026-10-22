@@ -167,7 +167,8 @@ Deliberate deviations, with reasons:
   Revisit if a second heavy scene is added.
 - **No bloom/post-processing, even on HIGH.** The owner asked for no neon beams (rev 4);
   HIGH only raises DPR to 2 and enables MSAA.
-- **Tier beacon endpoint not built yet** (needs a route + table): tracked in docs/tasks.md.
+- **Tier beacon** (2026-10-22): `report()` in hero.js → `POST /beacon/3d` (sendBeacon, ≤ 1 per
+  tab session) → `TierStat` daily counters (core/beacon.py); read with `manage.py tier_report`.
 - **Hero model source:** "Dualsense" by miwaVV on Sketchfab, **CC BY 4.0**; modified
   (simplified, recoloured, logos removed). **Credit lives on `/credits/`**, linked from the
   hero's "3D INTERACTIVE SCENE" badge — the owner wants no credit text on the page, and CC BY

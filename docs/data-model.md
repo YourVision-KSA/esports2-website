@@ -162,6 +162,14 @@ registration_closes_at, event_start_date, event_end_date, archived (bool)`, plus
 and is checked **in every form view** (GET shows closed-state message, POST returns 403).
 Editable only in Django admin; every change audit-logged.
 
+## TierStat (core)
+
+Daily counters for the hero-3D outcome ("WebGL fallback rate", docs/frontend.md):
+`day` (Asia/Riyadh), `outcome` (high/mid/low/fallback/reduced), `device` (mobile/desktop),
+`count`. Unique (day, outcome, device); incremented race-safely (UPDATE +1, INSERT on first,
+retry on unique conflict). **No PII, no visitor identifier** — nothing to purge, deleted
+with the database at end of life.
+
 ## AuditLog (core)
 
 `actor FK (nullable=system), action (slug), model, object_id, before JSON, after JSON,

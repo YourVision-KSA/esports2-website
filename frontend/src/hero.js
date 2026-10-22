@@ -53,19 +53,40 @@ function whenNear(el, fn) {
   io.observe(el);
 }
 
+// Count-only beacon (core/beacon.py): how the hero ended up on this device — at most once
+// per tab session, two values from fixed lists, nothing identifying. Feeds tier_report.
+const BEACON_KEY = "es2.beacon";
+function report(outcome) {
+  try {
+    if (sessionStorage.getItem(BEACON_KEY)) return;
+    sessionStorage.setItem(BEACON_KEY, outcome);
+  } catch {
+    /* storage blocked: still send — worst case a duplicate count */
+  }
+  const device = window.matchMedia("(pointer: coarse)").matches ? "mobile" : "desktop";
+  const body = new Blob([`o=${outcome}&d=${device}`], { type: "application/x-www-form-urlencoded" });
+  if (!(navigator.sendBeacon && navigator.sendBeacon("/beacon/3d", body))) {
+    fetch("/beacon/3d", { method: "POST", body, keepalive: true }).catch(() => {});
+  }
+}
+
 const mount = document.getElementById("hero-scene");
 const modelUrl = mount && mount.dataset.model;
 const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const tier = startingTier();
+
+if (mount && still) report("reduced");
+else if (mount && tier === "low") report("low"); // saved from an earlier slow visit, or ≤ 2 GB RAM
 
 if (mount && modelUrl && !still && tier !== "low") {
   afterLoad(() =>
     whenIdle(() =>
       whenNear(mount, () => {
         import("./scene.js")
-          .then((m) => m.start(mount, { tier, modelUrl, tierKey: TIER_KEY }))
+          .then((m) => m.start(mount, { tier, modelUrl, tierKey: TIER_KEY, onSettled: report }))
           .catch(() => {
-            /* FALLBACK tier: bundle or model failed — the poster stays, page unaffected */
+            /* FALLBACK tier: bundle, model or WebGL failed — the poster stays, page unaffected */
+            report("fallback");
           });
       }),
     ),

@@ -24,6 +24,7 @@ Cache column = Cloudflare edge behavior (configured as cache rules, see docs/ope
 | `/api/bracket/<game-slug>.json` | GET | event..archive | **10 s** | Flat match list for polling. The ONLY JSON endpoint. No PII beyond player display names/gamer tags. |
 | `/invite/<token>/` | GET | all | BYPASS | Guest view: name, date, venue, QR code rendered client-side or as inline SVG. 404 for unknown/revoked tokens (uniform response, no token-validity oracle beyond this). |
 | `/healthz` | GET | all | BYPASS | 200 + DB ping. Used by uptime checks. |
+| `/beacon/3d` | POST | all | **BYPASS** | Count-only hero-3D outcome beacon (`navigator.sendBeacon` from the home page, ≤ 1 per tab session): `o` ∈ high/mid/low/fallback/reduced, `d` ∈ mobile/desktop → +1 on `TierStat`. CSRF-exempt (sent from an edge-cached page without a token); body ≤ 200 B; 204 / 400; rate-limited at the edge. No PII, no cookie. |
 | `/privacy/` | GET | all | 60 s | Privacy notice (DEC-08, PDPL). Static content from core/content.py (PRIVACY_*). Linked from the registration consent checkbox (new tab), the vote page and the footer. No forms. Must be final before G2. |
 | `/credits/` | GET | all | 1 h | Licence notices for third-party assets (CC BY 4.0 hero model). Linked from the hero's "3D INTERACTIVE SCENE" badge. English legal text. No forms. |
 
