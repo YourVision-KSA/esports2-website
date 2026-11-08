@@ -54,6 +54,24 @@ earlier than needed). Dates shift with DEC-01; the **sequence and gates are fixe
   without recipient PII, Error Reporting added to the monitoring checklist. Docs updated:
   operations.md (CF checklist 5–6, WIF, GitHub step 7, monitoring), voting.md (cookie 14 d),
   architecture.md (beacon clarification).
+- **2026-10-22 — CHECKPOINT `checkpoint-2026-10-22-merged`** (git tag + branch
+  `checkpoint/2026-10-22-merged`, same commit; restore with
+  `git checkout checkpoint-2026-10-22-merged`). Frozen state: **all work is on `main`** —
+  PRs #2–#9 (logo-palette rebrand, hero 3D, staff pages + privacy notice, live mirrored
+  bracket, camera QR scanner, tier beacon, dormant Cloud Run deploy workflow), PR #10
+  (stack consolidation) and PR #11 (security hardening M1/M2 + minor findings).
+  **114/114 tests green** (local PostgreSQL 17 and CI PostgreSQL 16), ruff clean, CI green,
+  no open PRs. Same-day full security review found no critical issues (details in the
+  entry above). **Merge-process lesson:** the stacked PRs #3–#9 were based on each other,
+  not on `main`, so merging "in order" landed each PR inside its parent branch and only
+  #2/#6 reached `main`; PR #10 consolidated the rest. Next time: retarget each stacked PR
+  to `main` after its parent merges, then merge. Dev-environment note: Hussein's Windows
+  machine now has PostgreSQL 17 as a service (`postgresql-x64-17`, local db `esports`) —
+  the full suite incl. concurrency marks runs locally. Owner-facing Arabic status update
+  written to `company-update-2026-10-22.md` (kept out of git). Next up: owner approvals
+  (DEC-01..14, DRAFT strings, privacy placeholders), GCP + Cloudflare day ~Oct 29
+  (now includes origin shield `CF_ORIGIN_TOKEN`, CSP header rule, Error Reporting +
+  uptime alerts), staging rehearsal before the vote opens (~Nov 2).
 
 ## Timeline
 

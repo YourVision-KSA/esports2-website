@@ -47,13 +47,15 @@ Yousef (24446357ksa@aou.edu.sa — org owner on GitHub, owner-facing follow-ups)
 ## ⬜ Remaining — Yousef (code, with Claude) — next session starts here
 
 Checkpoint 2026-10-21: rebrand done and committed on `dev-yousef` (PR #2 → `main`).
-**Checkpoint 2026-10-22:** hero 3D scene done on `feat/hero-3d` (PR #3, stacked on #2).
-Restore point: branch `checkpoint/2026-10-22` + tag `checkpoint-2026-10-22` (same commit).
-To go back: `git checkout checkpoint/2026-10-22` (or branch off the tag).
-Merge order: #2 → `main`, then retarget #3 to `main` and merge.
+Checkpoint 2026-10-22 (morning): hero 3D done on `feat/hero-3d` — superseded by the entry
+below; the old restore point `checkpoint/2026-10-22` + tag `checkpoint-2026-10-22` remain.
+**Checkpoint 2026-10-22-merged (current):** ALL of the work below is merged to `main`
+(PRs #2–#11, incl. the security-hardening PR #11); 114/114 tests green; no open PRs.
+Restore point: branch `checkpoint/2026-10-22-merged` + tag `checkpoint-2026-10-22-merged`.
+Details + the stacked-PR merge lesson: `docs/plan.md` status log (2026-10-22 entries).
 Order agreed — code work that does NOT wait on owner decisions:
 
-- [ ] Merge the rebrand PR after review (Hussein to glance at it)
+- [x] Merge the rebrand PR after review (merged 2026-10-22 with the whole stack, PRs #2–#10)
 - [x] **Staff pages for phones** (2026-10-22, branch `feat/staff-pages`): shared staff layout
       (who's signed in + logout, no public footer); results = Arabic round names, big
       winner cards (✓ + dim the other), score field, PRG + confirmation, game filter,
@@ -111,6 +113,15 @@ Order agreed — code work that does NOT wait on owner decisions:
 ## ⬜ Remaining — Hussein (with Claude)
 
 - [x] Upload the org avatar (verified 2026-10-22: Your Vision logo is live on the org)
+- [x] **Full review + merge of Yousef's branches** (2026-10-22): file-by-file security review
+      of PRs #2–#9 (no critical findings), merged to `main` (stack consolidated via PR #10),
+      verified 105/105 → 114/114 tests on real local PostgreSQL 17 (installed as a service).
+- [x] **Security hardening PR #11** (2026-10-22): M1 origin shield (`CF_ORIGIN_TOKEN`,
+      core/middleware.py — direct Cloud Run hits get 403, CF-Connecting-IP only trusted
+      behind the shield), M2 WIF main-only + required reviewers, constant-time internal
+      token compare, 12 h staff sessions, pinned CI actions, outbox ERROR logging without
+      recipient PII, Error Reporting + CSP documented in operations.md. 9 new tests.
+- [x] Owner status update (Arabic) written: `company-update-2026-10-22.md` (untracked)
 - [x] Verify staff 2FA enrollment flow end-to-end (left over from W1) — gap found and
       fixed 2026-10-21: new `enroll_totp` management command + 4 tests (59 total green)
 - [ ] GCP + Cloudflare setup per `docs/operations.md` (~Oct 29; needs DEC-04/05 from Yousef first)
