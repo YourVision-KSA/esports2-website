@@ -19,8 +19,8 @@ earlier than needed). Dates shift with DEC-01; the **sequence and gates are fixe
   `esports2-website`); owner invite sent to Yousef (24446357ksa@aou.edu.sa, pending
   acceptance); org profile branded from the official guideline PDF. Arena Night rev 3.1
   theme is implemented on the site (commit 761e9b5). Local smoke test green: `/`,
-  `/vote/`, `/register/`, `/bracket/`, `/healthz`. Execution checklist with per-person
-  assignments added: `docs/tasks.md`.
+  `/vote/`, `/register/`, `/bracket/`, `/healthz`. Execution checklist
+  added: `docs/tasks.md`.
 
 - **2026-10-21 — CHECKPOINT `checkpoint-2026-10-21`** (git tag; restore with
   `git checkout checkpoint-2026-10-21`). Frozen state: W1 build complete on the Arena
@@ -32,7 +32,7 @@ earlier than needed). Dates shift with DEC-01; the **sequence and gates are fixe
   scene, static logo panel) was built, then **reverted at the owner's direction** —
   it lives in history between `2f9746e` and `fc19a91` on `dev-hussein` and can be
   cherry-picked back selectively. Event logo source: `Downloads/UI` on the dev machine.
-  Next up: DEC answers (Yousef), GCP/Cloudflare (~Oct 29), design direction decision.
+  Next up: DEC answers, GCP/Cloudflare (~Oct 29), design direction decision.
 
 - **2026-10-21** — Owner supplied the event logo and asked for the site colours to follow
   it (no neon beams, no volt green). Implemented as frontend rev 4 "logo palette": colour

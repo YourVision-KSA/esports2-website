@@ -1,12 +1,11 @@
-# Tasks — who does what (Hussein / Yousef)
+# Tasks — unified checklist
 
 Working checklist derived from `docs/plan.md` (the plan stays the source of truth for
 sequence and gates — this file only tracks execution). Mark a task `[x]` when it is done.
 
-**People**: Hussein (husseinalshawa — dev machine, builds with Claude) ·
-Yousef (24446357ksa@aou.edu.sa — org owner on GitHub, owner-facing follow-ups).
-
 ## ✅ Done
+
+### Foundation and setup
 
 - [x] Django skeleton: project + 5 apps (core, voting, registration, bracket, invitations), settings, CI, Dockerfile
 - [x] Data model + migrations, server-side phase gating
@@ -30,21 +29,7 @@ Yousef (24446357ksa@aou.edu.sa — org owner on GitHub, owner-facing follow-ups)
       placeholder photos regraded. Details: `docs/frontend.md` → Theme tokens rev 4.
       Logo export files for the owner were delivered outside the repo.
 
-## ⬜ Remaining — Yousef
-
-- [ ] Chase Your Vision for the open decisions in `docs/plan.md` — most urgent:
-  - [ ] DEC-01 final event dates + venue
-  - [ ] DEC-03 vote definition (game list, choices per ballot, window, counting-rules text)
-  - [ ] DEC-04 final domain + who owns the Cloudflare account
-  - [ ] DEC-05 GCP billing account owner
-  - [ ] DEC-02, DEC-06..09, DEC-11..14 (see the decision log table)
-- [ ] Get owner sign-off on the design **with the new logo colours** (rev 4, branch `dev-yousef`)
-- [ ] **DEC-02**: the logo says «تجمع الرياضات الإلكترونية» but SITE-NAME / hero title say
-      «يوم الرياضات الإلكترونية» — ask which name the site uses (one-line change after)
-- [ ] Owner review of the new DRAFT strings LOGO-TITLE / LOGO-SUB (`docs/content-ar.md`)
-- [ ] Collect content: prize values (DEC-13), staff roster (DEC-11), VIP sender mailbox (DEC-12)
-
-## ⬜ Remaining — Yousef (code, with Claude) — next session starts here
+### Code work since 2026-10-21 (all merged)
 
 Checkpoint 2026-10-21: rebrand done and committed on `dev-yousef` (PR #2 → `main`).
 Checkpoint 2026-10-22 (morning): hero 3D done on `feat/hero-3d` — superseded by the entry
@@ -53,7 +38,7 @@ below; the old restore point `checkpoint/2026-10-22` + tag `checkpoint-2026-10-2
 (PRs #2–#11, incl. the security-hardening PR #11); 114/114 tests green; no open PRs.
 Restore point: branch `checkpoint/2026-10-22-merged` + tag `checkpoint-2026-10-22-merged`.
 Details + the stacked-PR merge lesson: `docs/plan.md` status log (2026-10-22 entries).
-Order agreed — code work that does NOT wait on owner decisions:
+Order agreed — code work that did NOT wait on owner decisions:
 
 - [x] Merge the rebrand PR after review (merged 2026-10-22 with the whole stack, PRs #2–#10)
 - [x] **Staff pages for phones** (2026-10-22, branch `feat/staff-pages`): shared staff layout
@@ -66,10 +51,6 @@ Order agreed — code work that does NOT wait on owner decisions:
       facts matched to the implementation (14-day voter cookie, HMAC-only IP/UA, gamer tags
       only in public, no national ID/payments); linked from the consent checkbox (new tab),
       the vote page and the footer; 4 tests. **All text DRAFT.**
-- [ ] → Yousef: fill the [placeholders] in the privacy notice before registration opens
-      (G2): data controller (Your Vision vs. university), contact email, hosting
-      confirmation, retention days (DEC-08), under-18 policy (DEC-09), publish date.
-      Ideally a quick legal read.
 - [x] **Live bracket** (2026-10-22, branch `feat/bracket-live`): `static/js/bracket-live.js`
       polls the 10 s edge-cached JSON every 15 s (paused on hidden tab, back-off 30→120 s on
       errors, 60 s after the final), patches cells in place with a short highlight, reveals
@@ -96,24 +77,21 @@ Order agreed — code work that does NOT wait on owner decisions:
       manual run. **Dormant until `GCP_PROJECT_ID` is set.** One-time setup commands:
       docs/operations.md → *Deploy setup*. Production `collectstatic` verified with the Vite
       bundles; Vite assets now cached 1 year by WhiteNoise.
-- [ ] → after DEC-05: run the *Deploy setup* checklist (≈30 min), then rehearse a rollback on staging
 - [x] **Hero 3D scene** — Yousef, 2026-10-22, branch `feat/hero-3d` (PR stacked on the
       rebrand PR). CC-BY "Dualsense" model cleaned (no PS logo/symbols), recoloured,
       21 MB → 362 KB; lazy loader, tiers, worker decode, chunked start-up (longest task
       ≈ 145 ms on a 4×-slowed phone), poster WebP 13 KB, budgets in CI. Licence credit
       moved from under the scene to a faint footer line (owner request 2026-10-22) —
       it must not be removed entirely (CC BY 4.0 condition).
-      ⚠️ Tell Hussein the hero scene is done (it was on his list).
 - [x] **Tier beacon** (2026-10-22, branch `feat/tier-beacon`): `POST /beacon/3d` count-only
       (no PII, no cookie, ≤ 1 per tab session via sendBeacon) → `TierStat` daily counters,
       race-safe; `manage.py tier_report` shows the fallback share per device; admin
       read-only list. Ops: add `/beacon/*` to the Cloudflare BYPASS + rate-limit rules. 11 tests.
-- [ ] Trophy 3D scene (cut-list item 2 — static image acceptable)
 
-## ⬜ Remaining — Hussein (with Claude)
+### Review, hardening and operations
 
 - [x] Upload the org avatar (verified 2026-10-22: Your Vision logo is live on the org)
-- [x] **Full review + merge of Yousef's branches** (2026-10-22): file-by-file security review
+- [x] **Full review + merge of the feature branches** (2026-10-22): file-by-file security review
       of PRs #2–#9 (no critical findings), merged to `main` (stack consolidated via PR #10),
       verified 105/105 → 114/114 tests on real local PostgreSQL 17 (installed as a service).
 - [x] **Security hardening PR #11** (2026-10-22): M1 origin shield (`CF_ORIGIN_TOKEN`,
@@ -124,16 +102,40 @@ Order agreed — code work that does NOT wait on owner decisions:
 - [x] Owner status update (Arabic) written: `company-update-2026-10-22.md` (untracked)
 - [x] Verify staff 2FA enrollment flow end-to-end (left over from W1) — gap found and
       fixed 2026-10-21: new `enroll_totp` management command + 4 tests (59 total green)
-- [ ] GCP + Cloudflare setup per `docs/operations.md` (~Oct 29; needs DEC-04/05 from Yousef first)
-      — deploy workflow + step-by-step *Deploy setup* commands are ready (PR #9)
+
+## ⬜ Remaining — code (next session starts here)
+
+- [ ] Trophy 3D scene (cut-list item 2, W5; static image acceptable / cut-list fallback: static image)
+
+## ⬜ Remaining — needs an owner decision or content (Your Vision)
+
+- [ ] Chase Your Vision for the open decisions in `docs/plan.md` — most urgent:
+  - [ ] DEC-01 final event dates + venue
+  - [ ] DEC-03 vote definition (game list, choices per ballot, window, counting-rules text)
+  - [ ] DEC-04 final domain + who owns the Cloudflare account
+  - [ ] DEC-05 GCP billing account owner
+  - [ ] DEC-02, DEC-06..09, DEC-11..14 (see the decision log table)
+- [ ] Get owner sign-off on the design **with the new logo colours** (rev 4, branch `dev-yousef`)
+- [ ] **DEC-02**: the logo says «تجمع الرياضات الإلكترونية» but SITE-NAME / hero title say
+      «يوم الرياضات الإلكترونية» — ask which name the site uses (one-line change after)
+- [ ] Owner review of the new DRAFT strings LOGO-TITLE / LOGO-SUB (`docs/content-ar.md`)
+- [ ] Collect content: prize values (DEC-13), staff roster (DEC-11), VIP sender mailbox (DEC-12)
+- [ ] Fill the [placeholders] in the privacy notice (`/privacy/`) before registration opens
+      (G2): data controller (Your Vision vs. university), contact email, hosting
+      confirmation, retention days (DEC-08), under-18 policy (DEC-09), publish date.
+      Ideally a quick legal read.
 - [~] Vote-page counting-rules content — VOTE-RULES draft is already shown on `/vote/`;
       only owner approval of the text is left (DEC-03)
-- [x] Hero 3D scene → done by Yousef 2026-10-22 (see Yousef's list)
-- [ ] Trophy 3D scene (W5; cut-list fallback: static image)
+
+## ⬜ Remaining — infrastructure and operations
+
+- [ ] GCP + Cloudflare setup per `docs/operations.md` (~Oct 29; needs DEC-04/05 first)
+      — deploy workflow + step-by-step *Deploy setup* commands are ready (PR #9)
+- [ ] → after DEC-05: run the *Deploy setup* checklist (≈30 min), then rehearse a rollback on staging
 - [ ] Monitoring + uptime alert before G1 (vote opens ~Nov 2)
 - [ ] Staging cache + abuse rehearsal (W2)
 
-## ⬜ Later — together
+## ⬜ Later
 
 - [ ] Company website project (new repo in the org; use the brand guidelines)
 - [ ] W4–W6 event items per `docs/plan.md` timeline (rehearsal, draw, event days, wrap-up)
