@@ -14,14 +14,24 @@ class ChoiceInline(admin.TabularInline):
     can_delete = False
     readonly_fields = ("game",)
 
+    def has_add_permission(self, request, obj=None):
+        return False  # a choice added here would change the tally without an audit row
+
 
 @admin.register(Ballot)
 class BallotAdmin(admin.ModelAdmin):
     list_display = ("id", "status", "held_reason", "turnstile_passed", "asn", "created_at")
     list_filter = ("status", "held_reason", "turnstile_passed")
     search_fields = ("ip_hash", "asn")
+    # Everything read-only: status moves ONLY through the bulk actions below, which write
+    # the AuditLog (audit 2026-11-13, finding 12 — the change form used to let status be
+    # edited with only Django's LogEntry as a trace).
     readonly_fields = (
         "token_hash",
+        "status",
+        "held_reason",
+        "invalidated_reason",
+        "invalidated_by",
         "ip_hash",
         "ua_hash",
         "asn",
@@ -34,6 +44,9 @@ class BallotAdmin(admin.ModelAdmin):
 
     def has_add_permission(self, request):
         return False  # ballots are only created by voters
+
+    def has_delete_permission(self, request, obj=None):
+        return False  # invalidate instead (audited); deletion would change the tally silently
 
     def _bulk(self, request, queryset, status, action, reason=""):
         for ballot in queryset:

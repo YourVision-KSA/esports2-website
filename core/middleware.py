@@ -34,3 +34,33 @@ class CloudflareOriginMiddleware:
             if not hmac.compare_digest(sent, token):
                 return HttpResponseForbidden()
         return self.get_response(request)
+
+
+# Same policy as the Cloudflare Transform Rule (docs/operations.md → Cloudflare checklist
+# step 6). Turnstile (vote + registration) needs the two challenges.cloudflare.com entries.
+CONTENT_SECURITY_POLICY = (
+    "default-src 'self'; "
+    "script-src 'self' https://challenges.cloudflare.com; "
+    "frame-src https://challenges.cloudflare.com; "
+    "style-src 'self' 'unsafe-inline'; "
+    "img-src 'self' data:; "
+    "connect-src 'self'; "
+    "worker-src 'self' blob:; "
+    "base-uri 'none'; "
+    "form-action 'self'; "
+    "frame-ancestors 'none'"
+)
+
+
+class SecurityHeadersMiddleware:
+    """Adds Content-Security-Policy unless the response already has one (production only,
+    see esports/settings/production.py). Audit 2026-11-13: until now the CSP existed only
+    as an edge rule, so any path around Cloudflare had none."""
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+        response.headers.setdefault("Content-Security-Policy", CONTENT_SECURITY_POLICY)
+        return response

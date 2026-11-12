@@ -3,6 +3,7 @@ single-elimination tree (R16→final) and feeds R1 from confirmed registrations.
 Byes (fewer than 16 players) become forfeit wins that propagate immediately."""
 
 import random
+import secrets
 
 from django.db import transaction
 
@@ -30,6 +31,10 @@ def draw(game: Game, seed: int | None = None, actor=None) -> list[Match]:
             f"{game.slug}: need 2..{game.seats} confirmed players, have {len(players)}"
         )
 
+    # No seed given → pick one and RECORD it, so the shuffle can be reproduced if the
+    # draw is disputed (audit 2026-11-13: seed=None was logged and lost).
+    if seed is None:
+        seed = secrets.randbits(63)
     rng = random.Random(seed)
     rng.shuffle(players)
 

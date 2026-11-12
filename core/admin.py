@@ -2,12 +2,23 @@
 
 import csv
 
+from django import forms
 from django.contrib import admin
 from django.forms.models import model_to_dict
 from django.http import HttpResponse
 
-from . import audit
+from . import audit, privacy
 from .models import AuditLog, Game, OutboxEmail, SiteConfig, TierStat
+
+# Spreadsheet apps evaluate a cell that starts with one of these as a formula
+# (CSV/formula injection — audit 2026-11-13). Registrants control names and gamer tags.
+_FORMULA_PREFIXES = ("=", "+", "-", "@", "\t", "\r")
+
+
+def csv_safe(value) -> str:
+    """Neutralise a cell for Excel/Sheets: a leading quote makes it plain text."""
+    text = "" if value is None else str(value)
+    return "'" + text if text.startswith(_FORMULA_PREFIXES) else text
 
 
 def export_csv_action(fields, description="Export selected to CSV (audit-logged)"):
@@ -29,7 +40,7 @@ def export_csv_action(fields, description="Export selected to CSV (audit-logged)
         writer = csv.writer(response)
         writer.writerow(fields)
         for obj in queryset:
-            writer.writerow([getattr(obj, f, "") for f in fields])
+            writer.writerow([csv_safe(getattr(obj, f, "")) for f in fields])
         return response
 
     export.short_description = description
@@ -44,9 +55,38 @@ class GameAdmin(admin.ModelAdmin):
     prepopulated_fields = {"slug": ("name_en",)}
 
 
+class SiteConfigForm(forms.ModelForm):
+    class Meta:
+        model = SiteConfig
+        fields = [
+            "vote_opens_at",
+            "vote_closes_at",
+            "registration_opens_at",
+            "registration_closes_at",
+            "event_start_date",
+            "event_end_date",
+            "archived",
+            "stream_url_1",
+            "stream_url_2",
+            "stream_url_3",
+        ]
+
+    def clean_registration_opens_at(self):
+        """Refuse to schedule registration while the privacy notice is unfinished
+        (core/privacy.py — audit 2026-11-13). The registration views enforce the same
+        rule at request time, so this is the early, visible warning for staff."""
+        value = self.cleaned_data.get("registration_opens_at")
+        if value and not privacy.notice_complete():
+            missing = ", ".join(sorted({key for key, _ in privacy.unfilled_placeholders()}))
+            raise forms.ValidationError(f"{privacy.STAFF_MESSAGE} Unfilled: {missing}.")
+        return value
+
+
 @admin.register(SiteConfig)
 class SiteConfigAdmin(admin.ModelAdmin):
     """The phase switch. Every change is audit-logged; only one row ever exists."""
+
+    form = SiteConfigForm
 
     def has_add_permission(self, request):
         return not SiteConfig.objects.exists()
@@ -86,9 +126,34 @@ class AuditLogAdmin(admin.ModelAdmin):
 
 @admin.register(OutboxEmail)
 class OutboxEmailAdmin(admin.ModelAdmin):
+    """Read-only. Bodies can hold a manage link (a credential) until sent; sent bodies
+    are blanked by core/outbox.py (audit 2026-11-13). Retrying a failed email = set it
+    back to queued with the action below."""
+
     list_display = ("to_email", "subject", "status", "attempts", "next_attempt_at", "created_at")
     list_filter = ("status",)
-    readonly_fields = ("attempts", "last_error", "created_at", "updated_at")
+    readonly_fields = (
+        "to_email",
+        "subject",
+        "body_text",
+        "status",
+        "attempts",
+        "next_attempt_at",
+        "last_error",
+        "created_at",
+        "updated_at",
+    )
+    actions = ["retry"]
+
+    def has_add_permission(self, request):
+        return False
+
+    @admin.action(description="Retry selected failed emails")
+    def retry(self, request, queryset):
+        n = queryset.filter(status=OutboxEmail.Status.FAILED).update(
+            status=OutboxEmail.Status.QUEUED, attempts=0, next_attempt_at=None
+        )
+        self.message_user(request, f"{n} email(s) queued again.")
 
 
 @admin.register(TierStat)

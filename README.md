@@ -34,7 +34,8 @@ W1 implementation done: all five apps, 59 tests green (incl. concurrency on Post
 ruff clean, CI + Dockerfile. DEC-15 design delivered — "Arena Night" layout; colours now
 follow the owner-supplied event logo (frontend rev 4 "logo palette": cyan / magenta / silver
 on deep navy, logo lockup in the header — `docs/frontend.md`). Owner sign-off pending. Code lives in the GitHub org
-[YourVision-KSA](https://github.com/YourVision-KSA/esports2-website) (private).
+[YourVision-KSA](https://github.com/YourVision-KSA/esports2-website) (public repository —
+keep secrets, prices and personal data out of it).
 Timeline and gates: `docs/plan.md` · execution checklist per person: `docs/tasks.md`.
 Target: vote opens ~Nov 2, registration ~Nov 16, event late Nov / early Dec 2026.
 

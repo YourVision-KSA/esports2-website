@@ -16,7 +16,7 @@ Cache column = Cloudflare edge behavior (configured as cache rules, see docs/ope
 | `/vote/` | POST | vote | BYPASS | Casts the ballot. Sets/reads the signed voter-token cookie. Rate-limited at edge + app. |
 | `/vote/done/` | GET | vote+ | BYPASS | Confirmation ("تم تسجيل صوتك"). After close: totals page (counted + held) per docs/voting.md. |
 | `/register/` | GET | registration | BYPASS | Game chooser with live seats-left (server-rendered; indicative). |
-| `/register/<game-slug>/` | GET/POST | registration | BYPASS | The registration form; on success redirect to the manage page and show the manage link prominently (REG-SAVE-LINK). If an email was provided, the manage link is also queued to it via the outbox (REG-LINK-EMAILED); email remains optional. |
+| `/register/<game-slug>/` | GET/POST | registration **and a complete privacy notice** (core/privacy.py) | BYPASS | Turnstile widget; POST verified server-side (fail or outage → rejected, retry) and rate-limited at edge + app (registration/abuse.py → 429). The registration form; on success redirect to the manage page and show the manage link prominently (REG-SAVE-LINK). If an email was provided, the manage link is also queued to it via the outbox (REG-LINK-EMAILED); email remains optional. |
 | `/r/<manage_token>/` | GET | registration..event | BYPASS | Player status page: game, confirmed/waitlist position, schedule of their matches. |
 | `/r/<manage_token>/withdraw/` | POST | registration | BYPASS | Withdraw (confirm step). Triggers waitlist promotion. |
 | `/bracket/` | GET | event..archive | 30 s | Overview of all confirmed games' brackets (server-rendered). |
@@ -44,10 +44,17 @@ page. Both enforced in the view via `current_phase()`, regardless of what links 
 |---|---|---|
 | `/staff/` | per-model perms | Django admin: Games, SiteConfig (admin only), Ballots (hold/invalidate actions), Players/Registrations (remove, promote shown), Invitations (create, mark sent, revoke, CSV export), OutboxEmail, AuditLog (read-only). CSV exports admin-only + audit-logged. |
 | `/staff/results/` | referee, admin | Mobile-friendly result entry: playable `pending` matches (optional `?game=<slug>` filter) → tap winner → optional score → save (POST/redirect/GET with a confirmation message). Thin wrapper over the result-entry transaction; a second phone entering the same match gets an Arabic error, first entry kept. (Cut-list item: fall back to Django admin.) |
-| `/staff/checkin/` | door, admin | Camera QR scanner (`frontend/src/scanner.js`: getUserMedia + native BarcodeDetector, jsQR worker fallback) → **lookup** shows guest name/org (nothing written) → staff check ID → **confirm** → atomic check-in. Manual token/URL entry + searchable guest list feed the same lookup. (Cut-list item: list page only.) |
+| `/staff/checkin/` | door (`invitations.checkin_invitation` only), admin | Camera QR scanner (`frontend/src/scanner.js`: getUserMedia + native BarcodeDetector, jsQR worker fallback) → **lookup** shows guest name/org (nothing written) → staff check ID → **confirm** → atomic check-in. Manual token/URL entry + searchable guest list feed the same lookup. (Cut-list item: list page only.) |
 
 Admin path note: serve Django admin at `/staff/` (not `/admin/`) and rate-limit login at the
-edge. Door/referee users get is_staff with narrow model permissions via groups.
+edge. Door/referee users get is_staff with narrow permissions via groups
+(`manage.py setup_roles`): **door** holds only `invitations.checkin_invitation` — no admin
+model at all, so no VIP contact details; **referee** holds view/change Match (results page
++ read-only Match admin; corrections are admin-only). The Invitation, Player and
+Registration admins and all exports are superuser-only; invitation status, registration
+status and ballot status are read-only on change forms and move only through audited
+actions/services (audit 2026-11-13). `/staff/results/` and `/staff/checkin/` check
+staff + permission + a verified TOTP device (core/staff.py) themselves.
 
 ## Error pages
 

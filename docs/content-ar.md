@@ -192,6 +192,7 @@ Note for owner: «أفضل لاعب في اليوم» may need rewording for a 3
 | REG-LINK-EMAILED | أرسلنا رابط إدارة التسجيل إلى بريدك الإلكتروني أيضًا. |
 | REG-DUP-TOURNAMENT | لديك تسجيل قائم بالفعل — يمكن لكل لاعب التسجيل في بطولة واحدة فقط |
 | REG-FULL | اكتملت المقاعد وقائمة الانتظار لهذه البطولة |
+| REG-RATE-LIMITED | وصلنا عدد كبير من محاولات التسجيل من هذا الجهاز أو هذه الشبكة — يُرجى المحاولة لاحقًا، أو التواصل مع المنظمين. | DRAFT — needs owner review (added 2026-11-13: app-side registration rate limit, HTTP 429) |
 | REG-CLOSED | التسجيل مغلق حاليًا |
 | REG-WITHDRAW | الانسحاب من البطولة |
 | REG-WITHDRAW-CONFIRM | هل أنت متأكد؟ سيُعطى مقعدك لأول لاعب في قائمة الانتظار. |
@@ -303,9 +304,10 @@ voter cookie 14 days (voting/views.py), HMAC-only IP/UA (docs/voting.md), signal
 | PRIVACY-S1-P1 | [يُحدَّد: Your Vision KSA أو الجامعة العربية المفتوحة] هي الجهة المسؤولة عن البيانات التي تُجمع عبر هذا الموقع. للتواصل في أي شأن يخص بياناتك: [البريد الإلكتروني للتواصل]. | DRAFT — needs owner review |
 | PRIVACY-S2-TITLE | البيانات التي نجمعها | DRAFT — needs owner review |
 | PRIVACY-S2-P1 | عند التسجيل في البطولات: الاسم الكامل، ورقم الجوال، ومعرّف اللاعب في اللعبة، والبريد الإلكتروني إن أدخلته (اختياري). | DRAFT — needs owner review |
-| PRIVACY-S2-P2 | عند التصويت: لا نطلب منك أي بيانات شخصية. نحتفظ ببصمة مشفّرة لا يمكن عكسها لعنوان الشبكة ونوع المتصفح، للحدّ من التصويت المتكرر، ولا نحفظ عنوان الشبكة نفسه. | DRAFT — needs owner review |
-| PRIVACY-S2-P3 | لضيوف الدعوات الخاصة: الاسم والجهة ووسيلة التواصل التي تزوّدنا بها الجهة المنظِّمة. | DRAFT — needs owner review |
-| PRIVACY-S2-P4 | لا نطلب رقم الهوية الوطنية أو الإقامة، ولا نجمع أي بيانات دفع. | DRAFT — needs owner review |
+| PRIVACY-S2-P2 | عند إرسال نموذج التسجيل: نحتفظ ببصمة مشفّرة لا يمكن عكسها لعنوان الشبكة ونوع المتصفح ورقم الجوال، للحدّ من التسجيل الآلي والمتكرر، ونحذفها مع بقية بيانات التسجيل. | DRAFT — needs owner review (added 2026-11-13: the registration form now keeps HMAC hashes of IP, user agent and phone for its rate limit — registration/abuse.py; deleted by purge_pii) |
+| PRIVACY-S2-P3 | عند التصويت: لا نطلب منك أي بيانات شخصية. نحتفظ ببصمة مشفّرة لا يمكن عكسها لعنوان الشبكة ونوع المتصفح، للحدّ من التصويت المتكرر، ولا نحفظ عنوان الشبكة نفسه. | DRAFT — needs owner review |
+| PRIVACY-S2-P4 | لضيوف الدعوات الخاصة: الاسم والجهة ووسيلة التواصل التي تزوّدنا بها الجهة المنظِّمة. | DRAFT — needs owner review |
+| PRIVACY-S2-P5 | لا نطلب رقم الهوية الوطنية أو الإقامة، ولا نجمع أي بيانات دفع. | DRAFT — needs owner review |
 | PRIVACY-S3-TITLE | لماذا نجمعها | DRAFT — needs owner review |
 | PRIVACY-S3-P1 | لتنظيم البطولات وإدارة المقاعد وقائمة الانتظار، والتواصل معك بشأن مشاركتك، وتنظيم دخول الضيوف، وحماية التصويت من التلاعب. | DRAFT — needs owner review |
 | PRIVACY-S3-P2 | لا نستخدم بياناتك في التسويق، ولا نبيعها لأي جهة. | DRAFT — needs owner review |

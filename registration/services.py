@@ -90,7 +90,6 @@ def register(
 
 
 def _queue_manage_link_email(player: Player, registration: Registration, raw_token: str):
-    manage_url = settings.SITE_BASE_URL + reverse("manage", args=[raw_token])
     outbox.queue(
         to_email=player.email,
         subject=CONTENT["EMAIL_MANAGE_SUBJECT"].format(site_name=CONTENT["SITE_NAME"]),
@@ -98,7 +97,7 @@ def _queue_manage_link_email(player: Player, registration: Registration, raw_tok
             name=player.full_name,
             game=registration.game.name_ar,
             status=registration.get_status_display(),
-            manage_url=manage_url,
+            manage_url=manage_url(raw_token),
         ),
     )
 
@@ -113,8 +112,6 @@ def withdraw(registration: Registration, actor=None) -> Registration | None:
         if registration.status not in Registration.ACTIVE:
             return None  # already withdrawn/removed — no-op
 
-        was_confirmed = registration.status == Registration.Status.CONFIRMED
-        old_position = registration.waitlist_position
         registration.status = Registration.Status.WITHDRAWN
         registration.waitlist_position = None
         registration.withdrawn_at = timezone.now()
@@ -126,43 +123,116 @@ def withdraw(registration: Registration, actor=None) -> Registration | None:
             before={"status": "active"},
             after={"status": "withdrawn"},
         )
+        promoted = _fill_seats_and_renumber(game, actor)
+        return promoted[0] if promoted else None
 
-        waitlist = list(
-            game.registrations.select_for_update()
-            .filter(status=Registration.Status.WAITLISTED)
-            .order_by("waitlist_position")
+
+def _fill_seats_and_renumber(game: Game, actor) -> list[Registration]:
+    """Promote waitlisted registrations (FIFO) into free confirmed seats, then renumber
+    the remaining waitlist densely 1..n. The caller must hold the game row lock
+    (select_for_update) inside its transaction. Each promotion is audit-logged."""
+    confirmed = game.registrations.filter(status=Registration.Status.CONFIRMED).count()
+    waitlist = list(
+        game.registrations.select_for_update()
+        .filter(status=Registration.Status.WAITLISTED)
+        .order_by("waitlist_position", "created_at")
+    )
+    promoted = []
+    while confirmed < game.seats and waitlist:
+        reg = waitlist.pop(0)
+        reg.status = Registration.Status.CONFIRMED
+        reg.waitlist_position = None
+        reg.promoted_at = timezone.now()
+        reg.save()
+        audit.record(
+            actor,
+            "registration.promote",
+            reg,
+            before={"status": "waitlisted"},
+            after={"status": "confirmed"},
         )
+        confirmed += 1
+        promoted.append(reg)
+    for i, reg in enumerate(waitlist, start=1):
+        if reg.waitlist_position != i:
+            reg.waitlist_position = i
+            reg.save(update_fields=["waitlist_position"])
+    return promoted
 
-        promoted = None
-        if was_confirmed and waitlist:
-            promoted = waitlist.pop(0)
-            promoted.status = Registration.Status.CONFIRMED
-            promoted.waitlist_position = None
-            promoted.promoted_at = timezone.now()
-            promoted.save()
-            audit.record(
-                actor,
-                "registration.promote",
-                promoted,
-                before={"status": "waitlisted"},
-                after={"status": "confirmed"},
+
+def remove_registrations(registration_ids, actor, reason: str) -> tuple[int, int]:
+    """Staff removal of registrations — one or many, e.g. a scripted wave of fake sign-ups
+    (audit 2026-11-13, finding 1). Returns (removed, promoted).
+
+    Per game, in ONE transaction under the game row lock: every selected active
+    registration is marked REMOVED first, and only then are freed seats filled from the
+    waitlist. So removing fakes that sit on both the seats and the waitlist never promotes
+    a fake that is about to be removed, and real players move up in FIFO order. Every
+    removal and promotion is audit-logged with the actor and the reason."""
+    removed = promoted = 0
+    ids = list(registration_ids)
+    game_ids = sorted(
+        set(Registration.objects.filter(pk__in=ids).values_list("game_id", flat=True))
+    )
+    with transaction.atomic():
+        for game_id in game_ids:  # fixed lock order: no deadlock between two staff
+            game = Game.objects.select_for_update().get(pk=game_id)
+            selected = Registration.objects.select_for_update().filter(
+                pk__in=ids, game=game, status__in=Registration.ACTIVE
             )
-        elif old_position is not None:
-            # A waitlisted player left: close the gap behind them.
-            waitlist = [r for r in waitlist if r.waitlist_position > old_position]
+            for reg in selected:
+                before = reg.status
+                reg.status = Registration.Status.REMOVED
+                reg.waitlist_position = None
+                reg.save(update_fields=["status", "waitlist_position", "updated_at"])
+                audit.record(
+                    actor,
+                    "registration.remove",
+                    reg,
+                    before={"status": before},
+                    after={"status": "removed", "reason": reason},
+                )
+                removed += 1
+            promoted += len(_fill_seats_and_renumber(game, actor))
+    return removed, promoted
 
-        # Re-number remaining waitlist densely (FIFO preserved).
-        remaining = (
-            game.registrations.select_for_update()
-            .filter(status=Registration.Status.WAITLISTED)
-            .order_by("waitlist_position")
+
+def release_phone(player: Player, actor, reason: str) -> None:
+    """Free a phone number that someone else registered (squatting — audit 2026-11-13,
+    finding 1). Removes the player's active registrations (waitlist promotes), detaches
+    the number so its real owner can register fresh and get their own manage link, and
+    invalidates the old manage link. The phone itself is NOT written to the audit log
+    (the log is kept after the PII purge)."""
+    with transaction.atomic():
+        player = Player.objects.select_for_update().get(pk=player.pk)
+        active = player.registrations.filter(status__in=Registration.ACTIVE)
+        remove_registrations(active.values_list("pk", flat=True), actor, reason)
+        player.phone = f"released-{player.pk}"
+        player.manage_token_hash = Player.hash_token(new_manage_token())
+        player.save(update_fields=["phone", "manage_token_hash", "updated_at"])
+        audit.record(actor, "player.release_phone", player, after={"reason": reason})
+
+
+def regenerate_manage_link(player: Player, actor) -> str:
+    """New manage link for a player who lost theirs; the old link stops working.
+    Emails it (same template as at registration) when the player gave an email.
+    Returns the absolute URL so staff can share it another way."""
+    raw = new_manage_token()
+    with transaction.atomic():
+        player.manage_token_hash = Player.hash_token(raw)
+        player.save(update_fields=["manage_token_hash", "updated_at"])
+        audit.record(actor, "player.regenerate_link", player)
+        registration = (
+            player.registrations.filter(status__in=Registration.ACTIVE).first()
+            or player.registrations.order_by("-created_at").first()
         )
-        for i, reg in enumerate(remaining, start=1):
-            if reg.waitlist_position != i:
-                reg.waitlist_position = i
-                reg.save(update_fields=["waitlist_position"])
+        if player.email and registration:
+            _queue_manage_link_email(player, registration, raw)
+    return manage_url(raw)
 
-        return promoted
+
+def manage_url(raw_token: str) -> str:
+    return settings.SITE_BASE_URL + reverse("manage", args=[raw_token])
 
 
 def seats_left(game: Game) -> int:

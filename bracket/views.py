@@ -6,7 +6,6 @@ Public display uses gamer tags (game_player_id), never real names.
 
 from urllib.parse import urlencode
 
-from django.contrib.auth.decorators import permission_required
 from django.core.exceptions import ValidationError
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -14,6 +13,7 @@ from django.views.decorators.cache import cache_control, never_cache
 
 from core.models import Game
 from core.phases import Phase, current_phase
+from core.staff import staff_page
 
 from . import services, tree
 from .models import Match
@@ -101,7 +101,7 @@ SCORE_MAX = Match._meta.get_field("score_text").max_length
 
 
 @never_cache
-@permission_required("bracket.change_match", raise_exception=True)
+@staff_page("bracket.change_match")
 def staff_results(request):
     """Mobile-friendly result entry for referees (docs/routes.md /staff/results/).
 

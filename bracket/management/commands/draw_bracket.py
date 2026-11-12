@@ -27,6 +27,6 @@ class Command(BaseCommand):
             raise CommandError(str(exc)) from exc
         self.stdout.write(
             self.style.SUCCESS(
-                f"{game.slug}: {len(matches)} matches created (seed={options['seed']})"
+                f"{game.slug}: {len(matches)} matches created (seed in the audit log: bracket.draw)"
             )
         )

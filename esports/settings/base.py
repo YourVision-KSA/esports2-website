@@ -143,8 +143,18 @@ VOTE_IP_HOURLY_LIMIT = env.int("VOTE_IP_HOURLY_LIMIT", default=5)
 VOTE_UA_IP_10MIN_LIMIT = env.int("VOTE_UA_IP_10MIN_LIMIT", default=3)
 VOTER_COOKIE_NAME = "vt"
 
+# Registration abuse limits (audit 2026-11-13, finding 1; registration/abuse.py).
+# Application-side, per client — behind Cloudflare the client is CF-Connecting-IP
+# (core/security.client_ip). Generous on purpose: a campus network shares one IP, and
+# there are only 48 seats + 24 waitlist places in total.
+REG_IP_ATTEMPTS_PER_10MIN = env.int("REG_IP_ATTEMPTS_PER_10MIN", default=20)
+REG_IP_REGISTRATIONS_PER_DAY = env.int("REG_IP_REGISTRATIONS_PER_DAY", default=10)
+REG_DEVICE_REGISTRATIONS_PER_DAY = env.int("REG_DEVICE_REGISTRATIONS_PER_DAY", default=3)
+REG_PHONE_ATTEMPTS_PER_DAY = env.int("REG_PHONE_ATTEMPTS_PER_DAY", default=5)
+
 # Cloudflare Turnstile. When disabled (local dev), the server treats the
-# challenge as passed. In production it MUST be enabled.
+# challenge as passed. In production it MUST be enabled (production.py refuses to start
+# otherwise). Used by the vote AND the registration form.
 TURNSTILE_ENABLED = env.bool("TURNSTILE_ENABLED", default=True)
 TURNSTILE_SITE_KEY = env("TURNSTILE_SITE_KEY", default="")
 TURNSTILE_SECRET = env("TURNSTILE_SECRET", default="")

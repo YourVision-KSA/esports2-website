@@ -99,6 +99,17 @@ the admin list and contacts the player.
 State machine: `confirmed → withdrawn|removed`; `waitlisted → confirmed (promotion) |
 withdrawn | removed`. Registrations freeze when the phase leaves `registration`.
 
+**RegistrationAttempt** (audit 2026-11-13): one row per POST to the registration form —
+`ip_hash`, `ua_hash`, `phone_hash` (HMAC with `SIGNALS_SALT`, never raw values), game,
+outcome (registered / invalid / limited / turnstile / duplicate / full), registration FK
+(nullable), created_at. Feeds the app-side rate limits and the staff "network" column;
+deleted by `purge_pii`.
+
+Staff removal (one or many, `services.remove_registrations`): under the game lock, mark ALL
+selected rows `removed` first, then fill free seats FIFO from the remaining waitlist and
+renumber it; each removal (with reason) and promotion audit-logged. Phone release
+(`services.release_phone`) additionally detaches the phone and invalidates the manage link.
+
 ## Match (bracket)
 
 Fixed single-elimination tree of 15 matches per game, created at draw time.
@@ -135,6 +146,10 @@ byes fill from the top (status `forfeit` with the lone player as winner).
 | status | `created` → `sent` → `checked_in` \| `revoked` |
 | sent_at / checked_in_at | datetimes |
 | checked_in_by | FK → staff user |
+
+Status changes happen only in invitations/services.py (check_in, mark_sent, revoke,
+undo_checkin — each a conditional update + AuditLog row); the admin form shows status
+read-only. Door staff need only the `checkin_invitation` permission.
 
 **Single-use check-in** (atomic, race-safe):
 `UPDATE invitation SET status='checked_in', checked_in_at=now(), checked_in_by=?
@@ -179,7 +194,8 @@ Append-only: no update/delete paths in app code; excluded from admin editing.
 
 ## Retention
 
-- Raw ballot `signals`: strip 14 days after the vote closes (keep status + hashes for audit).
+- Raw ballot `signals`: strip 14 days after the vote closes (keep status + hashes for audit)
+  — `manage.py strip_vote_signals` (refuses earlier).
 - Player, Registration (PII fields), Invitation contacts, OutboxEmail: delete at the published
   retention deadline (30–90 days post-event, DEC-08). Keep: anonymized results (gamer tags
   only, if the privacy notice says so — DEC-08), Game, Match (winner names replaced per

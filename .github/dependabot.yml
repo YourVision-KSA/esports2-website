@@ -1,0 +1,20 @@
+# Weekly dependency update PRs (audit 2026-11-13). Each PR still has to pass CI.
+# Python: Dependabot updates the pip-compile lock (requirements*.txt) from requirements*.in.
+version: 2
+updates:
+  - package-ecosystem: pip
+    directory: "/"
+    schedule:
+      interval: weekly
+  - package-ecosystem: npm
+    directory: "/frontend"
+    schedule:
+      interval: weekly
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+  - package-ecosystem: docker
+    directory: "/"
+    schedule:
+      interval: weekly

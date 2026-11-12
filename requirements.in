@@ -1,0 +1,14 @@
+# Production dependencies — the SOURCE list. Each entry is justified in
+# docs/architecture.md / CLAUDE.md rule 5. After editing, regenerate the hash-pinned lock:
+#   pip-compile --generate-hashes --allow-unsafe requirements.in
+#   pip-compile --generate-hashes --allow-unsafe requirements-dev.in
+# (pip-tools in any throwaway venv). CI and the Docker image install the .txt locks, so
+# production runs exactly what CI tested (audit 2026-11-13).
+Django>=5.2.19,<5.3        # the framework (5.2 LTS; 5.2.19 = latest security patch, 2026-11)
+psycopg[binary]>=3.2       # PostgreSQL driver
+django-environ>=0.11       # settings from environment variables
+django-otp>=1.5            # staff TOTP two-factor auth (CLAUDE.md hard rule 4)
+qrcode>=8                  # QR images for VIP invitations
+whitenoise>=6.7            # serve hashed static files from the app container
+gunicorn>=23               # production WSGI server (Cloud Run)
+tzdata>=2024.1             # time-zone data; Django needs it on Windows dev machines

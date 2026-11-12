@@ -63,6 +63,9 @@ def send_due(limit: int = 50) -> int:
                     )
             else:
                 email.status = OutboxEmail.Status.SENT
+                # The body may contain a manage link (a credential): don't keep it once
+                # delivered (audit 2026-11-13). Subject + recipient stay for the record.
+                email.body_text = ""
                 sent += 1
             email.save()
     return sent
