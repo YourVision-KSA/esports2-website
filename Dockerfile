@@ -2,7 +2,7 @@
 
 # --- stage 1: build the 3D bundle (docs/frontend.md → Build) ----------------------
 # Node 24 LTS (Node 20 reached end of life in April 2026 — audit 2026-11-13).
-FROM node:24-slim AS frontend
+FROM node:25-slim AS frontend
 WORKDIR /app/frontend
 COPY frontend/package.json frontend/package-lock.json ./
 RUN npm ci --no-audit --no-fund
