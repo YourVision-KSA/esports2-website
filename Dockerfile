@@ -11,7 +11,7 @@ COPY static/models/ /app/static/models/
 RUN npm run build && npm run budget
 
 # --- stage 2: the Django app --------------------------------------------------------
-FROM python:3.13-slim
+FROM python:3.15-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 \
     DJANGO_SETTINGS_MODULE=esports.settings.production
