@@ -1,0 +1,23 @@
+{% extends "admin/base_site.html" %}
+{% comment %}
+Confirmation step for audited bulk actions (registration/admin.py). Staff-only admin
+page in English, like the rest of the Django admin.
+{% endcomment %}
+{% block content %}
+<p>{{ explanation }}</p>
+<ul>
+  {% for obj in objects %}<li>{{ obj }}</li>{% empty %}<li>Nothing selected is still active.</li>{% endfor %}
+</ul>
+<form method="post">
+  {% csrf_token %}
+  {% for obj in objects %}<input type="hidden" name="{{ action_checkbox_name }}" value="{{ obj.pk }}">{% endfor %}
+  <input type="hidden" name="action" value="{{ action }}">
+  <input type="hidden" name="confirm" value="yes">
+  <p>
+    <label for="reason">Reason (kept in the audit log):</label><br>
+    <input type="text" id="reason" name="reason" maxlength="200" size="60" required>
+  </p>
+  <input type="submit" value="Confirm">
+  <a href="" class="button cancel-link">Cancel</a>
+</form>
+{% endblock %}

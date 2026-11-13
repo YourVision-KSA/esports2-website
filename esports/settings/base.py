@@ -143,8 +143,26 @@ VOTE_IP_HOURLY_LIMIT = env.int("VOTE_IP_HOURLY_LIMIT", default=5)
 VOTE_UA_IP_10MIN_LIMIT = env.int("VOTE_UA_IP_10MIN_LIMIT", default=3)
 VOTER_COOKIE_NAME = "vt"
 
+# Registration abuse limits (audit 2026-11-13, finding 1; registration/abuse.py).
+# Application-side, per client — behind Cloudflare the client is CF-Connecting-IP
+# (core/security.client_ip).
+#
+# Sized for the real audience: most players register from the university network, where
+# the whole campus leaves through one address (NAT) — so "per client IP" means "per
+# campus". And a "device" is only IP + user agent, which is IDENTICAL for every phone of
+# the same model and OS version on that network; it cannot tell two students apart.
+# The defaults therefore let half of all places (48 seats + 24 waitlist = 72) come from
+# one network in a day, and a dozen from one phone model, while still stopping a script
+# from taking everything. Turnstile and the Cloudflare rate rule do the fine-grained work.
+# Runbook and the staging note: docs/operations.md → "Registration abuse".
+REG_IP_ATTEMPTS_PER_10MIN = env.int("REG_IP_ATTEMPTS_PER_10MIN", default=60)
+REG_IP_REGISTRATIONS_PER_DAY = env.int("REG_IP_REGISTRATIONS_PER_DAY", default=36)
+REG_DEVICE_REGISTRATIONS_PER_DAY = env.int("REG_DEVICE_REGISTRATIONS_PER_DAY", default=12)
+REG_PHONE_ATTEMPTS_PER_DAY = env.int("REG_PHONE_ATTEMPTS_PER_DAY", default=5)
+
 # Cloudflare Turnstile. When disabled (local dev), the server treats the
-# challenge as passed. In production it MUST be enabled.
+# challenge as passed. In production it MUST be enabled (production.py refuses to start
+# otherwise). Used by the vote AND the registration form.
 TURNSTILE_ENABLED = env.bool("TURNSTILE_ENABLED", default=True)
 TURNSTILE_SITE_KEY = env("TURNSTILE_SITE_KEY", default="")
 TURNSTILE_SECRET = env("TURNSTILE_SECRET", default="")

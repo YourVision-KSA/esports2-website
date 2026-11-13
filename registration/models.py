@@ -86,3 +86,41 @@ class Registration(models.Model):
 
     def __str__(self):
         return f"{self.game_player_id} @ {self.game.slug} [{self.status}]"
+
+
+class RegistrationAttempt(models.Model):
+    """One row per POST to the registration form — the application-side rate limit
+    and the evidence staff use to find a scripted wave (audit 2026-11-13, finding 1).
+
+    Like the vote (docs/voting.md → Privacy) only HMAC hashes are stored, never the raw
+    IP, user agent or phone (CLAUDE.md hard rule 7). The rows are deleted by purge_pii.
+    "Device" here means the (ip_hash, ua_hash) pair: weak on its own, but it costs a
+    script something and needs no new cookie.
+    """
+
+    class Outcome(models.TextChoices):
+        REGISTERED = "registered", "Registered"
+        INVALID = "invalid", "Form invalid"
+        LIMITED = "limited", "Rate-limited"
+        TURNSTILE = "turnstile", "Bot check failed"
+        DUPLICATE = "duplicate", "Already registered"
+        FULL = "full", "Game full"
+
+    ip_hash = models.CharField(max_length=64)
+    ua_hash = models.CharField(max_length=64)
+    phone_hash = models.CharField(max_length=64, blank=True)  # set once the form is valid
+    game = models.ForeignKey("core.Game", on_delete=models.CASCADE, related_name="+")
+    outcome = models.CharField(max_length=10, choices=Outcome.choices)
+    registration = models.ForeignKey(
+        Registration, null=True, blank=True, on_delete=models.SET_NULL, related_name="attempts"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["ip_hash", "created_at"], name="regattempt_ip_idx"),
+            models.Index(fields=["phone_hash", "created_at"], name="regattempt_phone_idx"),
+        ]
+
+    def __str__(self):
+        return f"attempt {self.pk} [{self.outcome}]"

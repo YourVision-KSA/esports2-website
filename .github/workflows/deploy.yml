@@ -34,9 +34,22 @@ concurrency:
 
 jobs:
   deploy:
+    # The repository is PUBLIC. `workflow_run` + `branches: [main]` matches the head
+    # BRANCH NAME, so a fork's pull request from a branch called "main" would also match
+    # and this job would check out and deploy the fork's commit (audit 2026-11-13).
+    # Only deploy CI runs that were a push to this repository's own main branch;
+    # manual runs only from main.
     if: >-
       vars.GCP_PROJECT_ID != '' &&
-      (github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success')
+      (
+        (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
+        (
+          github.event.workflow_run.conclusion == 'success' &&
+          github.event.workflow_run.event == 'push' &&
+          github.event.workflow_run.head_branch == 'main' &&
+          github.event.workflow_run.head_repository.full_name == github.repository
+        )
+      )
     runs-on: ubuntu-latest
     # GitHub environments: add required reviewers to "production" for a manual approval gate.
     environment: ${{ inputs.target || 'production' }}

@@ -15,8 +15,8 @@ earlier than needed). Dates shift with DEC-01; the **sequence and gates are fixe
   DEC answers (esp. DEC-03 vote definition, DEC-15 design), 2FA enrollment flow check,
   GCP/Cloudflare setup per docs/operations.md.
 
-- **2026-10-21** — Code pushed to GitHub org **YourVision-KSA** (private repo
-  `esports2-website`); owner invite sent to Yousef (24446357ksa@aou.edu.sa, pending
+- **2026-10-21** — Code pushed to GitHub org **YourVision-KSA** (repo
+  `esports2-website` — it is **public**, see the 2026-10-21 checkpoint entry); owner invite sent to Yousef (pending
   acceptance); org profile branded from the official guideline PDF. Arena Night rev 3.1
   theme is implemented on the site (commit 761e9b5). Local smoke test green: `/`,
   `/vote/`, `/register/`, `/bracket/`, `/healthz`. Execution checklist with per-person
@@ -31,7 +31,7 @@ earlier than needed). Dates shift with DEC-01; the **sequence and gates are fixe
   4 tests). A full logo-driven redesign (rev 4: event-logo palette, hero 3D controller
   scene, static logo panel) was built, then **reverted at the owner's direction** —
   it lives in history between `2f9746e` and `fc19a91` on `dev-hussein` and can be
-  cherry-picked back selectively. Event logo source: `Downloads/UI` on the dev machine.
+  cherry-picked back selectively. Event logo source files are kept by the team outside the repo.
   Next up: DEC answers (Yousef), GCP/Cloudflare (~Oct 29), design direction decision.
 
 - **2026-10-21** — Owner supplied the event logo and asked for the site colours to follow
@@ -67,8 +67,8 @@ earlier than needed). Dates shift with DEC-01; the **sequence and gates are fixe
   #2/#6 reached `main`; PR #10 consolidated the rest. Next time: retarget each stacked PR
   to `main` after its parent merges, then merge. Dev-environment note: Hussein's Windows
   machine now has PostgreSQL 17 as a service (`postgresql-x64-17`, local db `esports`) —
-  the full suite incl. concurrency marks runs locally. Owner-facing Arabic status update
-  written to `company-update-2026-10-22.md` (kept out of git). Next up: owner approvals
+  the full suite incl. concurrency marks runs locally. Owner-facing status update written
+  (kept out of git). Next up: owner approvals
   (DEC-01..14, DRAFT strings, privacy placeholders), GCP + Cloudflare day ~Oct 29
   (now includes origin shield `CF_ORIGIN_TOKEN`, CSP header rule, Error Reporting +
   uptime alerts), staging rehearsal before the vote opens (~Nov 2).
@@ -134,6 +134,8 @@ server-side phase gating · backups/PITR · the printed event-day fallback.
 | DEC-12 | VIP mail sender mailbox/domain; SPF/DKIM configured + test email passed | before W5 | OPEN |
 | DEC-13 | Prize values / descriptions for the prizes section | before G3 | OPEN |
 | DEC-14 | Confirm no payments (A5) and no national ID (A6) | this week | ASSUMED YES |
+| DEC-16 | Phone-number verification for registration (SMS one-time code before a seat is confirmed). Needs an SMS provider + budget; SMS APIs are on the "deliberately not built" list (architecture.md). Until decided: Turnstile + app-side limits + staff removal/phone-release tools (operations.md → Registration abuse) — added after the 2026-11-13 audit | before G2 | OPEN |
+| DEC-17 | Repository visibility: the GitHub repo is PUBLIC and its history contains internal content (see the owner's private note from the 2026-11-13 audit) — make it private, or accept that history | ASAP | OPEN |
 | DEC-15 | **New design from /design** — the design artifact that becomes the design reference (theme tokens, fonts, 3D scene subjects, effects → recorded in docs/frontend.md). `reference/prototype.html` is content reference only | before the base template in W1 | **DELIVERED 2026-10-20** — "Tournament Broadcast" direction, 7 artboards: https://claude.ai/artifact/SNEBV9cXyS8YCmeJJfEvqG (tokens recorded in docs/frontend.md); owner sign-off pending |
 
 When a DEC closes, record the answer here (edit the row, add the date) — this table is the

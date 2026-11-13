@@ -17,8 +17,9 @@ Last updated: 2026-10-20. Open decisions are tracked as DEC-xx in `docs/plan.md`
   decided by the **public vote** (candidate list: DEC-03). Permits for the chosen games are
   obtained after the vote closes.
 - Saudi Esports Federation involvement planned; VIP invitations will be sent.
-- Sponsorship tiers (offline sales, no online payment): Diamond 150,000 · Gold 100,000 ·
-  Silver 50,000 · Participant 30,000 SAR.
+- Sponsorship tiers (offline sales, no online payment): Diamond · Gold · Silver ·
+  Participant. Prices are commercial information kept by the organizer, not in this
+  repository (the site never shows them).
 - One edition only. No reuse for future events. Planned end of life (see docs/operations.md).
 
 ## 1b. Design and prototype status
