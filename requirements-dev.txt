@@ -10,6 +10,10 @@ asgiref==3.13.0 \
     # via
     #   -c requirements.txt
     #   django
+colorama==0.4.6 \
+    --hash=sha256:08695f5cb7ed6e0531a20572697297273c47b8cae5a63ffc6d6ed5c201be6e44 \
+    --hash=sha256:4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6
+    # via -r requirements-dev.in
 django==5.2.19 \
     --hash=sha256:5965d974a5218a2b68a11dd1276434707f23886525c23f0598eccedaf4f4ca00 \
     --hash=sha256:ad03d8abc51dbff95ebf34b27123cf0c26a3b62db7ba0cd520783686362533d1

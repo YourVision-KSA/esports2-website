@@ -54,9 +54,9 @@ containers — on sccc the app would run on a plain ECS VM.
 
 | Case | Choice |
 |---|---|
-| Default (residency unknown or required) | **GCP me-central2 on the $300/90-day free trial.** Estimated real usage $40–80 over ~5 cloud weeks → effectively free, and hedges residency. |
-| University mandates a Saudi-licensed (CST) provider | **sccc by stc on the SAR 5,000 credit**: ApsaraDB RDS for PostgreSQL + one small ECS VM (container via systemd + Caddy for TLS). Accept added ops. Verify credit terms + RDS-PostgreSQL in the Riyadh console first. |
-| Residency confirmed NOT required and GCP trial unavailable | Small PaaS (Railway/Fly.io), ~$15–25/mo. Last resort only. |
+| Default (residency unknown or required) | **GCP me-central2 on the $300/90-day free trial** (Google's public offer). The estimated usage for ~5 cloud weeks fits well inside it, and it hedges residency. |
+| University mandates a Saudi-licensed (CST) provider | **sccc by stc, on the credit available there**: ApsaraDB RDS for PostgreSQL + one small ECS VM (container via systemd + Caddy for TLS). Accept added ops. Verify credit terms + RDS-PostgreSQL in the Riyadh console first. |
+| Residency confirmed NOT required and GCP trial unavailable | Small PaaS (Railway/Fly.io), paid monthly. Last resort only. |
 
 Lifecycle: develop locally (Postgres per developer); create cloud resources **4–5 days before
 the vote opens** (rehearsal needs the real edge); resources stay up continuously from first

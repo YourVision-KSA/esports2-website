@@ -62,8 +62,20 @@ def test_outbox_body_is_read_only_in_admin(admin_client):
 # ---------------------------------------------------------------- CSV export
 
 
-@pytest.mark.parametrize("value", ["=HYPERLINK(1)", "+1", "-1", "@SUM(1)", "\t=1", "\r=1"])
+@pytest.mark.parametrize("value", ["=HYPERLINK(1)", "+1+1", "-1", "@SUM(1)", "\t=1", "\r=1"])
 def test_csv_cells_cannot_start_a_formula(value):
+    assert csv_safe(value) == "'" + value
+
+
+@pytest.mark.parametrize("value", ["+966551234567", "+1"])
+def test_csv_leaves_international_phone_numbers_alone(value):
+    """'+' followed by digits only is a plain number, not a formula — exported phones
+    must stay usable (pre-merge review)."""
+    assert csv_safe(value) == value
+
+
+@pytest.mark.parametrize("value", ["+966+cmd|' /C calc'!A0", "+1+1", "+SUM(1)", "+", "+966 55"])
+def test_csv_plus_prefix_is_still_neutralised_when_not_a_plain_number(value):
     assert csv_safe(value) == "'" + value
 
 

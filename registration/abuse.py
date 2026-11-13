@@ -8,7 +8,11 @@ and a request is refused when any of these counts is already at its limit:
                                   (refused attempts are not counted, so a person who
                                   waits a few minutes gets through again)
   REG_PHONE_ATTEMPTS_PER_DAY      POSTs naming one phone number in 24 hours — slows down
-                                  probing which numbers are registered
+                                  probing which numbers are registered. Only attempts
+                                  that PASSED Turnstile count: the limit is checked
+                                  before Turnstile, so if bot-check failures counted, a
+                                  script with no Turnstile solution could use up a
+                                  stranger's number and lock them out for a day
   REG_IP_REGISTRATIONS_PER_DAY    successful registrations from one client IP in 24 hours
   REG_DEVICE_REGISTRATIONS_PER_DAY  successful registrations from one IP + user agent
 
@@ -49,7 +53,10 @@ def ip_attempts_exceeded(ip_hash: str) -> bool:
 
 
 def phone_attempts_exceeded(p_hash: str) -> bool:
-    n = _recent(timedelta(days=1), phone_hash=p_hash).exclude(outcome=Outcome.LIMITED).count()
+    # Not counted: refused attempts (LIMITED) and attempts that failed the bot check
+    # (TURNSTILE) — see the module docstring. What is left needed a solved Turnstile.
+    not_counted = (Outcome.LIMITED, Outcome.TURNSTILE)
+    n = _recent(timedelta(days=1), phone_hash=p_hash).exclude(outcome__in=not_counted).count()
     return n >= settings.REG_PHONE_ATTEMPTS_PER_DAY
 
 

@@ -27,7 +27,9 @@ SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 # Content-Security-Policy from the app as well as from the Cloudflare Transform Rule
 # (docs/operations.md → Cloudflare checklist step 6), so a missing edge rule or a request
 # that reaches the origin some other way is still covered (audit 2026-11-13).
-MIDDLEWARE = [*MIDDLEWARE, "core.middleware.SecurityHeadersMiddleware"]
+# First in the list on purpose: responses that an earlier middleware returns by itself
+# (https redirect, origin-shield 403, CSRF failure) must carry the header too.
+MIDDLEWARE = ["core.middleware.SecurityHeadersMiddleware", *MIDDLEWARE]
 
 # Sessions exist only for staff (public pages set no cookies — CLAUDE.md rule 8).
 # 12 h instead of Django's 2-week default limits a stolen admin session's lifetime.

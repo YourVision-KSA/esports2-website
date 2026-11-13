@@ -20,6 +20,7 @@ import os
 
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand, CommandError
+from django.db import transaction
 from django_otp.plugins.otp_totp.models import TOTPDevice
 
 
@@ -57,23 +58,46 @@ class Command(BaseCommand):
             raise CommandError(f"{url_file} already exists; choose a new path.")
 
         existing = TOTPDevice.objects.filter(user=user)
-        if existing.exists():
-            if not options["replace"]:
-                raise CommandError(
-                    f"{user.username!r} already has a TOTP device. Use --replace to rotate it."
-                )
-            existing.delete()
-            self.stdout.write("Existing device(s) deleted.")
+        if existing.exists() and not options["replace"]:
+            raise CommandError(
+                f"{user.username!r} already has a TOTP device. Use --replace to rotate it."
+            )
 
-        # confirmed=True: the printed URL is handed to the user directly, there is no
-        # separate confirmation step (the admin's own confirm flow is unreachable here).
-        device = TOTPDevice.objects.create(user=user, name="default", confirmed=True)
+        # Create the file BEFORE touching the devices. If the path cannot be written
+        # (missing folder, no permission) the command must stop here: otherwise the old
+        # device is already deleted and the new secret was shown to nobody — the user
+        # would be locked out of /staff/.
+        fh = None
+        if url_file:
+            try:
+                # O_EXCL: never overwrite an existing file; 0600: owner-only.
+                fd = os.open(url_file, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+            except OSError as exc:
+                raise CommandError(
+                    f"Cannot create {url_file} ({exc.strerror}); nothing was changed."
+                ) from None
+            fh = os.fdopen(fd, "w")
+
+        try:
+            # One transaction: the old device is only gone if the new one exists.
+            with transaction.atomic():
+                if existing.exists():
+                    existing.delete()
+                    self.stdout.write("Existing device(s) deleted.")
+                # confirmed=True: the printed URL is handed to the user directly, there
+                # is no separate confirmation step (the admin's own confirm flow is
+                # unreachable here).
+                device = TOTPDevice.objects.create(user=user, name="default", confirmed=True)
+                if fh:
+                    fh.write(device.config_url + "\n")
+                    fh.close()
+        except BaseException:
+            if fh:  # do not leave an empty or half-written file behind
+                fh.close()
+                os.unlink(url_file)
+            raise
         self.stdout.write(f"TOTP device created for {user.username!r}.")
         if url_file:
-            # O_EXCL: never overwrite an existing file; 0600: owner-only.
-            fd = os.open(url_file, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
-            with os.fdopen(fd, "w") as fh:
-                fh.write(device.config_url + "\n")
             self.stdout.write(f"Setup URL written to {url_file} — add it to an authenticator")
             self.stdout.write("app, then DELETE the file.")
         else:

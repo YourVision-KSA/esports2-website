@@ -37,11 +37,18 @@ registrations and brackets continuously from first deploy.
 7. Run migrations as a Cloud Run **job** (same image, `python manage.py migrate`) — not at
    container boot.
 8. `createsuperuser` and TOTP enrollment run **interactively from a staff laptop** against
-   the production database through the Cloud SQL Auth Proxy — **not** as a Cloud Run job:
+   the production database through the Cloud SQL Auth Proxy — **not** as a Cloud Run job.
+   Start the proxy (`cloud-sql-proxy <project>:me-central2:esports-db --port 5433`) and, in
+   that terminal session only, point `DATABASE_URL` at it —
+   `export DATABASE_URL=postgres://<user>:<password>@127.0.0.1:5433/<database>` — otherwise
+   the commands run against your LOCAL database and production still has no admin (the
+   `database-url` secret's value does not work from a laptop: it addresses the instance
+   the way Cloud Run reaches it). Close the terminal afterwards. Why not a job:
    `enroll_totp <username>` shows the otpauth:// URL, which contains the permanent TOTP
    secret, and a job's stdout is kept in Cloud Logging. The command refuses to print the
    URL to anything but a terminal (or `--url-file PATH`, a new 0600 file — delete it after
-   scanning). Enrollment is required because OTPAdminSite refuses login without a confirmed
+   scanning; the command creates the file before it touches the device, so a path that
+   cannot be written changes nothing). Enrollment is required because OTPAdminSite refuses login without a confirmed
    device. Then `python manage.py setup_roles` (groups referee/door with their narrow
    permissions — **re-run it after every upgrade**, it replaces the groups' permissions)
    and create the staff users (roster: DEC-11). Rotate a compromised device with
@@ -84,12 +91,19 @@ registrations and brackets continuously from first deploy.
    (core/middleware.py) — except `/healthz` and `/internal/` — and CF-Connecting-IP becomes
    trustworthy for the vote's per-IP limits.
 6. **Security headers** (Response Header Transform Rule) — set
-   `Content-Security-Policy: default-src 'self'; script-src 'self' https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; worker-src 'self' blob:; base-uri 'none'; frame-ancestors 'none'`.
+   `Content-Security-Policy: default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' blob:; worker-src 'self' blob:; base-uri 'none'; form-action 'self'; frame-ancestors 'none'`.
    All site scripts are external files, so `script-src 'self'` holds; `'unsafe-inline'` styles
-   are required by the current templates; `worker-src blob:` is for the meshopt decoder worker;
-   Turnstile needs the two cloudflare.com entries. The app sends the same policy itself
-   (core/middleware.py `SecurityHeadersMiddleware`, production only) unless the response
-   already carries one, so a missing edge rule is not a gap.
+   are required by the current templates; Turnstile needs the two cloudflare.com entries.
+   The 3D hero needs the rest: `'wasm-unsafe-eval'` because the meshopt decoder that unpacks
+   the model is WebAssembly (it permits compiling WebAssembly only, not `eval()`),
+   `worker-src blob:` for the decoder's worker, and `blob:` in `img-src` and `connect-src`
+   because the model's embedded textures are handed to the browser as `blob:` URLs. Without
+   them the scene fails and every visitor silently gets the poster — after changing the rule,
+   open the home page with the browser console open and check there are no CSP errors.
+   The app sends the same policy itself (core/middleware.py `SecurityHeadersMiddleware`,
+   production only, first in the middleware list so redirects and 403s carry it too) unless
+   the response already carries one, so a missing edge rule is not a gap. **Keep the two
+   identical** — a test compares this line with the app's policy.
 7. Verify with `curl -I`: `cf-cache-status: HIT` on static + content pages, `BYPASS`/`DYNAMIC`
    on forms; **no `Set-Cookie` on cached responses**; a request to the `*.run.app` URL
    (not via the domain) returns 403.
@@ -127,7 +141,9 @@ Variables used below: `P=esports2-prod`, `R=me-central2`, `ORG=YourVision-KSA`,
    - deployer: `gcloud iam service-accounts create esports-deploy` → roles `roles/run.admin`,
      `roles/artifactregistry.writer`, and `roles/iam.serviceAccountUser` **on esports-run only**
 3. **Secrets** (Secret Manager): `secret-key`, `database-url`, `signals-salt`, `turnstile-secret`,
-   `internal-token`, `email-host-password` — generated once, never in the repo or image.
+   `internal-token`, `cf-origin-token`, `email-host-password` — generated once, never in the
+   repo or image. `cf-origin-token` is the origin-shield value (Cloudflare checklist step 5);
+   step 4 below mounts it, so the first deploy fails if the secret does not exist yet.
 4. **Service** (first deploy by hand, from any built image; later deploys only swap the image):
    ```
    gcloud run deploy esports --region $R --image $R-docker.pkg.dev/$P/esports/web:<sha> \
@@ -162,7 +178,9 @@ Variables used below: `P=esports2-prod`, `R=me-central2`, `ORG=YourVision-KSA`,
    review 2026-10-22, M2) and `staging`. The WIF condition above (main-only) is the second
    half of that control: tokens are only issued to workflows running on `main`.
 8. **Staging**: repeat 4–5 as `esports-staging` / `esports-staging-migrate` against the staging
-   database; deploy it with *Run workflow → staging*.
+   database; deploy it with *Run workflow → staging*. If staging is not behind Cloudflare
+   (`ALLOW_NO_ORIGIN_SHIELD=True` instead of `CF_ORIGIN_TOKEN`), also raise the `REG_*`
+   limits there — see "Registration abuse" below.
 9. **Verify**: push a docs-only commit to `main` → CI → Deploy → green smoke test; then rehearse
    the rollback command on staging.
 
@@ -195,13 +213,41 @@ event span).
 
 **Registration launch day:** seat race tests green on the deployed revision (run once against
 staging); waitlist cap set; **`python manage.py check_privacy` prints "complete"** — while
-the privacy notice has [placeholders] the app keeps registration closed and the SiteConfig
-admin refuses a registration date (core/privacy.py); a dry-run registration + withdraw +
+the privacy notice has [placeholders] the app keeps registration closed, the home page
+shows no Register links, and the SiteConfig admin refuses to set or change the
+registration date (other fields can still be saved — core/privacy.py); a dry-run registration + withdraw +
 promotion on staging; export CSV works; Turnstile widget visible on the form.
 
 **Registration abuse (runbook):** the form has Turnstile plus app-side limits per client
 IP, per device (IP + browser) and per phone number (registration/abuse.py, `REG_*`
-settings; a refused request gets HTTP 429 and REG-RATE-LIMITED). Phone numbers are NOT
+settings; a refused request gets HTTP 429 and REG-RATE-LIMITED).
+
+| Setting (env var) | Default | Counts |
+|---|---|---|
+| `REG_IP_ATTEMPTS_PER_10MIN` | 60 | form submissions from one network address in 10 minutes |
+| `REG_IP_REGISTRATIONS_PER_DAY` | 36 | successful registrations from one network address in 24 h |
+| `REG_DEVICE_REGISTRATIONS_PER_DAY` | 12 | successful registrations from one address + browser in 24 h |
+| `REG_PHONE_ATTEMPTS_PER_DAY` | 5 | submissions naming one phone number in 24 h (only those that passed Turnstile, so a script cannot lock out someone else's number) |
+
+Why these numbers: most players register from the university network, and a campus
+leaves the internet through **one shared address** — to the app, the whole campus is one
+"client". A "device" is only that address plus the browser's user-agent text, which is
+**identical for every phone of the same model and OS version**, so it cannot tell two
+students apart. Tighter limits (the first version had 20 / 10 / 3) would have refused
+real students on launch day. The defaults let half of all 72 places come from one network
+in a day and a dozen from one phone model, and still stop a script from taking
+everything; Turnstile and the Cloudflare rate rule are the finer controls. If real
+players report REG-RATE-LIMITED on launch day, raise the matching `REG_*` variable on the
+service (`gcloud run services update esports --update-env-vars REG_…=…`) — no deploy needed.
+
+**Staging without Cloudflare** (`ALLOW_NO_ORIGIN_SHIELD=True`): the app then cannot see
+visitors' real addresses and may see **every visitor as the same address**, so all testers
+share one allowance. Raise the limits on that service before a rehearsal (e.g.
+`REG_IP_ATTEMPTS_PER_10MIN=1000`, `REG_IP_REGISTRATIONS_PER_DAY=500`,
+`REG_DEVICE_REGISTRATIONS_PER_DAY=500`), or the seat-race and dry-run rehearsals stop with
+429 after a few registrations. Never copy those values to production.
+
+Phone numbers are NOT
 verified (no SMS provider — management decision DEC-16), so expect two failure modes:
 - *A scripted wave of fake sign-ups*: admin → Registrations → the **network** column shows
   a hash prefix of the client IP each registration came from; search for it (or filter by

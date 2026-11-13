@@ -70,7 +70,8 @@ def register_form(request, slug):
     1. privacy notice complete (else closed, like any other phase gate)
     2. per-client attempt limit                       → 429, nothing else evaluated
     3. form valid
-    4. per-phone attempt limit, per-client registration caps → 429
+    4. per-phone attempt limit (counts only attempts that passed Turnstile — otherwise
+       a script could lock out someone else's number), per-client registration caps → 429
     5. Turnstile, verified server-side (fail OR outage → reject, player retries;
        docs/architecture.md: registration never goes to a "held" bucket)
     6. the seat transaction (services.register)

@@ -78,3 +78,24 @@ def test_enroll_requires_replace_to_rotate(admin_user):
     call_command("enroll_totp", admin_user.username, "--replace", stdout=TTY())
     device = TOTPDevice.objects.get(user=admin_user)  # exactly one device remains
     assert device.key != old_key
+
+
+def test_unwritable_url_file_changes_nothing(admin_user, tmp_path):
+    """Pre-merge review: with --replace the old device used to be deleted and a new one
+    created BEFORE the file was opened — a bad path locked the user out (the new secret
+    was shown to nobody). The path is now checked first."""
+    call_command("enroll_totp", admin_user.username, stdout=TTY())
+    old_key = TOTPDevice.objects.get(user=admin_user).key
+
+    target = tmp_path / "no-such-folder" / "totp-url.txt"
+    with pytest.raises(CommandError, match="nothing was changed"):
+        call_command("enroll_totp", admin_user.username, "--replace", "--url-file", str(target))
+    assert TOTPDevice.objects.get(user=admin_user).key == old_key  # still the old device
+    assert not target.exists()
+
+
+def test_unwritable_url_file_creates_no_first_device(admin_user, tmp_path):
+    target = tmp_path / "no-such-folder" / "totp-url.txt"
+    with pytest.raises(CommandError, match="nothing was changed"):
+        call_command("enroll_totp", admin_user.username, "--url-file", str(target))
+    assert not TOTPDevice.objects.exists()

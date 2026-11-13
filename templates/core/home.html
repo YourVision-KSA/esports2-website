@@ -26,7 +26,7 @@
         {% if phase == "event" or phase == "archive" %}<li><a href="/bracket/">{{ content.BRACKET_TITLE }}</a></li>{% endif %}
         <li>
           {% if phase == "vote" %}<a class="cta" href="/vote/">{{ content.HERO_BTN_VOTE }}</a>
-          {% else %}<a class="cta" href="{% if phase == 'registration' %}/register/{% else %}#join{% endif %}">{{ content.HERO_BTN_REGISTER }}</a>{% endif %}
+          {% else %}<a class="cta" href="{% if registration_open %}/register/{% else %}#join{% endif %}">{{ content.HERO_BTN_REGISTER }}</a>{% endif %}
         </li>
       </ul>
     </nav>
@@ -42,7 +42,7 @@
         <div class="hero-ctas">
           {% if phase == "vote" %}
           <a class="btn btn-primary" href="/vote/">{{ content.HERO_BTN_VOTE }}</a>
-          {% elif phase == "registration" %}
+          {% elif registration_open %}
           <a class="btn btn-primary" href="/register/">{{ content.HERO_BTN_REGISTER }}</a>
           {% elif phase == "event" or phase == "archive" %}
           <a class="btn btn-primary" href="/bracket/">{{ content.BRACKET_TITLE }}</a>
@@ -144,7 +144,7 @@
         </div>
         <div class="foot">
           <span class="seats">{{ content.LABEL_SEATS }}: <b dir="ltr">{{ game.seats }}</b></span>
-          {% if phase == "registration" %}<a class="go" href="/register/{{ game.slug }}/">{{ content.HERO_BTN_REGISTER }} ←</a>{% endif %}
+          {% if registration_open %}<a class="go" href="/register/{{ game.slug }}/">{{ content.HERO_BTN_REGISTER }} ←</a>{% endif %}
         </div>
       </div>
     </article>
@@ -165,7 +165,7 @@
         <span class="label" style="color: var(--accent);" dir="ltr">FOR PLAYERS</span>
         <h3>{{ content.PATH_PLAYERS }}</h3>
         <p>{{ content.JOIN_TEXT }}</p>
-        <a class="btn btn-primary" href="{% if phase == 'registration' %}/register/{% else %}#join{% endif %}">{{ content.HERO_BTN_REGISTER }}</a>
+        <a class="btn btn-primary" href="{% if registration_open %}/register/{% else %}#join{% endif %}">{{ content.HERO_BTN_REGISTER }}</a>
       </div>
     </div>
     <div class="path-card reveal">
@@ -279,7 +279,7 @@
     <span class="label" style="font-family: var(--num); font-weight: 700; font-size: 12px; letter-spacing: 0.22em; color: var(--accent);" dir="ltr">JOIN GAME</span>
     <h2>{{ content.SEC_JOIN }}</h2>
     <p>{{ content.JOIN_TEXT }}</p>
-    {% if phase == "registration" %}
+    {% if registration_open %}
     <a class="btn btn-primary" href="/register/" style="margin-block-start: 8px;">{{ content.HERO_BTN_REGISTER }}</a>
     {% elif phase == "vote" %}
     <a class="btn btn-primary" href="/vote/" style="margin-block-start: 8px;">{{ content.HERO_BTN_VOTE }}</a>

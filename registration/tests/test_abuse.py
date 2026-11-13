@@ -132,6 +132,36 @@ def test_attempts_per_phone_number_are_limited(client, phase_registration, game)
     assert response.status_code == 429
 
 
+@override_settings(REG_PHONE_ATTEMPTS_PER_DAY=2, TURNSTILE_ENABLED=True)
+def test_failed_bot_checks_cannot_lock_out_a_phone_number(
+    client, phase_registration, game, monkeypatch
+):
+    """Pre-merge review: the phone limit is checked before Turnstile. If attempts that
+    FAILED the bot check counted, a script with no Turnstile solution could spend a
+    stranger's daily allowance and keep them out for 24 hours."""
+    monkeypatch.setattr("core.turnstile.verify", lambda token, ip="": False)
+    for i in range(5):  # the script: well past the limit of 2, never passes Turnstile
+        assert post(client, game, phone="0551112233", ip=f"203.0.113.{i}").status_code == 400
+
+    monkeypatch.setattr("core.turnstile.verify", lambda token, ip="": True)
+    owner = post(client, game, phone="0551112233", ip="198.51.100.200")
+    assert owner.status_code == 302  # the real owner still registers
+    assert Registration.objects.count() == 1
+
+
+def test_default_limits_fit_a_shared_campus_network(client, phase_registration, game):
+    """Pre-merge review: a 'device' is IP + user agent, which is identical for every
+    phone of one model behind the campus NAT. With the DEFAULT settings a dozen students
+    on the same phone model must all get through; the next one is refused."""
+    game.seats = 16
+    game.save()
+    for i in range(12):
+        assert post(client, game, phone=phone(i)).status_code == 302, f"student {i + 1}"
+    assert post(client, game, phone=phone(12)).status_code == 429
+    # ...while a different phone model on the same network is still welcome
+    assert post(client, game, phone=phone(13), ua="Other/1.0").status_code == 302
+
+
 def test_attempt_rows_hold_hashes_only(client, phase_registration, game):
     post(client, game, phone="0551234567")
     attempt = RegistrationAttempt.objects.get()

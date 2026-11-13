@@ -1,7 +1,10 @@
 # Production dependencies — the SOURCE list. Each entry is justified in
 # docs/architecture.md / CLAUDE.md rule 5. After editing, regenerate the hash-pinned lock:
-#   pip-compile --generate-hashes --allow-unsafe requirements.in
-#   pip-compile --generate-hashes --allow-unsafe requirements-dev.in
+#   pip-compile --allow-unsafe --generate-hashes --strip-extras --output-file=requirements.txt requirements.in
+#   pip-compile --allow-unsafe --generate-hashes --strip-extras --output-file=requirements-dev.txt requirements-dev.in
+# pip-compile only resolves for the machine it runs on (and drops lines whose marker does
+# not match it): a dependency that a package needs on Windows only must be listed by hand,
+# WITHOUT a marker — tzdata below, colorama in requirements-dev.in.
 # (pip-tools in any throwaway venv). CI and the Docker image install the .txt locks, so
 # production runs exactly what CI tested (audit 2026-11-13).
 Django>=5.2.19,<5.3        # the framework (5.2 LTS; 5.2.19 = latest security patch, 2026-11)

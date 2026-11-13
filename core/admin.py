@@ -1,6 +1,7 @@
 """Core admin. SiteConfig changes and every PII export are audit-logged."""
 
 import csv
+import re
 
 from django import forms
 from django.contrib import admin
@@ -13,11 +14,16 @@ from .models import AuditLog, Game, OutboxEmail, SiteConfig, TierStat
 # Spreadsheet apps evaluate a cell that starts with one of these as a formula
 # (CSV/formula injection — audit 2026-11-13). Registrants control names and gamer tags.
 _FORMULA_PREFIXES = ("=", "+", "-", "@", "\t", "\r")
+# ...except an international phone number (+9665XXXXXXXX): "+" then digits only is a
+# plain number to a spreadsheet, and a quote in front would break the exported phones.
+_PLAIN_PHONE = re.compile(r"^\+\d+$")
 
 
 def csv_safe(value) -> str:
     """Neutralise a cell for Excel/Sheets: a leading quote makes it plain text."""
     text = "" if value is None else str(value)
+    if _PLAIN_PHONE.match(text):
+        return text
     return "'" + text if text.startswith(_FORMULA_PREFIXES) else text
 
 
@@ -74,9 +80,17 @@ class SiteConfigForm(forms.ModelForm):
     def clean_registration_opens_at(self):
         """Refuse to schedule registration while the privacy notice is unfinished
         (core/privacy.py — audit 2026-11-13). The registration views enforce the same
-        rule at request time, so this is the early, visible warning for staff."""
+        rule at request time, so this is the early, visible warning for staff.
+
+        Only when the date is being set or changed: with a date already saved, staff
+        must still be able to edit the other fields (stream URLs, event dates, archive)."""
         value = self.cleaned_data.get("registration_opens_at")
-        if value and not privacy.notice_complete():
+
+        def to_second(moment):  # the admin's time box has no microseconds
+            return moment.replace(microsecond=0) if moment else None
+
+        unchanged = to_second(value) == to_second(self.instance.registration_opens_at)
+        if value and not unchanged and not privacy.notice_complete():
             missing = ", ".join(sorted({key for key, _ in privacy.unfilled_placeholders()}))
             raise forms.ValidationError(f"{privacy.STAFF_MESSAGE} Unfilled: {missing}.")
         return value

@@ -59,7 +59,8 @@ def test_complete_production_config_starts():
     assert values["REQUIRE_2FA"] is True
     assert values["CSRF_COOKIE_HTTPONLY"] is values["SESSION_COOKIE_SECURE"] is True
     assert values["CSRF_COOKIE_SECURE"] is True
-    assert "core.middleware.SecurityHeadersMiddleware" in values["MIDDLEWARE"]
+    # First, so responses returned by any other middleware carry the CSP too.
+    assert values["MIDDLEWARE"][0] == "core.middleware.SecurityHeadersMiddleware"
 
 
 @pytest.mark.parametrize(
@@ -108,3 +109,68 @@ def test_csp_header_added_unless_already_present(rf):
         SecurityHeadersMiddleware(preset)(rf.get("/"))["Content-Security-Policy"]
         == "default-src 'none'"
     )
+
+
+def _directives(policy: str) -> dict[str, list[str]]:
+    return {part.split()[0]: part.split()[1:] for part in policy.split(";") if part.strip()}
+
+
+def test_csp_allows_what_the_3d_hero_needs():
+    """Pre-merge review: the hero scene loads a meshopt-compressed .glb. The decoder is
+    WebAssembly ('wasm-unsafe-eval'), and the model's embedded textures reach the browser
+    as blob: URLs (fetched → connect-src, decoded as images → img-src). Without these the
+    scene silently falls back to the poster for every visitor."""
+    from core.middleware import CONTENT_SECURITY_POLICY
+
+    csp = _directives(CONTENT_SECURITY_POLICY)
+    assert "'wasm-unsafe-eval'" in csp["script-src"]
+    assert "blob:" in csp["connect-src"]
+    assert "blob:" in csp["img-src"]
+    # ...and nothing broader than that
+    assert "'unsafe-eval'" not in csp["script-src"]
+    assert "'unsafe-inline'" not in csp["script-src"]
+
+
+def test_documented_edge_rule_matches_the_app_policy():
+    """docs/operations.md tells staff which CSP to paste into the Cloudflare rule; the
+    edge rule overrides the app's header, so the two must not drift apart."""
+    import re
+    from pathlib import Path
+
+    from core.middleware import CONTENT_SECURITY_POLICY
+
+    doc = (Path(__file__).resolve().parents[2] / "docs" / "operations.md").read_text()
+    documented = re.search(r"`Content-Security-Policy: ([^`]+)`", doc).group(1)
+    assert _directives(documented) == _directives(CONTENT_SECURITY_POLICY)
+
+
+@pytest.fixture
+def production_middleware(settings):
+    """The same order production.py builds: the CSP middleware in front of base's list."""
+    settings.MIDDLEWARE = ["core.middleware.SecurityHeadersMiddleware", *settings.MIDDLEWARE]
+
+
+@pytest.mark.django_db
+def test_responses_from_earlier_middleware_carry_the_csp(production_middleware, settings):
+    from django.test import Client
+
+    from core.middleware import CONTENT_SECURITY_POLICY
+
+    # the https redirect (SecurityMiddleware)
+    settings.SECURE_SSL_REDIRECT = True
+    redirect = Client().get("/")
+    assert redirect.status_code == 301
+    assert redirect["Content-Security-Policy"] == CONTENT_SECURITY_POLICY
+    settings.SECURE_SSL_REDIRECT = False
+
+    # the origin-shield 403 (CloudflareOriginMiddleware)
+    settings.CF_ORIGIN_TOKEN = "shield"
+    blocked = Client().get("/")
+    assert blocked.status_code == 403
+    assert blocked["Content-Security-Policy"] == CONTENT_SECURITY_POLICY
+    settings.CF_ORIGIN_TOKEN = ""
+
+    # the CSRF failure page (CsrfViewMiddleware)
+    csrf = Client(enforce_csrf_checks=True).post("/staff/login/", {"username": "x"})
+    assert csrf.status_code == 403
+    assert csrf["Content-Security-Policy"] == CONTENT_SECURITY_POLICY

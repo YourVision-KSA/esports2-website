@@ -3,3 +3,8 @@
 pytest>=8
 pytest-django>=4.9
 ruff>=0.8
+# Not a new dependency: pytest (and qrcode) require colorama on Windows only, so
+# pip-compile on macOS/Linux leaves it out of the lock, and the hash-checked
+# `pip install -r requirements-dev.txt` then fails on a Windows machine. Listed here
+# without a marker so the lock pins it for every platform (it is tiny and pure Python).
+colorama>=0.4.6
