@@ -7,7 +7,7 @@
 # WITHOUT a marker — tzdata below, colorama in requirements-dev.in.
 # (pip-tools in any throwaway venv). CI and the Docker image install the .txt locks, so
 # production runs exactly what CI tested (audit 2026-11-13).
-Django>=5.2.19,<5.3        # the framework (5.2 LTS; 5.2.19 = latest security patch, 2026-11)
+Django>=6.1.3,<6.2        # the framework (5.2 LTS; 5.2.19 = latest security patch, 2026-11)
 psycopg[binary]>=3.2       # PostgreSQL driver
 django-environ>=0.11       # settings from environment variables
 django-otp>=1.5            # staff TOTP two-factor auth (CLAUDE.md hard rule 4)
