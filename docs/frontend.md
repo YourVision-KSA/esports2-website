@@ -14,6 +14,14 @@
   assets, preview resolution). Production uses full-resolution, licensed or event-owned
   photography with the same treatment: dark duotone atmosphere, gradient-to-background
   overlay, cyan/magenta light (rev 4).
+  **2026-11-16:** the game-card images and the trophy poster were replaced with real
+  assets: `fifa.jpg` / `call-of-duty.jpg` / `default.jpg` are Pexels-licensed photos
+  (sources on `/credits/`) graded to the palette with `frontend/scripts/grade-photo.mjs`
+  (run it on any future event photo too); `rocket-league.jpg` is an AI-generated arena
+  render (brand-free, full-res original in the owner's Canva media library);
+  `trophy.jpg` is the trophy model's own render regraded to navy/gold (it doubles as
+  the 3D scene's poster). `arena.jpg`, `controller.jpg`, `crowd.jpg` are still the
+  low-res placeholders — replace with event photography via the same script.
 - **Game-card imagery rule:** each tournament card carries imagery that EVOKES its game
   without using game IP (no official art, logos or characters): rocket-car + giant ball in a
   neon arena (Rocket League), night football stadium (EA FC), tactical soldier silhouette
@@ -178,6 +186,16 @@ Deliberate deviations, with reasons:
   (reverted; owner preferred the realistic model) → linked credits page. **Do not remove the
   badge link or /credits/ while this model ships** — that would breach the licence; switch to
   a CC0/no-credit asset instead.
+
+### Trophy scene implementation (2026-11-16) — W5 item, same pipeline as the hero
+
+| Piece | Where | What it does |
+|---|---|---|
+| Loader | `frontend/src/hero.js` (`arm()`) | Same gates as the hero (reduced motion, LOW tier, model shipped, load → idle → near viewport 600 px). The trophy sits far down the page, so in practice it loads on scroll approach. Only the hero reports to the `/beacon/3d` beacon — outcomes stay the fixed TierStat list. |
+| Scene | `frontend/src/scene.js` (`VARIANTS.trophy`) | One module for both scenes (shared three.js chunk, +~1 KB gzip). Trophy: gold cup over the pedestal with gold + faint cyan rings, warm key light, slow full turn every 16 s (the cup is symmetric), drag to rotate, no parallax. `#trophy-still` freezes it for poster capture. |
+| Model | `static/models/trophy.glb` (17 KB, 518 tris; `npm run model:trophy -- <raw.glb>`) | "Trophy" by CreativeTrio, poly.pizza, **CC0** (no credit required; listed on `/credits/` anyway). `frontend/scripts/optimize-trophy.mjs`: plinth → cool silver, polished-metal material, quantize + meshopt, WebP texture. |
+| Poster | `static/img/trophy.jpg` (800×1029, 21 KB) | The model's own render regraded to navy/gold (same trophy, so the fade-in matches). To replace with a pixel-perfect capture: serve the site, open `/#trophy-still`, scroll to the prizes section and screenshot the frame — same procedure as the hero's `/#hero-still`. |
+| Wiring | `templates/core/home.html`, `core/tests/test_trophy_3d.py` | `{% static_if_exists "models/trophy.glb" %}` → `data-model` on `#trophy-scene`; no model/bundle → unchanged poster panel. Budget: `npm run budget` enforces ≤ 1.0 MB for the trophy model. |
 
 ### Bracket page (2026-10-22)
 
