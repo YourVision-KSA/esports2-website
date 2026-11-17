@@ -3,8 +3,9 @@
 import pytest
 from django.core.management import call_command
 
-from conftest import fill_confirmed
+from conftest import fill_confirmed, set_phase
 from core.models import AuditLog, OutboxEmail
+from core.phases import Phase
 from invitations.models import Invitation
 from registration.models import Player
 
@@ -52,6 +53,7 @@ def test_export_refused_for_non_superuser(game, django_user_model, rf):
 def test_pii_purge_command(game):
     from bracket.draw import draw
 
+    set_phase(Phase.ARCHIVE)
     fill_confirmed(game, 16)
     draw(game, seed=1)
     Invitation.objects.create(guest_name="ضيف مهم", contact_email="vip@example.com")

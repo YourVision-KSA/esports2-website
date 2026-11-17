@@ -9,13 +9,19 @@ from django.contrib.auth.models import Group, Permission
 from django.core.management.base import BaseCommand
 
 ROLE_PERMS = {
+    # Referees: /staff/results/ (needs change_match) and the read-only Match admin. Match
+    # rows hold gamer tags only; result corrections in the admin are superuser-only
+    # (bracket/admin.py). No access to players, invitations, ballots or settings.
     "referee": [
         ("bracket", "view_match"),
         ("bracket", "change_match"),
     ],
+    # Door staff: ONLY the check-in page (/staff/checkin/). No admin model permission at
+    # all — with view/change_invitation they could rewrite invitations in the admin and see
+    # every VIP's contact details (audit 2026-11-13, finding 2). Re-run this command after
+    # upgrading: group.permissions.set() replaces the old permissions.
     "door": [
-        ("invitations", "view_invitation"),
-        ("invitations", "change_invitation"),
+        ("invitations", "checkin_invitation"),
     ],
 }
 

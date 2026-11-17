@@ -17,9 +17,9 @@ sequence and gates — this file only tracks execution). Mark a task `[x]` when 
 - [x] 55/55 tests green (incl. concurrency on real PostgreSQL 16), ruff clean
 - [x] Local dev environment: portable PostgreSQL 16 (`scripts/dev-db.ps1`)
 - [x] DEC-15 design delivered → "Arena Night" rev 3.1 theme implemented on the site
-- [x] GitHub organization **YourVision-KSA** created, `esports2-website` pushed (private)
+- [x] GitHub organization **YourVision-KSA** created, `esports2-website` pushed (the repo is public — DEC-17)
 - [x] Org profile branded from `YOUR VISION Guide Line.pdf` (README, colors, logo assets)
-- [x] Owner invitation sent to Yousef (24446357ksa@aou.edu.sa)
+- [x] Owner invitation sent to Yousef
 - [x] Local smoke test 2026-10-21: `/`, `/vote/`, `/register/`, `/bracket/`, `/healthz` all OK
 - [x] Yousef accepted the GitHub owner invitation (active org admin, 2026-10-21)
 - [x] Yousef's Mac dev environment set up (README → Quickstart macOS); 59/59 tests green
@@ -99,7 +99,7 @@ Order agreed — code work that did NOT wait on owner decisions:
       behind the shield), M2 WIF main-only + required reviewers, constant-time internal
       token compare, 12 h staff sessions, pinned CI actions, outbox ERROR logging without
       recipient PII, Error Reporting + CSP documented in operations.md. 9 new tests.
-- [x] Owner status update (Arabic) written: `company-update-2026-10-22.md` (untracked)
+- [x] Owner status update (Arabic) written (kept out of git)
 - [x] Verify staff 2FA enrollment flow end-to-end (left over from W1) — gap found and
       fixed 2026-10-21: new `enroll_totp` management command + 4 tests (59 total green)
 

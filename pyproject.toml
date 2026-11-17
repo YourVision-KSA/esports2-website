@@ -16,5 +16,6 @@ DJANGO_SETTINGS_MODULE = "esports.settings.local"
 python_files = ["test_*.py"]
 markers = [
     "concurrency: multi-threaded tests that need real PostgreSQL (docs/testing.md)",
+    "real_privacy_notice: run with the real privacy strings (registration gate active)",
 ]
 filterwarnings = ["ignore::DeprecationWarning"]

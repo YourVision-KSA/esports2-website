@@ -71,6 +71,19 @@ state. Flaky-proof by asserting invariants, not orderings.
 | `test_export_audit_logged` | admin CSV export writes an AuditLog row |
 | `test_pii_purge_command` | end-of-life command removes PII per the retention spec in data-model.md, keeps results/audit |
 
+## Audit 2026-11-13 additions
+
+| Test file | Covers |
+|---|---|
+| `registration/tests/test_abuse.py` | Turnstile on registration (fail and outage both reject); per-client/device/network/phone limits keyed on the trusted client IP; hashes only; bulk removal promotes only real waitlisted players in FIFO order; phone release; operator actions admin-only |
+| `invitations/tests/test_roles.py` | door = check-in permission only, no admin, no VIP contacts; referee boundaries; invitation status only via audited services; staff pages need a verified TOTP device |
+| `core/tests/test_production_settings.py` | production refuses to start without CF_ORIGIN_TOKEN / Turnstile / SITE_BASE_URL (subprocess); CSP middleware |
+| `core/tests/test_privacy_gate.py` | registration closed while the privacy notice has [placeholders]; SiteConfig admin refuses; `check_privacy` |
+| `core/tests/test_audit_misc.py`, `voting/tests/test_audit_fixes.py` | manage-link regeneration, outbox bodies, CSV formula injection, purge safety, draw seed, deploy/CI/Docker hygiene, unicode digits, ballot admin read-only, 14-day signals strip |
+
+Tests run with the privacy gate switched off (conftest.py) unless marked
+`@pytest.mark.real_privacy_notice`, because the real notice still has placeholders.
+
 ## CI (GitHub Actions)
 
 - Job 1: ruff check + format check.

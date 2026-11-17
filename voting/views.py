@@ -85,7 +85,9 @@ def vote(request):
             _set_voter_cookie(response, token)
             return response
 
-        choice_ids = [int(v) for v in request.POST.getlist("choices") if v.isdigit()]
+        # isdecimal(), not isdigit(): "²".isdigit() is True but int("²") raises → was a 500
+        # (audit 2026-11-13). Arabic-Indic digits are decimal and int() accepts them.
+        choice_ids = [int(v) for v in request.POST.getlist("choices") if v.isdecimal()]
         ts_ok = turnstile.verify(request.POST.get("cf-turnstile-response", ""), client_ip(request))
         try:
             services.cast_ballot(

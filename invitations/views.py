@@ -1,12 +1,13 @@
 """Invitation views: the public guest page (uniform 404 for unknown/revoked
 tokens — no validity oracle) and the door-staff check-in page."""
 
-from django.contrib.auth.decorators import permission_required
 from django.db.models import Q
 from django.http import Http404
 from django.shortcuts import render
 from django.utils.safestring import mark_safe
 from django.views.decorators.cache import never_cache
+
+from core.staff import staff_page
 
 from . import services
 from .models import Invitation
@@ -50,7 +51,7 @@ def _token_from(raw: str) -> str:
 
 
 @never_cache
-@permission_required("invitations.change_invitation", raise_exception=True)
+@staff_page("invitations.checkin_invitation")
 def staff_checkin(request):
     """Door-staff page (docs/routes.md /staff/checkin/). Two steps, so staff can check
     the guest's ID before anything is recorded:

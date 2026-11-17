@@ -32,6 +32,11 @@ class Invitation(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        # The door role holds ONLY this permission (core/management/commands/setup_roles.py):
+        # it opens /staff/checkin/ and nothing in the Django admin (audit 2026-11-13).
+        permissions = [("checkin_invitation", "Can check guests in at the door")]
+
     def __str__(self):
         return f"{self.guest_name} [{self.status}]"
 

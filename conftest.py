@@ -11,6 +11,21 @@ from core.models import Game, SiteConfig
 from core.phases import Phase
 
 # ---------------------------------------------------------------------------
+# Privacy-notice gate (core/privacy.py)
+# ---------------------------------------------------------------------------
+
+
+@pytest.fixture(autouse=True)
+def _privacy_notice_complete(request, monkeypatch):
+    """The real notice still has [placeholders] until the owner decides DEC-08/DEC-09, and
+    while it does, registration stays closed. Most tests exercise registration itself, so
+    they run as if the notice were complete; tests of the gate are marked
+    @pytest.mark.real_privacy_notice and see the real strings."""
+    if request.node.get_closest_marker("real_privacy_notice") is None:
+        monkeypatch.setattr("core.privacy.unfilled_placeholders", lambda: [])
+
+
+# ---------------------------------------------------------------------------
 # Phase control
 # ---------------------------------------------------------------------------
 
