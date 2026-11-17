@@ -8,7 +8,7 @@
     "watch": "vite build --watch --mode development",
     "budget": "node scripts/budget.mjs",
     "model": "node scripts/optimize-model.mjs",
-    "model:trophy": "node scripts/optimize-trophy.mjs"
+    "model:trophy": "node scripts/build-trophy.mjs"
   },
   "dependencies": {
     "jsqr": "1.4.0",

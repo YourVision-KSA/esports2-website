@@ -52,7 +52,8 @@ def test_home_with_trophy_model_wires_it_independently_of_hero(client, trophy_sh
 
 
 def test_credits_page_lists_trophy_and_photo_sources(client):
-    """CC0 needs no credit, but the sources are listed on /credits/ for completeness."""
+    """The trophy is an original code-built model (no licence to honour); the photo
+    sources are listed on /credits/ for completeness."""
     body = client.get("/credits/").content.decode()
-    assert "CreativeTrio" in body and "CC0" in body
+    assert "build-trophy.mjs" in body
     assert "Pexels" in body
