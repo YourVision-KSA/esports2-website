@@ -36,7 +36,7 @@ follow the owner-supplied event logo (frontend rev 4 "logo palette": cyan / mage
 on deep navy, logo lockup in the header — `docs/frontend.md`). Owner sign-off pending. Code lives in the GitHub org
 [YourVision-KSA](https://github.com/YourVision-KSA/esports2-website) (public repository —
 keep secrets, prices and personal data out of it).
-Timeline and gates: `docs/plan.md` · execution checklist per person: `docs/tasks.md`.
+Timeline and gates: `docs/plan.md` · execution checklist: `docs/tasks.md`.
 Target: vote opens ~Nov 2, registration ~Nov 16, event late Nov / early Dec 2026.
 
 ## Quickstart (Windows)
