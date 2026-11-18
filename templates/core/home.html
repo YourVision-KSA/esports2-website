@@ -244,10 +244,12 @@
         {% endfor %}
       </ol>
     </div>
-    <!-- 3D trophy scene (lazy; photo poster = fallback) -->
-    <div style="flex: 1 1 360px; min-width: 0;" id="trophy-scene">
+    <!-- 3D trophy scene (lazy; photo poster = LOW/FALLBACK tier).
+         frontend/src/hero.js mounts it on scroll approach, like the hero scene. -->
+    {% static_if_exists "models/trophy.glb" as trophy_model %}
+    <div style="flex: 1 1 360px; min-width: 0;" id="trophy-scene"{% if trophy_model %} data-model="{{ trophy_model }}"{% endif %}>
       <div class="trophy-frame reveal">
-        <img src="{% static 'img/trophy.jpg' %}" alt="">
+        <img class="scene-poster" src="{% static 'img/trophy.jpg' %}" alt="" decoding="async" loading="lazy">
         <div class="shade" aria-hidden="true"></div>
         <div class="scene-badge"><i></i><span dir="ltr">3D TROPHY SCENE</span></div>
       </div>

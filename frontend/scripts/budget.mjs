@@ -42,6 +42,12 @@ const budgets = [
       ? statSync(join(root, "static/models/controller.glb")).size
       : 0,
   },
+  {
+    // secondary scene (docs/frontend.md: ≤ 1.0 MB, lazy)
+    name: "trophy model (glb)",
+    limit: 1.0 * 1024 * KB,
+    size: existsSync(join(root, "static/models/trophy.glb")) ? statSync(join(root, "static/models/trophy.glb")).size : 0,
+  },
 ];
 
 let failed = false;
