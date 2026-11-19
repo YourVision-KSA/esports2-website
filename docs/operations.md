@@ -79,8 +79,13 @@ registrations and brackets continuously from first deploy.
 3. **Rate limiting**: POST `/vote/` 10/min/IP → managed challenge; POST `/register/*`
    5/min/IP → managed challenge; `/staff/` login 5/min/IP → block 10 min;
    POST `/beacon/*` 6/min/IP → block (keeps the anonymous 3D counters honest).
-   The app has its own registration limits too (registration/abuse.py, `REG_*` settings)
-   — they hold even if an edge rule is missing.
+   The app has its own limits too — they hold even if an edge rule is missing:
+   registration (registration/abuse.py, `REG_*`), vote bursts (`VOTE_*`), staff login
+   (core/staff_login.py, `STAFF_LOGIN_*`) and the beacon (`BEACON_PER_NETWORK_10MIN`, per
+   network per 10 min, in process memory → 429). All app limits count per client network:
+   the address for IPv4, the /64 for IPv6.
+   Note: the POST `/register/*` 5/min/IP edge rule also counts the whole campus NAT as one
+   IP; use **managed challenge** (as above), never block, for that rule.
 4. **Turnstile**: create one widget covering the domain; site key → env `TURNSTILE_SITE_KEY`,
    secret → Secret Manager. Both the vote and the registration form use it.
 5. **Origin shield** (security review 2026-10-22, M1): generate a secret (`openssl rand -hex 32`)
@@ -89,7 +94,13 @@ registrations and brackets continuously from first deploy.
    service as `CF_ORIGIN_TOKEN`, and add it as GitHub Actions secret `CF_ORIGIN_TOKEN` (the
    deploy smoke test sends it). From then on direct hits on the `*.run.app` URL get 403
    (core/middleware.py) — except `/healthz` and `/internal/` — and CF-Connecting-IP becomes
-   trustworthy for the vote's per-IP limits.
+   trustworthy for the vote's per-IP limits. The app trusts CF-Connecting-IP and
+   X-Client-ASN only on requests that carry this token (core/security.py).
+5b. **ASN header** (security assessment 2026-11-19, YV-39): Transform Rule (Modify Request
+   Header) → **Set** (not Add) `X-Client-ASN` to the dynamic value `ip.src.asnum` on all
+   proxied requests. "Set" overwrites whatever a client sent. Without this rule the
+   vote's datacenter hold (voting/asns.py) never fires and the ASN column stays empty; a
+   client-sent X-Client-ASN is ignored unless the request also carries the origin token.
 6. **Security headers** (Response Header Transform Rule) — set
    `Content-Security-Policy: default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' blob:; worker-src 'self' blob:; base-uri 'none'; form-action 'self'; frame-ancestors 'none'`.
    All site scripts are external files, so `script-src 'self'` holds; `'unsafe-inline'` styles
@@ -219,13 +230,16 @@ registration date (other fields can still be saved — core/privacy.py); a dry-r
 promotion on staging; export CSV works; Turnstile widget visible on the form.
 
 **Registration abuse (runbook):** the form has Turnstile plus app-side limits per client
-IP, per device (IP + browser) and per phone number (registration/abuse.py, `REG_*`
-settings; a refused request gets HTTP 429 and REG-RATE-LIMITED).
+network, per device (network + browser) and per phone number (registration/abuse.py,
+`REG_*` settings; a refused request gets HTTP 429 and REG-RATE-LIMITED). "Network" is the
+address for IPv4 and the /64 for IPv6 (one IPv6 line is a whole /64 — security assessment
+2026-11-19, YV-07).
 
 | Setting (env var) | Default | Counts |
 |---|---|---|
-| `REG_IP_ATTEMPTS_PER_10MIN` | 60 | form submissions from one network address in 10 minutes |
-| `REG_IP_REGISTRATIONS_PER_DAY` | 36 | successful registrations from one network address in 24 h |
+| `REG_IP_ATTEMPTS_PER_10MIN` | 60 | **verified** submissions from one network in 10 minutes — only those that passed form validation AND Turnstile, so nobody can lock out the campus with junk or unsolved POSTs (YV-06) |
+| `REG_IP_FLOOD_PER_10MIN` | 600 | **all** submissions from one network in 10 minutes — a ceiling against raw floods only |
+| `REG_IP_REGISTRATIONS_PER_DAY` | 36 | successful registrations from one network in 24 h |
 | `REG_DEVICE_REGISTRATIONS_PER_DAY` | 12 | successful registrations from one address + browser in 24 h |
 | `REG_PHONE_ATTEMPTS_PER_DAY` | 5 | submissions naming one phone number in 24 h (only those that passed Turnstile, so a script cannot lock out someone else's number) |
 
@@ -243,11 +257,15 @@ service (`gcloud run services update esports --update-env-vars REG_…=…`) —
 **Staging without Cloudflare** (`ALLOW_NO_ORIGIN_SHIELD=True`): the app then cannot see
 visitors' real addresses and may see **every visitor as the same address**, so all testers
 share one allowance. Raise the limits on that service before a rehearsal (e.g.
-`REG_IP_ATTEMPTS_PER_10MIN=1000`, `REG_IP_REGISTRATIONS_PER_DAY=500`,
+`REG_IP_ATTEMPTS_PER_10MIN=1000`, `REG_IP_FLOOD_PER_10MIN=5000`,
+`REG_IP_REGISTRATIONS_PER_DAY=500`,
 `REG_DEVICE_REGISTRATIONS_PER_DAY=500`), or the seat-race and dry-run rehearsals stop with
 429 after a few registrations. Never copy those values to production.
 
-Phone numbers are NOT
+Phone numbers are normalised strictly (security assessment 2026-11-19, YV-33): Arabic-Indic
+and Persian digits become ASCII, spaces/dashes/brackets/direction marks are removed, and the
+result must be `+9665` + 8 digits — anything else (letters, symbols) is refused, and a DB
+check constraint enforces the stored form. Phone numbers are NOT
 verified (no SMS provider — management decision DEC-16), so expect two failure modes:
 - *A scripted wave of fake sign-ups*: admin → Registrations → the **network** column shows
   a hash prefix of the client IP each registration came from; search for it (or filter by
@@ -279,13 +297,30 @@ Before the draw, staff review the confirmed list for obvious fakes.
 - Data restore: Cloud SQL PITR to a new instance → point staging at it → verify → swap
   `DATABASE_URL`. Rehearse once before the event.
 
+## Staff login throttle
+
+`/staff/login/` (core/staff_login.py, security assessment 2026-11-19, YV-38) asks for
+username, password **and** the 6-digit authenticator code on one page, and answers every
+failure with the same message — it never confirms a right password before the code.
+Failed attempts are stored as hashes only (`StaffLoginFailure`). While, in the last
+`STAFF_LOGIN_WINDOW_MINUTES` (15), the typed username has `STAFF_LOGIN_FAILURES_PER_ACCOUNT`
+(5) failures or the client network has `STAFF_LOGIN_FAILURES_PER_NETWORK` (20), the
+password is not checked and the page says "Too many failed sign-in attempts". It clears by
+itself when the window passes. To unlock someone at once (after verifying them):
+`python manage.py shell -c "from core.models import StaffLoginFailure as F; F.objects.all().delete()"`.
+Someone hammering a staff username can keep that account locked: if it happens, switch on
+the Cloudflare `/staff/` rule (Cloudflare checklist step 3) and unlock as above.
+
 ## End of life (after the event)
 
 1. Phase → archive: freeze results/winners/sponsors page; disable all forms.
 2. Exports for organizer + Federation (audit-logged).
 3. At the published retention deadline: run the PII purge command
    `python manage.py purge_pii --yes` (data-model.md → Retention; it refuses unless the
-   site is archived — step 1); delete `SIGNALS_SALT`.
+   site is archived — step 1); delete `SIGNALS_SALT`. The purge also anonymises the Django
+   admin history (`django_admin_log`) of players, registrations, invitations and outbox
+   mail — who did what and when is kept, the object's name (e.g. a VIP's) is replaced by
+   "purged" (YV-37) — and deletes the staff-login failure hashes.
 4. Final DB dump to the organizer's encrypted storage (per retention policy), then delete:
    Cloud Run services, Cloud SQL instance **and its backups**, Artifact Registry images,
    Scheduler jobs, secrets. Downgrade/close the billing account before trial end if nothing

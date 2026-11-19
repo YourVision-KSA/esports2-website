@@ -4,8 +4,6 @@ Cache policy follows docs/routes.md: edge-cached pages must carry no per-visitor
 state — no CSRF token, no Set-Cookie (CLAUDE.md hard rule 8).
 """
 
-import hmac
-
 from django.conf import settings
 from django.db import connection
 from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
@@ -16,6 +14,7 @@ from django.views.decorators.http import require_POST
 
 from .models import Game
 from .outbox import send_due
+from .security import secret_matches
 
 
 @cache_control(public=True, max_age=60, s_maxage=60)
@@ -76,8 +75,9 @@ def phase_closed(request, message_key: str = "PHASE_SOON"):
 def internal_outbox(request):
     """Scheduler tick: deliver due outbox emails (docs/operations.md)."""
     token = request.headers.get("X-Internal-Token", "")
-    # constant-time compare: no timing oracle on the shared secret
-    if not settings.INTERNAL_TOKEN or not hmac.compare_digest(token, settings.INTERNAL_TOKEN):
+    # constant-time byte compare: no timing oracle, and a non-ASCII header is a 403, not
+    # a 500 (security assessment 2026-11-19, YV-40)
+    if not secret_matches(token, settings.INTERNAL_TOKEN):
         return HttpResponseForbidden()
     return JsonResponse({"sent": send_due()})
 
@@ -102,15 +102,19 @@ def beacon_tier(request):
     CSRF-exempt by necessity: it is fired with navigator.sendBeacon from the edge-cached
     home page, which carries no CSRF token (rule 8). That is safe here because the only
     effect is +1 on an anonymous counter, values come from fixed lists, the body is capped,
-    and Cloudflare rate-limits the path (docs/operations.md)."""
+    each client network may send BEACON_PER_NETWORK_10MIN beacons per 10 minutes
+    (core.beacon.beacon_allowed — holds without Cloudflare), and Cloudflare rate-limits
+    the path as well (docs/operations.md)."""
     from urllib.parse import parse_qs
 
     from django.http import HttpResponseNotAllowed
 
-    from .beacon import record_tier
+    from .beacon import beacon_allowed, record_tier
 
     if request.method != "POST":
         return HttpResponseNotAllowed(["POST"])
+    if not beacon_allowed(request):
+        return HttpResponse(status=429)
     if len(request.body) > 200:
         return HttpResponse(status=413)
     data = parse_qs(request.body.decode("utf-8", "ignore"))

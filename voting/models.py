@@ -21,7 +21,8 @@ class Ballot(models.Model):
     # HMAC hashes only; raw IP/UA are never stored (CLAUDE.md hard rule 7).
     ip_hash = models.CharField(max_length=64, db_index=True)
     ua_hash = models.CharField(max_length=64)
-    asn = models.PositiveIntegerField(null=True, blank=True)
+    # 32-bit ASNs exceed PostgreSQL's integer, hence BigInteger (YV-39).
+    asn = models.PositiveBigIntegerField(null=True, blank=True)
     # Coarse heuristics for review; stripped 14 days after close (docs/voting.md).
     signals = models.JSONField(null=True, blank=True)
     held_reason = models.CharField(max_length=40, blank=True)

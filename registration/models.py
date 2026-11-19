@@ -6,22 +6,44 @@ logic: it holds even if two requests race past the service-layer check.
 
 import re
 import secrets
+import unicodedata
 
 from django.core.exceptions import ValidationError
 from django.db import models
 
 from core.security import token_hash
 
+# Arabic-Indic (U+0660–0669) and Extended Arabic-Indic / Persian (U+06F0–06F9) digits →
+# ASCII. An Arabic phone keyboard types these, and they are the same number.
+_TO_ASCII_DIGITS = str.maketrans("٠١٢٣٤٥٦٧٨٩۰۱۲۳۴۵۶۷۸۹", "0123456789" * 2)
+# Formatting a person or a phone may put in a number: whitespace (any, incl. no-break
+# space), hyphens/dashes, brackets, dots, and the invisible direction marks that RTL
+# text fields insert (LRM, RLM, ALM, LRE…PDF, LRI…PDI).
+_FORMATTING = re.compile(r"[\s\-\u2010-\u2015().\u200e\u200f\u061c\u202a-\u202e\u2066-\u2069]")
+# The ONLY stored form: +9665 followed by exactly 8 ASCII digits.
+PHONE_RE = re.compile(r"\+9665[0-9]{8}", re.ASCII)
+
 
 def normalize_phone(raw: str) -> str:
-    """Normalize a Saudi mobile number to +9665XXXXXXXX. Raises ValidationError."""
-    digits = re.sub(r"[\s\-()]", "", raw or "")
-    if digits.startswith("+9665") and len(digits) == 13:
-        return digits
-    if digits.startswith("9665") and len(digits) == 12:
-        return f"+{digits}"
-    if digits.startswith("05") and len(digits) == 10:
-        return f"+966{digits[1:]}"
+    """Normalize a Saudi mobile number to +9665XXXXXXXX. Raises ValidationError.
+
+    Security assessment 2026-11-19 (YV-33): this used to strip a few characters and
+    check only the prefix and length, so letters ("05abcdefgh") were accepted and the
+    same number typed with Arabic-Indic digits became a second, different player.
+    Now: Unicode-normalise (NFKC: full-width digits → ASCII), map Arabic-Indic and
+    Persian digits to ASCII, strip formatting, accept the usual prefixes
+    (05…, 9665…, +9665…, 009665…), then validate the result strictly against PHONE_RE.
+    Anything else is rejected."""
+    text = unicodedata.normalize("NFKC", raw or "").translate(_TO_ASCII_DIGITS)
+    text = _FORMATTING.sub("", text)
+    if text.startswith("00966"):
+        text = "+" + text[2:]
+    elif text.startswith("966"):
+        text = "+" + text
+    elif text.startswith("05"):
+        text = "+966" + text[1:]
+    if PHONE_RE.fullmatch(text):
+        return text
     raise ValidationError("invalid phone")
 
 
@@ -35,12 +57,25 @@ class Player(models.Model):
     the only credential (CLAUDE.md hard rule 4). Only its hash is stored."""
 
     full_name = models.CharField(max_length=120)
-    phone = models.CharField(max_length=16, unique=True)  # normalized +9665XXXXXXXX
+    # normalized +9665XXXXXXXX (normalize_phone); "purged-<pk>" / "released-<pk>" after
+    # the end-of-life purge or a staff phone release. Enforced by the check constraint.
+    phone = models.CharField(max_length=16, unique=True)
     email = models.EmailField(blank=True)
     manage_token_hash = models.CharField(max_length=64, unique=True)
     consent_at = models.DateTimeField()  # privacy-notice consent (DEC-08)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            # Defence in depth for normalize_phone (YV-33): nothing but the normalized
+            # form — or the purge/release placeholders — can reach the unique column.
+            models.CheckConstraint(
+                condition=models.Q(phone__regex=r"^\+9665[0-9]{8}$")
+                | models.Q(phone__regex=r"^(purged|released)-[0-9]+$"),
+                name="player_phone_normalized",
+            ),
+        ]
 
     def __str__(self):
         return f"player {self.pk}"

@@ -25,6 +25,17 @@ def _privacy_notice_complete(request, monkeypatch):
         monkeypatch.setattr("core.privacy.unfilled_placeholders", lambda: [])
 
 
+@pytest.fixture(autouse=True)
+def _empty_cache():
+    """The beacon limit (core/beacon.py) counts in Django's local-memory cache, which
+    would otherwise carry counts from one test into the next."""
+    from django.core.cache import cache
+
+    cache.clear()
+    yield
+    cache.clear()
+
+
 # ---------------------------------------------------------------------------
 # Phase control
 # ---------------------------------------------------------------------------

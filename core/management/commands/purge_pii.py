@@ -2,7 +2,10 @@
 
 Run at the published retention deadline. Keeps: Game, Match structure, AuditLog.
 Removes: player PII, invitation contacts, outbox bodies, ballot signals, registration
-attempt hashes. Winner display keeps the gamer tag only (per the privacy notice — DEC-08).
+attempt hashes, staff-login failure hashes, and the names that the Django admin wrote
+into its own history (django_admin_log.object_repr — security assessment 2026-11-19,
+YV-37: a VIP added in the admin left "Guest Name [created]" there for good).
+Winner display keeps the gamer tag only (per the privacy notice — DEC-08).
 
 Safety (audit 2026-11-13): refuses unless the site is in the ARCHIVE phase (or --force),
 so it cannot wipe names and phones mid-event; placeholders use the row's primary key, so
@@ -10,10 +13,12 @@ a second run cannot collide with the unique columns; gamer tags of registrations
 no longer active (withdrawn/removed — never shown on a bracket) are blanked too.
 """
 
+from django.contrib.admin.models import LogEntry
+from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
-from core.models import OutboxEmail
+from core.models import OutboxEmail, StaffLoginFailure
 from core.phases import Phase, current_phase
 from invitations.models import Invitation
 from registration.models import Player, Registration, RegistrationAttempt
@@ -58,10 +63,22 @@ class Command(BaseCommand):
         n_mail = OutboxEmail.objects.count()
         OutboxEmail.objects.all().delete()
         Ballot.objects.all().update(signals=None)
+        StaffLoginFailure.objects.all().delete()
+        # Admin history of personal-data models: keep WHO did WHAT and WHEN (useful after
+        # the event), drop the object's name. object_repr is the model's __str__ at the
+        # time of the change (e.g. the guest's name); change_message lists changed field
+        # NAMES only, never values, but is cleared too so nothing typed survives.
+        pii_types = ContentType.objects.get_for_models(
+            Player, Registration, Invitation, RegistrationAttempt, OutboxEmail
+        ).values()
+        n_log = LogEntry.objects.filter(content_type__in=pii_types).update(
+            object_repr="purged", change_message=""
+        )
         self.stdout.write(
             self.style.SUCCESS(
                 f"Purged PII: {n_players} players anonymized, "
-                f"{n_inv} invitations scrubbed, {n_mail} outbox rows deleted."
+                f"{n_inv} invitations scrubbed, {n_mail} outbox rows deleted, "
+                f"{n_log} admin-history entries anonymized."
             )
         )
         self.stdout.write("Remember: delete SIGNALS_SALT from the environment now.")
