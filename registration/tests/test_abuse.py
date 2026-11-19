@@ -76,18 +76,28 @@ def test_registration_with_passed_bot_check_goes_through(
 
 
 @override_settings(REG_IP_ATTEMPTS_PER_10MIN=3)
-def test_attempts_per_client_are_limited(client, phase_registration, game):
-    for _ in range(3):
-        post(client, game, phone="not-a-phone")  # invalid attempts count too
-    response = post(client, game, phone=phone(1))
+def test_verified_attempts_per_network_are_limited(client, phase_registration, game):
+    for i in range(3):
+        assert post(client, game, phone=phone(i), ua=f"UA{i}").status_code == 302
+    response = post(client, game, phone=phone(5), ua="UA5")
     assert response.status_code == 429
     assert CONTENT["REG_RATE_LIMITED"] in response.content.decode()
+    assert Registration.objects.count() == 3
+    # a different network is not affected
+    assert post(client, game, phone=phone(6), ip="203.0.113.77").status_code == 302
+
+
+@override_settings(REG_IP_FLOOD_PER_10MIN=3)
+def test_raw_attempt_flood_per_network_is_limited(client, phase_registration, game):
+    """The separate, much higher ceiling on ALL attempts (YV-06): garbage POSTs count."""
+    for _ in range(3):
+        post(client, game, phone="not-a-phone")
+    assert post(client, game, phone=phone(1)).status_code == 429
     assert not Registration.objects.exists()
-    # a different client is not affected
     assert post(client, game, phone=phone(2), ip="203.0.113.77").status_code == 302
 
 
-@override_settings(REG_IP_ATTEMPTS_PER_10MIN=2, CF_ORIGIN_TOKEN="shield")
+@override_settings(REG_IP_FLOOD_PER_10MIN=2, CF_ORIGIN_TOKEN="shield")
 def test_limit_follows_the_trusted_client_ip_behind_cloudflare(client, phase_registration, game):
     """Behind the origin shield every request arrives from a Cloudflare address; the
     limit must key on CF-Connecting-IP (core.security.client_ip), not the socket."""

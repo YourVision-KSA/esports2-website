@@ -58,5 +58,18 @@ def test_client_ip_ignores_cf_header_without_the_shield(rf):
 
 @override_settings(CF_ORIGIN_TOKEN="shield-secret")
 def test_client_ip_trusts_cf_header_behind_the_shield(rf):
-    request = rf.get("/", HTTP_CF_CONNECTING_IP="203.0.113.9", REMOTE_ADDR="198.51.100.4")
+    request = rf.get(
+        "/",
+        HTTP_CF_CONNECTING_IP="203.0.113.9",
+        HTTP_X_ORIGIN_TOKEN="shield-secret",
+        REMOTE_ADDR="198.51.100.4",
+    )
     assert client_ip(request) == "203.0.113.9"
+
+
+@override_settings(CF_ORIGIN_TOKEN="shield-secret")
+def test_client_ip_ignores_cf_header_without_the_token_even_with_the_shield_on(rf):
+    """The shield-exempt paths (/healthz, /internal/) are reachable without the token;
+    a client there must not choose its own CF-Connecting-IP (YV-39 follow-up)."""
+    request = rf.get("/", HTTP_CF_CONNECTING_IP="203.0.113.9", REMOTE_ADDR="198.51.100.4")
+    assert client_ip(request) == "198.51.100.4"

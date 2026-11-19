@@ -13,6 +13,13 @@ if settings.REQUIRE_2FA:
 
     admin.site.__class__ = OTPAdminSite
 
+# One-step login (password + TOTP code checked together, one generic error) with an
+# application-side failure throttle — core/staff_login.py (security assessment
+# 2026-11-19, YV-38).
+from core.staff_login import StaffLoginForm  # noqa: E402
+
+admin.site.login_form = StaffLoginForm
+
 urlpatterns = [
     path("", core_views.home, name="home"),
     path("healthz", core_views.healthz, name="healthz"),

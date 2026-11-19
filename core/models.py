@@ -145,3 +145,25 @@ class TierStat(models.Model):
 
     def __str__(self):
         return f"{self.day} {self.device} {self.outcome}: {self.count}"
+
+
+class StaffLoginFailure(models.Model):
+    """One failed /staff/login/ attempt — the application-side login throttle
+    (core/staff_login.py; security assessment 2026-11-19, YV-38).
+
+    Hashes only (CLAUDE.md hard rule 7): the HMAC of the lower-cased username that was
+    typed (it may not exist) and of the client network (IPv4 address / IPv6 /64). Rows
+    older than the throttle window are deleted on each failure; purge_pii deletes all."""
+
+    username_hash = models.CharField(max_length=64)
+    network_hash = models.CharField(max_length=64)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["username_hash", "created_at"], name="stafflogin_user_idx"),
+            models.Index(fields=["network_hash", "created_at"], name="stafflogin_net_idx"),
+        ]
+
+    def __str__(self):
+        return f"staff login failure {self.pk}"

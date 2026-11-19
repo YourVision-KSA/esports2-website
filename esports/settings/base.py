@@ -155,10 +155,21 @@ VOTER_COOKIE_NAME = "vt"
 # one network in a day, and a dozen from one phone model, while still stopping a script
 # from taking everything. Turnstile and the Cloudflare rate rule do the fine-grained work.
 # Runbook and the staging note: docs/operations.md → "Registration abuse".
+#
+# REG_IP_ATTEMPTS_PER_10MIN counts only VERIFIED attempts (valid form + passed Turnstile);
+# REG_IP_FLOOD_PER_10MIN counts every attempt and is only a ceiling against raw floods
+# (security assessment 2026-11-19, YV-06). "Network" = the address for IPv4, the /64 for
+# IPv6 (core.security.network_key, YV-07).
 REG_IP_ATTEMPTS_PER_10MIN = env.int("REG_IP_ATTEMPTS_PER_10MIN", default=60)
+REG_IP_FLOOD_PER_10MIN = env.int("REG_IP_FLOOD_PER_10MIN", default=600)
 REG_IP_REGISTRATIONS_PER_DAY = env.int("REG_IP_REGISTRATIONS_PER_DAY", default=36)
 REG_DEVICE_REGISTRATIONS_PER_DAY = env.int("REG_DEVICE_REGISTRATIONS_PER_DAY", default=12)
 REG_PHONE_ATTEMPTS_PER_DAY = env.int("REG_PHONE_ATTEMPTS_PER_DAY", default=5)
+
+# Hero 3D tier beacon (/beacon/3d, core/beacon.py): beacons per client network per
+# 10 minutes, kept in process memory. One beacon per tab session, so a whole campus NAT
+# rarely needs more; above it counts are dropped (204 → 429), never an error page.
+BEACON_PER_NETWORK_10MIN = env.int("BEACON_PER_NETWORK_10MIN", default=60)
 
 # Cloudflare Turnstile. When disabled (local dev), the server treats the
 # challenge as passed. In production it MUST be enabled (production.py refuses to start
@@ -181,6 +192,12 @@ OUTBOX_MAX_ATTEMPTS = 5
 
 # Require TOTP for /staff/ (True in production).
 REQUIRE_2FA = env.bool("REQUIRE_2FA", default=False)
+
+# /staff/login/ failure throttle (core/staff_login.py, YV-38): failures per typed
+# username and per client network (IPv4 address / IPv6 /64) within the window.
+STAFF_LOGIN_WINDOW_MINUTES = env.int("STAFF_LOGIN_WINDOW_MINUTES", default=15)
+STAFF_LOGIN_FAILURES_PER_ACCOUNT = env.int("STAFF_LOGIN_FAILURES_PER_ACCOUNT", default=5)
+STAFF_LOGIN_FAILURES_PER_NETWORK = env.int("STAFF_LOGIN_FAILURES_PER_NETWORK", default=20)
 
 # Base URL used when building absolute links in emails (manage links, invites).
 SITE_BASE_URL = env("SITE_BASE_URL", default="http://127.0.0.1:8000")

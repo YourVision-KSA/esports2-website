@@ -14,7 +14,7 @@ from django.views.decorators.cache import never_cache
 
 from core.models import Game
 from core.phases import Phase, current_phase
-from core.security import client_ip
+from core.security import came_through_cloudflare, client_ip
 
 from . import services, turnstile
 
@@ -43,12 +43,25 @@ def _set_voter_cookie(response, token: str):
     )
 
 
+# Valid autonomous system numbers are 32-bit (RFC 6793); 0 is reserved.
+_MAX_ASN = 2**32 - 1
+
+
 def _asn(request) -> int | None:
-    """Cloudflare can forward the origin ASN via a transform rule header."""
-    try:
-        return int(request.headers.get("X-Client-ASN", ""))
-    except (TypeError, ValueError):
+    """The client's ASN, from the X-Client-ASN header a Cloudflare Transform Rule sets
+    from ip.src.asnum (docs/operations.md → Cloudflare checklist).
+
+    Trusted ONLY when the request came through Cloudflare (valid origin-shield token):
+    any other X-Client-ASN was written by the client, which could dodge the datacenter
+    hold or forge the review data (security assessment 2026-11-19, YV-39). Values that
+    are not a plain decimal number in the 32-bit ASN range are ignored."""
+    if not came_through_cloudflare(request):
         return None
+    raw = request.headers.get("X-Client-ASN", "").strip()
+    if not (raw.isascii() and raw.isdecimal()):
+        return None
+    asn = int(raw)
+    return asn if 0 < asn <= _MAX_ASN else None
 
 
 @never_cache

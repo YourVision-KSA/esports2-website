@@ -15,10 +15,10 @@ Exempt paths, which are called directly at the origin on purpose:
   /internal/  — Cloud Scheduler ticks; authenticated by their own INTERNAL_TOKEN
 """
 
-import hmac
-
 from django.conf import settings
 from django.http import HttpResponseForbidden
+
+from .security import came_through_cloudflare
 
 EXEMPT_PREFIXES = ("/healthz", "/internal/")
 
@@ -28,10 +28,9 @@ class CloudflareOriginMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        token = settings.CF_ORIGIN_TOKEN
-        if token and not request.path.startswith(EXEMPT_PREFIXES):
-            sent = request.headers.get("X-Origin-Token", "")
-            if not hmac.compare_digest(sent, token):
+        if settings.CF_ORIGIN_TOKEN and not request.path.startswith(EXEMPT_PREFIXES):
+            # Byte comparison: a non-ASCII header is a 403, not a 500 (YV-40).
+            if not came_through_cloudflare(request):
                 return HttpResponseForbidden()
         return self.get_response(request)
 
