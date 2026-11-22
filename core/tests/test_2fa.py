@@ -4,6 +4,7 @@ In production OTPAdminSite refuses login without a confirmed device, so the firs
 device must come from this command; these tests prove the printed secret is usable.
 """
 
+import os
 from io import StringIO
 
 import pytest
@@ -52,7 +53,8 @@ def test_enroll_can_write_the_url_to_a_private_file(admin_user, tmp_path):
     call_command("enroll_totp", admin_user.username, "--url-file", str(target), stdout=out)
     assert "otpauth://" not in out.getvalue()
     assert target.read_text().startswith("otpauth://totp/")
-    assert (target.stat().st_mode & 0o777) == 0o600
+    if os.name == "posix":  # NTFS has no POSIX mode bits; chmod is a no-op on Windows
+        assert (target.stat().st_mode & 0o777) == 0o600
 
 
 def test_enroll_refuses_non_staff(django_user_model):
