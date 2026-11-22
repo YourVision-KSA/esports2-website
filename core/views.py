@@ -104,19 +104,26 @@ def beacon_tier(request):
     effect is +1 on an anonymous counter, values come from fixed lists, the body is capped,
     each client network may send BEACON_PER_NETWORK_10MIN beacons per 10 minutes
     (core.beacon.beacon_allowed — holds without Cloudflare), and Cloudflare rate-limits
-    the path as well (docs/operations.md)."""
+    the path as well (docs/operations.md).
+
+    Validation runs BEFORE beacon_allowed: a junk or oversized POST (405/413/400) must not
+    use up its network's allowance, or one broken client on a campus NAT could suppress
+    everyone else's real beacons and skew the fallback-rate statistic."""
     from urllib.parse import parse_qs
 
     from django.http import HttpResponseNotAllowed
 
-    from .beacon import beacon_allowed, record_tier
+    from .beacon import beacon_allowed, record_tier, valid_tier
 
     if request.method != "POST":
         return HttpResponseNotAllowed(["POST"])
-    if not beacon_allowed(request):
-        return HttpResponse(status=429)
     if len(request.body) > 200:
         return HttpResponse(status=413)
     data = parse_qs(request.body.decode("utf-8", "ignore"))
-    ok = record_tier(data.get("o", [""])[0], data.get("d", [""])[0])
-    return HttpResponse(status=204 if ok else 400)
+    outcome, device = data.get("o", [""])[0], data.get("d", [""])[0]
+    if not valid_tier(outcome, device):
+        return HttpResponse(status=400)
+    if not beacon_allowed(request):
+        return HttpResponse(status=429)
+    record_tier(outcome, device)
+    return HttpResponse(status=204)

@@ -12,11 +12,12 @@ from django.http import HttpResponseForbidden
 from django.shortcuts import render
 from django.views.decorators.cache import never_cache
 
+from core import turnstile
 from core.models import Game
 from core.phases import Phase, current_phase
 from core.security import came_through_cloudflare, client_ip
 
-from . import services, turnstile
+from . import services
 
 COOKIE_SALT = "voter-token"
 COOKIE_MAX_AGE = 60 * 60 * 24 * 14  # vote window + margin

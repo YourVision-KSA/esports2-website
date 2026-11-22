@@ -9,8 +9,14 @@ The Cloudflare rate rule is the first line, but this limit holds without it:
 BEACON_PER_NETWORK_10MIN beacons per client network (core.security.network_key: the
 address for IPv4, the /64 for IPv6) per fixed 10-minute window. It lives in the
 process's memory (Django's default local-memory cache — no Redis, docs/architecture.md),
-so it costs no database query; with several Cloud Run instances the effective limit is
-that number per instance, which is fine for a statistics counter.
+so it costs no database query; the effective limit is that number per server PROCESS
+(each gunicorn worker on each Cloud Run instance has its own cache), which is fine
+for a statistics counter.
+
+Only requests that would actually be recorded count against the limit: the view checks
+method, body size and the fixed-list values BEFORE beacon_allowed, so junk or oversized
+POSTs (answered 405/413/400) cannot use up a shared campus network's allowance and
+suppress the real counters this endpoint exists to measure.
 """
 
 import time
@@ -29,6 +35,12 @@ DEVICES = set(TierStat.Device.values)
 
 
 BEACON_WINDOW_SECONDS = 600
+
+
+def valid_tier(outcome: str, device: str) -> bool:
+    """Both values come from the fixed lists. Checked by the view before the beacon is
+    counted against its network's allowance (see module docstring)."""
+    return outcome in OUTCOMES and device in DEVICES
 
 
 def beacon_allowed(request) -> bool:

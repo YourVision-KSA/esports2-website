@@ -23,6 +23,14 @@ not recorded, so access returns by itself when the window passes. The counts are
 Runbook: docs/operations.md → "Staff login throttle".
 
 The admin is in English (Django's admin, USE_I18N = False), so these messages are too.
+Both strings are listed in docs/content-ar.md (STAFF-LOGIN-INVALID / STAFF-LOGIN-THROTTLED,
+DRAFT) so the owner reviews them like every other user-facing string (CLAUDE.md rule 1).
+
+Residual timing channel (accepted): the OTP check runs only after a correct password, so
+"right password + wrong code" answers measurably slower than "wrong password" even though
+the pages are byte-identical. The account throttle caps the attempts an attacker can time
+(STAFF_LOGIN_FAILURES_PER_ACCOUNT per window), which keeps the sample too small to exploit
+in practice; noted so nobody mistakes the identical pages for a complete fix.
 """
 
 from datetime import timedelta

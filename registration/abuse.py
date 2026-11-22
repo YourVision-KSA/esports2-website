@@ -11,10 +11,13 @@ and a request is refused when any of these counts is already at its limit:
                                   players share the campus NAT, so if garbage or unsolved
                                   POSTs counted, one person could lock registration for
                                   the whole campus at no cost (YV-06).
-  REG_IP_FLOOD_PER_10MIN          ALL attempts from one client network in 10 minutes —
-                                  a much higher anti-flood ceiling for raw POSTs (it stops
-                                  a script from filling the attempts table, and costs a
-                                  real campus nothing at the default).
+  REG_IP_FLOOD_PER_10MIN          all NON-REFUSED attempts from one client network in 10
+                                  minutes — a much higher anti-flood ceiling for raw POSTs
+                                  (costs a real campus nothing at the default). It stops
+                                  the processing of a flood (Turnstile calls, form work),
+                                  not the recording: every refused POST still writes one
+                                  LIMITED row, and LIMITED rows are excluded from this
+                                  count so the ceiling clears by itself after the flood.
   REG_PHONE_ATTEMPTS_PER_DAY      POSTs naming one phone number in 24 hours — slows down
                                   probing which numbers are registered. Only attempts
                                   that PASSED Turnstile count: the limit is checked

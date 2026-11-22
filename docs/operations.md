@@ -238,10 +238,17 @@ address for IPv4 and the /64 for IPv6 (one IPv6 line is a whole /64 — security
 | Setting (env var) | Default | Counts |
 |---|---|---|
 | `REG_IP_ATTEMPTS_PER_10MIN` | 60 | **verified** submissions from one network in 10 minutes — only those that passed form validation AND Turnstile, so nobody can lock out the campus with junk or unsolved POSTs (YV-06) |
-| `REG_IP_FLOOD_PER_10MIN` | 600 | **all** submissions from one network in 10 minutes — a ceiling against raw floods only |
+| `REG_IP_FLOOD_PER_10MIN` | 600 | all **non-refused** submissions from one network in 10 minutes — a ceiling that stops the *processing* of raw floods (each refused POST still writes one LIMITED row; those rows are excluded from the count, so the ceiling clears by itself) |
 | `REG_IP_REGISTRATIONS_PER_DAY` | 36 | successful registrations from one network in 24 h |
 | `REG_DEVICE_REGISTRATIONS_PER_DAY` | 12 | successful registrations from one address + browser in 24 h |
 | `REG_PHONE_ATTEMPTS_PER_DAY` | 5 | submissions naming one phone number in 24 h (only those that passed Turnstile, so a script cannot lock out someone else's number) |
+
+Key-scheme note: since the 2026-11-19 assessment these counts (and the vote burst limits)
+are keyed by the HMAC of the client **network**, no longer of the exact address. Rows
+written under an older key scheme never match the new keys — after such a deploy every
+limit restarts from zero and the admin's hash-prefix search cannot connect a client's
+pre- and post-deploy rows. Harmless while nothing is deployed; if the key scheme ever
+changes again, do not deploy the change mid-vote or mid-registration window.
 
 Why these numbers: most players register from the university network, and a campus
 leaves the internet through **one shared address** — to the app, the whole campus is one
@@ -307,7 +314,7 @@ Failed attempts are stored as hashes only (`StaffLoginFailure`). While, in the l
 (5) failures or the client network has `STAFF_LOGIN_FAILURES_PER_NETWORK` (20), the
 password is not checked and the page says "Too many failed sign-in attempts". It clears by
 itself when the window passes. To unlock someone at once (after verifying them):
-`python manage.py shell -c "from core.models import StaffLoginFailure as F; F.objects.all().delete()"`.
+`python manage.py unlock_staff_login`.
 Someone hammering a staff username can keep that account locked: if it happens, switch on
 the Cloudflare `/staff/` rule (Cloudflare checklist step 3) and unlock as above.
 

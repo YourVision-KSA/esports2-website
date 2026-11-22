@@ -187,6 +187,21 @@ def test_password_only_login_still_works_where_2fa_is_off(client, staff_user):
     assert _login(client, "referee", PASSWORD).status_code == 302
 
 
+@override_settings(REQUIRE_2FA=True, STAFF_LOGIN_FAILURES_PER_ACCOUNT=2)
+def test_unlock_staff_login_command_clears_the_throttle(client, staff_user):
+    """Event-day unlock runbook (docs/operations.md → Staff login throttle)."""
+    _, device = staff_user
+    for i in range(2):
+        _login(client, "referee", f"guess-{i}")
+    throttled = _login(client, "referee", PASSWORD, code=_code(device))
+    assert THROTTLED in throttled.content.decode()
+
+    call_command("unlock_staff_login")
+    assert not StaffLoginFailure.objects.exists()
+    unlocked = _login(client, "referee", PASSWORD, code=_code(device))
+    assert unlocked.status_code == 302 and unlocked["Location"] == "/staff/"
+
+
 # ------------------------------------------------------------- critic: /beacon/3d
 
 
@@ -209,3 +224,24 @@ def test_beacon_is_limited_per_network_without_cloudflare(client):
     # another network still counts
     assert _beacon(client, "203.0.113.50").status_code == 204
     assert TierStat.objects.get().count == 4
+
+
+@override_settings(BEACON_PER_NETWORK_10MIN=2)
+def test_invalid_beacons_do_not_use_up_the_network_allowance(client):
+    """Validation before counting: junk or oversized POSTs (one broken client on a campus
+    NAT) must not suppress the real beacons the statistic depends on."""
+    ip = "198.51.100.77"  # not used by any other beacon test (the cache survives tests)
+    form = "application/x-www-form-urlencoded"
+    for body, status in [
+        ("o=ultra&d=mobile", 400),
+        ("o=mid&d=fridge", 400),
+        ("", 400),
+        ("o=mid&d=mobile&pad=" + "x" * 300, 413),
+    ]:
+        response = client.post("/beacon/3d", body, content_type=form, REMOTE_ADDR=ip)
+        assert response.status_code == status
+    # The full allowance is still there for real beacons.
+    assert _beacon(client, ip).status_code == 204
+    assert _beacon(client, ip).status_code == 204
+    assert _beacon(client, ip).status_code == 429
+    assert TierStat.objects.get(outcome="mid", device="mobile").count >= 2

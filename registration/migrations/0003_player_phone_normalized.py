@@ -1,8 +1,10 @@
 # Security assessment 2026-11-19, YV-33: strict phone numbers.
 #
 # 1. Re-normalise any stored phone with the new normalize_phone (e.g. Arabic-Indic
-#    digits → ASCII). A row that still cannot be normalised makes the constraint below
-#    fail loudly — fix it by hand (staff "release phone"); nothing is guessed here.
+#    digits → ASCII). A row that still cannot be normalised (or whose normalised form
+#    collides with another player's) is SKIPPED with a printed "pk + reason" line and
+#    makes the constraint below fail loudly — fix it by hand (staff "release phone");
+#    nothing is guessed here.
 # 2. Add the CHECK constraint so only the normalised form (or the purge/release
 #    placeholders) can be stored from now on.
 
@@ -20,10 +22,17 @@ def renormalize(apps, schema_editor):
         try:
             phone = normalize_phone(player.phone)
         except ValidationError:
+            # Only the pk — never the number itself — may appear in deploy logs (rule 7).
+            print(f"phone-normalise SKIPPED player pk={player.pk}: not a valid Saudi mobile")
             continue
-        if not Player.objects.filter(phone=phone).exists():
-            player.phone = phone
-            player.save(update_fields=["phone"])
+        if Player.objects.filter(phone=phone).exists():
+            print(
+                f"phone-normalise SKIPPED player pk={player.pk}: normalised form collides "
+                "with another player's phone"
+            )
+            continue
+        player.phone = phone
+        player.save(update_fields=["phone"])
 
 
 class Migration(migrations.Migration):

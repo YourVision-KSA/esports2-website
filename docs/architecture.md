@@ -117,7 +117,8 @@ no visitor identifiers, docs/frontend.md) is a frontend health metric serving th
 "WebGL fallback rate" requirement, **not** an analytics stack; nothing third-party, nothing
 per-visitor. Its per-network limit (`BEACON_PER_NETWORK_10MIN`, security assessment
 2026-11-19) counts in Django's default in-process local-memory cache — not a cache server;
-the limit is per Cloud Run instance, which is enough for a statistics counter.
+the limit is per server process (each gunicorn worker on each Cloud Run instance has its
+own cache), which is enough for a statistics counter.
 
 ## Standing risks (top 3)
 
