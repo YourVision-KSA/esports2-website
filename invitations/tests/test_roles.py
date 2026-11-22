@@ -5,6 +5,8 @@ ID check), nothing in the Django admin, no VIP contact details. Invitation state
 happen only through audited services. Referees likewise see only what result entry needs.
 """
 
+from io import StringIO
+
 import pytest
 from django.contrib.auth.models import Group, User
 from django.core.management import call_command
@@ -22,7 +24,7 @@ EMAIL, PHONE = "vip.private@example.com", "0551230000"
 
 @pytest.fixture
 def roles():
-    call_command("setup_roles", stdout=open("/dev/null", "w"))
+    call_command("setup_roles", stdout=StringIO())  # /dev/null does not exist on Windows
 
 
 def login_as(client, role):

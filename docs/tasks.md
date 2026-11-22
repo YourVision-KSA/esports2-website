@@ -114,11 +114,12 @@ Order agreed — code work that did NOT wait on owner decisions:
 - [x] Dependabot triage (2026-11-22): merged gunicorn 27.0.1, three 0.187.0,
       meshoptimizer 1.3.0; **closed** Django 6 (stack fixed on 5.2 LTS, major ignored);
       **held until after the event**: vite 8 (#25), node 26-slim (#23), python 3.15-slim (#15).
-- [ ] Spot-check the hero + trophy 3D scenes in a browser after the three.js 0.187 bump
-      (CI only checks build + size budgets, not visuals)
-- [ ] Windows test portability (Hussein's machine): `test_roles.py` uses `/dev/null`,
-      `test_2fa.py` asserts POSIX 0o600, `test_production_settings.py` subprocesses hit
-      WinError 10106 — 32 tests fail locally on Windows only (green on CI/macOS)
+- [x] Spot-check the hero + trophy 3D scenes after the three.js 0.187 bump — done
+      2026-11-22 (headless Chrome screenshots: hero controller, trophy, game-card
+      imagery all render; demo data, local server)
+- [x] Windows test portability — fixed 2026-11-22: `os.devnull`-safe `setup_roles` call,
+      POSIX-only file-mode assert, `SYSTEMROOT` passed to the settings subprocesses
+      (WinError 10106). Full suite 279/279 green on Hussein's Windows machine.
 
 ## ⬜ Remaining — needs an owner decision or content (Your Vision)
 

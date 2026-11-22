@@ -45,6 +45,11 @@ def load(**overrides):
         **GOOD,
         **overrides,
     }
+    if os.name == "nt":
+        # Winsock (asyncio's _overlapped, imported via django.setup()) fails with
+        # WinError 10106 unless the subprocess inherits SYSTEMROOT. Not a Django
+        # setting, so the "fully controlled environment" guarantee is unaffected.
+        env["SYSTEMROOT"] = os.environ["SYSTEMROOT"]
     return subprocess.run(
         [sys.executable, "-c", PROBE], cwd=ROOT, env=env, capture_output=True, text=True
     )
