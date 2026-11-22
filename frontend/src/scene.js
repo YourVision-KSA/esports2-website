@@ -1,4 +1,6 @@
-/* Hero 3D scene: game controller over a lit pedestal (docs/frontend.md).
+/* The 3D scenes (docs/frontend.md): hero = game controller over a lit pedestal,
+   trophy = gold cup in the prizes section. One module, per-variant config (VARIANTS);
+   both are mounted lazily by hero.js and share the three.js chunk.
 
    Performance rules implemented here (all FIXED in docs/frontend.md):
    - imports only the three.js parts used (tree-shaken)
@@ -41,14 +43,58 @@ import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment
 const CYAN = 0x3cd6e0;
 const MAGENTA = 0xd15eb9;
 const NAVY = 0x050a14;
+const GOLD = 0xe9c15c;
 
 const DPR_CAP = { high: 2, mid: 1.5 };
-const MODEL_WIDTH = 2.5; // world units the controller is scaled to fit
-// Rest pose (radians), tuned to the model file: face toward the camera, top tipped back.
-const MODEL_REST = { x: -0.35, y: 0, z: 0 };
-// Idle motion: a slow sway that keeps the face visible (a full spin mostly shows the side).
-const SWAY = { amp: 0.42, period: 7000 };
-const IDLE_AFTER_DRAG = 2500; // ms before the sway takes over again
+const IDLE_AFTER_DRAG = 2500; // ms before the idle motion takes over again
+
+// Per-scene look & motion (docs/frontend.md → 3D scenes). The hero controller sways
+// (a full spin mostly shows its side); the trophy is symmetric, so it slowly turns.
+const VARIANTS = {
+  hero: {
+    // world units the model is scaled to fit, along the given axis
+    fit: { axis: "xz", size: 2.5 },
+    // rest pose (radians), tuned to the model file: face toward the camera, top tipped back
+    rest: { x: -0.35, y: 0, z: 0 },
+    camera: { fov: 32, pos: [0, 1.4, 7.4], look: [0, -0.4, 0] },
+    disc: { top: 1.45, bottom: 1.6 },
+    rings: [
+      { radius: 1.5, tube: 0.018, colour: CYAN, opacity: 1, y: 0.115 },
+      { radius: 1.78, tube: 0.012, colour: MAGENTA, opacity: 0.7, y: -0.09 },
+    ],
+    lights: [
+      { kind: "key", colour: 0xffffff, intensity: 1.6, pos: [2.5, 4, 3] },
+      { kind: "point", colour: CYAN, intensity: 18, pos: [-2.8, 1.2, -1.5] },
+      { kind: "point", colour: MAGENTA, intensity: 14, pos: [2.8, 0.6, -1.2] },
+    ],
+    sway: { amp: 0.42, period: 7000 }, // idle: slow sway, face stays visible
+    spin: 0,
+    float: { base: 0.12, amp: 0.05 },
+    parallax: true, // mouse over the hero tilts the scene slightly
+    stillHash: "#hero-still", // debug: freeze at the rest pose (poster screenshots)
+  },
+  trophy: {
+    fit: { axis: "y", size: 2.6 }, // the cup is tall: fit its height, not its width
+    rest: { x: 0, y: 0.5, z: 0 }, // turned so a handle catches the key light
+    camera: { fov: 30, pos: [0, 1.1, 7.8], look: [0, -0.15, 0] },
+    disc: { top: 1.1, bottom: 1.25 },
+    rings: [
+      { radius: 1.16, tube: 0.016, colour: GOLD, opacity: 1, y: 0.115 },
+      { radius: 1.42, tube: 0.01, colour: CYAN, opacity: 0.5, y: -0.09 },
+    ],
+    lights: [
+      { kind: "key", colour: 0xfff2d0, intensity: 1.7, pos: [2.5, 4, 3] }, // warm key for gold
+      { kind: "point", colour: GOLD, intensity: 16, pos: [0, 2.6, 2.6] },
+      { kind: "point", colour: CYAN, intensity: 7, pos: [-2.8, 1.2, -1.5] },
+      { kind: "point", colour: MAGENTA, intensity: 6, pos: [2.8, 0.6, -1.2] },
+    ],
+    sway: null,
+    spin: (Math.PI * 2) / 16000, // idle: one slow full turn every 16 s (rad/ms)
+    float: { base: 0.1, amp: 0.04 },
+    parallax: false,
+    stillHash: "#trophy-still",
+  },
+};
 
 // Give the browser a breather between heavy start-up steps (input, scrolling, paint).
 const yieldToMain = () =>
@@ -64,8 +110,9 @@ function saveTier(key, tier) {
   }
 }
 
-export async function start(mount, { tier, modelUrl, tierKey, onSettled = () => {} }) {
-  const frame = mount.querySelector(".scene-frame") || mount;
+export async function start(mount, { tier, modelUrl, tierKey, variant = "hero", onSettled = () => {} }) {
+  const cfg = VARIANTS[variant];
+  const frame = mount.querySelector(".scene-frame, .trophy-frame") || mount;
 
   // --- renderer (failure here = FALLBACK tier: poster stays) ---------------------
   // MSAA on every 3D tier: at DPR ≤ 1.5 it is cheap on current phone GPUs and removes jaggies
@@ -85,40 +132,35 @@ export async function start(mount, { tier, modelUrl, tierKey, onSettled = () => 
   // --- scene ----------------------------------------------------------------------
   const scene = new Scene();
 
-  const camera = new PerspectiveCamera(32, 1, 0.1, 50);
-  camera.position.set(0, 1.4, 7.4);
-  camera.lookAt(0, -0.4, 0);
+  const camera = new PerspectiveCamera(cfg.camera.fov, 1, 0.1, 50);
+  camera.position.set(...cfg.camera.pos);
+  camera.lookAt(...cfg.camera.look);
 
   scene.add(new HemisphereLight(0xdfe9f5, NAVY, 0.6));
-  const key = new DirectionalLight(0xffffff, 1.6);
-  key.position.set(2.5, 4, 3);
-  scene.add(key);
-  const rimCyan = new PointLight(CYAN, 18, 9, 2);
-  rimCyan.position.set(-2.8, 1.2, -1.5);
-  scene.add(rimCyan);
-  const rimMagenta = new PointLight(MAGENTA, 14, 9, 2);
-  rimMagenta.position.set(2.8, 0.6, -1.2);
-  scene.add(rimMagenta);
+  for (const spec of cfg.lights) {
+    const light =
+      spec.kind === "key" ? new DirectionalLight(spec.colour, spec.intensity) : new PointLight(spec.colour, spec.intensity, 9, 2);
+    light.position.set(...spec.pos);
+    scene.add(light);
+  }
 
   // pedestal: dark metal disc + two thin brand rings (soft, not neon)
   const pedestal = new Group();
   pedestal.position.y = -1.2;
   const disc = new Mesh(
-    new CylinderGeometry(1.45, 1.6, 0.22, 64),
+    new CylinderGeometry(cfg.disc.top, cfg.disc.bottom, 0.22, 64),
     new MeshStandardMaterial({ color: 0x0a1220, metalness: 0.35, roughness: 0.75 }),
   );
   pedestal.add(disc);
-  const ringA = new Mesh(new TorusGeometry(1.5, 0.018, 8, 96), new MeshBasicMaterial({ color: CYAN }));
-  ringA.rotation.x = Math.PI / 2;
-  ringA.position.y = 0.115;
-  pedestal.add(ringA);
-  const ringB = new Mesh(
-    new TorusGeometry(1.78, 0.012, 8, 96),
-    new MeshBasicMaterial({ color: MAGENTA, transparent: true, opacity: 0.7 }),
-  );
-  ringB.rotation.x = Math.PI / 2;
-  ringB.position.y = -0.09;
-  pedestal.add(ringB);
+  for (const spec of cfg.rings) {
+    const ring = new Mesh(
+      new TorusGeometry(spec.radius, spec.tube, 8, 96),
+      new MeshBasicMaterial({ color: spec.colour, transparent: spec.opacity < 1, opacity: spec.opacity }),
+    );
+    ring.rotation.x = Math.PI / 2;
+    ring.position.y = spec.y;
+    pedestal.add(ring);
+  }
   scene.add(pedestal);
 
   // --- model ----------------------------------------------------------------------
@@ -138,22 +180,23 @@ export async function start(mount, { tier, modelUrl, tierKey, onSettled = () => 
   performance.mark("es2:env");
   await yieldToMain();
   const model = gltf.scene;
-  // normalise: centre at origin, scale to MODEL_WIDTH
+  // normalise: centre at origin, scale so the fit axis spans cfg.fit.size world units
   const box = new Box3().setFromObject(model);
   const size = box.getSize(new Vector3());
   const centre = box.getCenter(new Vector3());
   model.position.sub(centre);
   const holder = new Group(); // rotation happens on holder, model stays centred
   holder.add(model);
-  holder.scale.setScalar(MODEL_WIDTH / Math.max(size.x, size.z, 1e-6));
-  const spin = new Group(); // user rotation (drag) + idle spin
+  const span = cfg.fit.axis === "y" ? size.y : Math.max(size.x, size.z);
+  holder.scale.setScalar(cfg.fit.size / Math.max(span, 1e-6));
+  const spin = new Group(); // user rotation (drag) + idle motion
   spin.add(holder);
-  holder.rotation.set(MODEL_REST.x, MODEL_REST.y, MODEL_REST.z);
+  holder.rotation.set(cfg.rest.x, cfg.rest.y, cfg.rest.z);
   scene.add(spin);
 
   // --- interaction: drag to rotate, pointer parallax -----------------------------
-  const state = { rotY: 0, rotX: 0, velY: 0, dragging: false, lastDrag: -1e9, lastX: 0, lastY: 0, tiltX: 0, tiltY: 0 };
-  const still = location.hash === "#hero-still"; // debug: freeze at the rest pose (screenshots)
+  const state = { rotY: 0, rotX: 0, velY: 0, dragging: false, lastDrag: -1e9, lastX: 0, lastY: 0, tiltX: 0, tiltY: 0, prevNow: 0 };
+  const still = location.hash === cfg.stillHash; // debug: freeze at the rest pose (screenshots)
   canvas.addEventListener("pointerdown", (e) => {
     state.dragging = true;
     state.lastX = e.clientX;
@@ -176,13 +219,15 @@ export async function start(mount, { tier, modelUrl, tierKey, onSettled = () => 
   };
   canvas.addEventListener("pointerup", release);
   canvas.addEventListener("pointercancel", release);
-  const hero = mount.closest(".hero") || mount;
-  hero.addEventListener("pointermove", (e) => {
-    if (e.pointerType !== "mouse") return;
-    const r = hero.getBoundingClientRect();
-    state.tiltY = ((e.clientX - r.left) / r.width - 0.5) * 0.25;
-    state.tiltX = ((e.clientY - r.top) / r.height - 0.5) * 0.12;
-  });
+  if (cfg.parallax) {
+    const hero = mount.closest(".hero") || mount;
+    hero.addEventListener("pointermove", (e) => {
+      if (e.pointerType !== "mouse") return;
+      const r = hero.getBoundingClientRect();
+      state.tiltY = ((e.clientX - r.left) / r.width - 0.5) * 0.25;
+      state.tiltX = ((e.clientY - r.top) / r.height - 0.5) * 0.12;
+    });
+  }
 
   // --- sizing ----------------------------------------------------------------------
   function resize() {
@@ -204,20 +249,26 @@ export async function start(mount, { tier, modelUrl, tierKey, onSettled = () => 
 
   function frameTick(now) {
     rafId = requestAnimationFrame(frameTick);
+    const dt = Math.min(now - state.prevNow || 16, 100); // clamp across pauses/tab switches
+    state.prevNow = now;
     if (!state.dragging && !still) {
       state.velY *= 0.94; // drag inertia dies out…
       state.rotY += state.velY;
       state.rotX *= 0.95;
       if (now - state.lastDrag > IDLE_AFTER_DRAG) {
-        // …then ease back into the sway (shortest way round after a full spin)
-        const sway = Math.sin((now / SWAY.period) * Math.PI * 2) * SWAY.amp;
-        const turns = Math.round((state.rotY - sway) / (Math.PI * 2));
-        state.rotY += (sway + turns * Math.PI * 2 - state.rotY) * 0.03;
+        if (cfg.sway) {
+          // …then ease back into the sway (shortest way round after a full spin)
+          const sway = Math.sin((now / cfg.sway.period) * Math.PI * 2) * cfg.sway.amp;
+          const turns = Math.round((state.rotY - sway) / (Math.PI * 2));
+          state.rotY += (sway + turns * Math.PI * 2 - state.rotY) * 0.03;
+        } else {
+          state.rotY += cfg.spin * dt; // …then the slow continuous turn resumes
+        }
       }
     }
     spin.rotation.y = state.rotY + state.tiltY;
     spin.rotation.x = state.rotX + state.tiltX;
-    spin.position.y = 0.12 + (still ? 0 : Math.sin(now / 1400) * 0.05); // hover above the pedestal + gentle float
+    spin.position.y = cfg.float.base + (still ? 0 : Math.sin(now / 1400) * cfg.float.amp); // hover above the pedestal + gentle float
     renderer.render(scene, camera);
 
     if (!probe.done) {

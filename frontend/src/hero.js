@@ -1,7 +1,8 @@
-/* Hero 3D loader (docs/frontend.md → 3D scenes + quality tiers).
+/* 3D loader for the home page's two scenes — hero controller + prizes trophy
+   (docs/frontend.md → 3D scenes + quality tiers).
 
    This file is deliberately tiny and imports nothing from three.js. It decides
-   WHETHER and WHEN the 3D scene loads; scene.js (with three.js) is fetched only
+   WHETHER and WHEN each 3D scene loads; scene.js (with three.js) is fetched only
    after that decision, so the page's text, buttons and countdown never wait on 3D.
 
    Order of gates, cheapest first:
@@ -70,25 +71,33 @@ function report(outcome) {
   }
 }
 
-const mount = document.getElementById("hero-scene");
-const modelUrl = mount && mount.dataset.model;
 const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const tier = startingTier();
 
-if (mount && still) report("reduced");
-else if (mount && tier === "low") report("low"); // saved from an earlier slow visit, or ≤ 2 GB RAM
-
-if (mount && modelUrl && !still && tier !== "low") {
+// Each scene gates and loads independently; the trophy sits far down the page, so its
+// IntersectionObserver usually fires much later (lazy by scroll approach, rootMargin 600px).
+// Only the hero reports to the beacon — its outcomes are the fixed list TierStat counts.
+function arm(mountId, variant, onSettled) {
+  const mount = document.getElementById(mountId);
+  const modelUrl = mount && mount.dataset.model;
+  if (!mount || !modelUrl || still || tier === "low") return;
   afterLoad(() =>
     whenIdle(() =>
       whenNear(mount, () => {
         import("./scene.js")
-          .then((m) => m.start(mount, { tier, modelUrl, tierKey: TIER_KEY, onSettled: report }))
+          .then((m) => m.start(mount, { tier, modelUrl, tierKey: TIER_KEY, variant, onSettled }))
           .catch(() => {
             /* FALLBACK tier: bundle, model or WebGL failed — the poster stays, page unaffected */
-            report("fallback");
+            onSettled("fallback");
           });
       }),
     ),
   );
 }
+
+const heroMount = document.getElementById("hero-scene");
+if (heroMount && still) report("reduced");
+else if (heroMount && tier === "low") report("low"); // saved from an earlier slow visit, or ≤ 2 GB RAM
+
+arm("hero-scene", "hero", report);
+arm("trophy-scene", "trophy", () => {});
