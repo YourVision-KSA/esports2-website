@@ -73,6 +73,24 @@ earlier than needed). Dates shift with DEC-01; the **sequence and gates are fixe
   (now includes origin shield `CF_ORIGIN_TOKEN`, CSP header rule, Error Reporting +
   uptime alerts), staging rehearsal before the vote opens (~Nov 2).
 
+- **2026-11-22** — Open PRs cleared, all work on `main`: PR #22 (Yousef's fixes for the
+  2026-11-19 security assessment) reviewed at high effort — no blocking bugs; 7 minor
+  findings fixed on the branch before merge, including the cause of its red CI: the
+  `voting/turnstile.py` re-export shim made the tests' monkeypatch of
+  `core.turnstile.verify` miss the view's call path, so tests hit the real Cloudflare
+  siteverify (green locally only because the dummy `.env` secret is Cloudflare's
+  always-pass test key). Shim removed; voting imports `core.turnstile` directly. Also
+  new: `unlock_staff_login` command (runbook updated), /beacon/3d validates before
+  counting against the network allowance, STAFF-LOGIN-* strings added to content-ar.md
+  as DRAFT. PR #21 (trophy 3D scene + real graded game imagery) merged — last W5 code
+  item done. Dependabot: gunicorn 27.0.1, three 0.187.0, meshoptimizer 1.3.0 merged;
+  Django 6 closed (stack is 5.2 LTS, major ignored); vite 8 / node 26 / python 3.15
+  majors held until after the event. Dev note: the full suite has 32 Windows-only
+  failures on Hussein's machine (`/dev/null`, POSIX chmod asserts, WinError 10106 in
+  settings subprocess tests — all test-portability issues from the audit-era test files,
+  green on CI/macOS; fix pending, see docs/tasks.md). The original timeline (vote Nov 2,
+  event Nov 26–28) has slipped — all gates remain blocked on DEC-01/03/04/05.
+
 ## Timeline
 
 | Week | Dates | Build focus | Milestone |

@@ -105,7 +105,20 @@ Order agreed — code work that did NOT wait on owner decisions:
 
 ## ⬜ Remaining — code (next session starts here)
 
-- [ ] Trophy 3D scene (cut-list item 2, W5; static image acceptable / cut-list fallback: static image)
+- [x] Trophy 3D scene — merged 2026-11-22 (PR #21, with real graded game-card imagery)
+- [x] **Security-assessment fixes merged** (2026-11-22): PR #22 reviewed (high review, no
+      blocking bugs; 7 minor findings fixed on the branch, incl. a test bug that sent the
+      tests' Turnstile token to the real Cloudflare endpoint — `voting/turnstile.py` shim
+      removed) and merged. New: `unlock_staff_login` command, beacon validates before
+      counting, STAFF-LOGIN-* strings as DRAFT in content-ar.md.
+- [x] Dependabot triage (2026-11-22): merged gunicorn 27.0.1, three 0.187.0,
+      meshoptimizer 1.3.0; **closed** Django 6 (stack fixed on 5.2 LTS, major ignored);
+      **held until after the event**: vite 8 (#25), node 26-slim (#23), python 3.15-slim (#15).
+- [ ] Spot-check the hero + trophy 3D scenes in a browser after the three.js 0.187 bump
+      (CI only checks build + size budgets, not visuals)
+- [ ] Windows test portability (Hussein's machine): `test_roles.py` uses `/dev/null`,
+      `test_2fa.py` asserts POSIX 0o600, `test_production_settings.py` subprocesses hit
+      WinError 10106 — 32 tests fail locally on Windows only (green on CI/macOS)
 
 ## ⬜ Remaining — needs an owner decision or content (Your Vision)
 
