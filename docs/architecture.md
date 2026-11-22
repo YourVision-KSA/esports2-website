@@ -78,6 +78,21 @@ deploy through the event; delete after archive + retention period. Backups + PIT
   later.
 - **Auth:** staff only (Django auth + TOTP 2FA via django-otp; roles admin/referee/door as
   groups). Players: secret manage links. Voters: signed tokens. No OAuth/SSO.
+  `/staff/login/` checks password and TOTP code in one step with one generic error (a right
+  password is never confirmed before the second factor) and has an app-side failure
+  throttle per typed username and per client network (core/staff_login.py; security
+  assessment 2026-11-19, YV-38).
+- **Client identity for limits** (security assessment 2026-11-19): every app-side limit
+  (vote bursts, registration, staff login, beacon) counts per client **network** —
+  `core.security.network_key`: the address for IPv4 and IPv4-mapped IPv6, the **/64** for
+  IPv6 (same rule as the platform), stored only as an HMAC (`ip_hash`). The raw address is
+  used only for Turnstile's `remoteip`. Cloudflare's headers (`CF-Connecting-IP`,
+  `X-Client-ASN`) are trusted only on requests that carry the valid origin-shield token;
+  secret headers are compared as bytes (a non-ASCII value is a 403, never a 500).
+- **Vote classification** runs inside the ballot's transaction after a per-network
+  `pg_advisory_xact_lock`, so parallel ballots from one network cannot all pass the burst
+  limit; only ballots that passed Turnstile count toward the bursts (voting/services.py,
+  YV-34/YV-35).
 
 ## Scaling and limits
 
@@ -100,7 +115,10 @@ Adding any of these requires a stated requirement and an update to this file.
 Clarification (2026-10-22): the count-only hero-3D tier beacon (`TierStat` daily counters —
 no visitor identifiers, docs/frontend.md) is a frontend health metric serving the stated
 "WebGL fallback rate" requirement, **not** an analytics stack; nothing third-party, nothing
-per-visitor.
+per-visitor. Its per-network limit (`BEACON_PER_NETWORK_10MIN`, security assessment
+2026-11-19) counts in Django's default in-process local-memory cache — not a cache server;
+the limit is per server process (each gunicorn worker on each Cloud Run instance has its
+own cache), which is enough for a statistics counter.
 
 ## Standing risks (top 3)
 

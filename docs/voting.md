@@ -26,6 +26,16 @@ detectable, never claim it is a verified election.
 | ASN in datacenter/hosting/VPN list (static list shipped in repo, updatable) | held |
 | > N ballots from same `ip_hash` in 1 h (default N=5 — campus/carrier NAT means SOFT handling: hold, don't block) | held |
 | > M ballots from same `ua_hash`+`ip_hash` in 10 min (default M=3) | held |
+
+`ip_hash` is the HMAC of the client **network** (the address for IPv4 / IPv4-mapped, the
+/64 for IPv6 — core.security.network_key), so rotating IPv6 addresses inside one line does
+not reset the counts. The two burst counts include **only ballots that passed Turnstile**
+(an unsolved ballot is already held for that reason and must not push real voters on the
+same NAT into held), and classification runs inside the ballot's transaction after a
+per-network advisory lock, so a parallel wave cannot all pass (security assessment
+2026-11-19, YV-07/YV-34/YV-35). The ASN comes from the `X-Client-ASN` header set by a
+Cloudflare Transform Rule and is trusted only on requests carrying the origin-shield token
+(YV-39; docs/operations.md → Cloudflare checklist 5b).
 | Proof-of-work token missing/invalid (if enabled, see below) | held |
 | Everything clean | counted |
 
@@ -36,7 +46,8 @@ move held→counted or →invalidated in admin (bulk actions, each audit-logged)
 
 - **Edge (Cloudflare rules):** `/vote/` POST: max 10/min per IP; challenge above that.
   `/staff/` login: 5/min per IP.
-- **App:** the per-ip_hash counters above (plain SQL count on an indexed column — no Redis).
+- **App:** the per-ip_hash counters above (plain SQL count on an indexed column — no Redis);
+  the staff login has its own failure throttle (core/staff_login.py).
 
 ## Optional proof-of-work (enable only if abuse observed)
 

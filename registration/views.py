@@ -68,7 +68,8 @@ def register_form(request, slug):
     """GET: the form. POST, cheapest check first (audit 2026-11-13, finding 1):
 
     1. privacy notice complete (else closed, like any other phase gate)
-    2. per-client attempt limit                       → 429, nothing else evaluated
+    2. per-network attempt limits (only VERIFIED attempts count, plus a high ceiling
+       on raw attempts — registration/abuse.py, YV-06)   → 429, nothing else evaluated
     3. form valid
     4. per-phone attempt limit (counts only attempts that passed Turnstile — otherwise
        a script could lock out someone else's number), per-client registration caps → 429

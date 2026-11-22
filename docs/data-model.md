@@ -37,8 +37,8 @@ provisionally 3 — "pick the 3 games you want").
 | token_hash | **unique** — HMAC-SHA256 of the voter token; the one-ballot rule |
 | status | `counted` \| `held` \| `invalidated` |
 | turnstile_passed | bool |
-| ip_hash, ua_hash | HMAC-SHA256 with `SIGNALS_SALT`; raw values never stored |
-| asn | int, nullable (from CF header/GeoIP if available) |
+| ip_hash, ua_hash | HMAC-SHA256 with `SIGNALS_SALT`; raw values never stored. ip_hash is of the client network (IPv4 address / IPv6 /64) |
+| asn | bigint (32-bit ASNs), nullable; from the Cloudflare `X-Client-ASN` header, only via the origin shield |
 | signals | JSON: coarse heuristics (header anomalies, timing). No raw PII |
 | held_reason / invalidated_reason | short code; set when status ≠ counted |
 | invalidated_by | FK → staff user, nullable; invalidation is audit-logged |
@@ -56,7 +56,7 @@ Tallies are computed queries over `status=counted` — never stored counters.
 | Field | Notes |
 |---|---|
 | full_name | required |
-| phone | required, normalized `+9665XXXXXXXX`; **unique** (one player identity per phone) |
+| phone | required, normalized `+9665XXXXXXXX` (Arabic-Indic/Persian digits → ASCII, strict check); **unique** (one player identity per phone); DB check constraint allows only that form or the `purged-<id>` / `released-<id>` placeholders |
 | email | optional; if given, the manage link is also emailed via OutboxEmail at registration |
 | manage_token | **unique**, ≥128-bit urlsafe random; the secret manage link. Store a hash if feasible; minimum bar: unguessable + never logged |
 | consent_at | datetime; privacy-notice consent checkbox timestamp |
@@ -103,7 +103,12 @@ withdrawn | removed`. Registrations freeze when the phase leaves `registration`.
 `ip_hash`, `ua_hash`, `phone_hash` (HMAC with `SIGNALS_SALT`, never raw values), game,
 outcome (registered / invalid / limited / turnstile / duplicate / full), registration FK
 (nullable), created_at. Feeds the app-side rate limits and the staff "network" column;
-deleted by `purge_pii`.
+deleted by `purge_pii`. `ip_hash` is of the client network (IPv4 address / IPv6 /64).
+
+**StaffLoginFailure** (security assessment 2026-11-19): one row per failed `/staff/login/` —
+`username_hash` (HMAC of the typed, lower-cased username), `network_hash`, created_at.
+Feeds the login throttle (core/staff_login.py); rows older than a day are deleted on each
+failure; all deleted by `purge_pii`.
 
 Staff removal (one or many, `services.remove_registrations`): under the game lock, mark ALL
 selected rows `removed` first, then fill free seats FIFO from the remaining waitlist and

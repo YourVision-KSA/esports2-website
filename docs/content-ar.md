@@ -244,6 +244,8 @@ Note for owner: «أفضل لاعب في اليوم» may need rewording for a 3
 | STAFF-SEARCH | بحث | door-staff guest search |
 | STAFF-SIGNED-IN | مسجّل الدخول باسم {user} | DRAFT — needs owner review (staff bar) |
 | STAFF-LOGOUT | تسجيل الخروج | DRAFT — needs owner review (staff bar) |
+| STAFF-LOGIN-INVALID | (English) Please enter the correct username, password and authentication code for a staff account. All fields may be case-sensitive. | DRAFT — needs owner review. Staff login failure message (core/staff_login.py); the staff admin is English (USE_I18N=False), hence no Arabic |
+| STAFF-LOGIN-THROTTLED | (English) Too many failed sign-in attempts. Please wait a few minutes and try again. | DRAFT — needs owner review. Staff login throttle message (core/staff_login.py) |
 | STAFF-MATCH | مباراة {n} | DRAFT — needs owner review (results: match label inside a round) |
 | STAFF-PICK-WINNER | اختر الفائز | DRAFT — needs owner review (results) |
 | STAFF-SCORE | النتيجة (اختياري) | DRAFT — needs owner review (results: score field label) |
