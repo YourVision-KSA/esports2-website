@@ -30,6 +30,10 @@
     </table>
   </div>
 
+  {% if registration.status == "confirmed" %}
+  <p><a class="btn" href="/r/{{ manage_token }}/badge/">{{ content.BADGE_TITLE }}</a></p>
+  {% endif %}
+
   {% if can_withdraw %}
   <p><a class="btn btn-ghost" href="/r/{{ manage_token }}/withdraw/">{{ content.REG_WITHDRAW }}</a></p>
   {% endif %}

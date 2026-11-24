@@ -4,5 +4,6 @@ from . import views
 
 urlpatterns = [
     path("<str:token>/", views.manage, name="manage"),
+    path("<str:token>/badge/", views.badge, name="manage-badge"),
     path("<str:token>/withdraw/", views.withdraw, name="manage-withdraw"),
 ]

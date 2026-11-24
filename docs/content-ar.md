@@ -273,6 +273,11 @@ Note for owner: «أفضل لاعب في اليوم» may need rewording for a 3
 | STAFF-SCAN-START | مسح رمز الدعوة بالكاميرا | DRAFT — needs owner review (check-in scanner button) |
 | STAFF-SCAN-STOP | إيقاف الكاميرا | DRAFT — needs owner review |
 | STAFF-SCAN-HINT | وجّه الكاميرا نحو رمز QR في الدعوة | DRAFT — needs owner review |
+| BADGE-TITLE | بطاقة الدخول | DRAFT — needs owner review (entry badge heading; also the manage-page link to it) |
+| BADGE-PLAYER | لاعب | DRAFT — needs owner review (badge kind label: player) |
+| BADGE-GUEST | ضيف | DRAFT — needs owner review (badge kind label: VIP guest) |
+| BADGE-PRINT | اطبع البطاقة | DRAFT — needs owner review (print button on the badge page) |
+| BADGE-HINT | أبرز رمز QR عند بوابة الدخول | DRAFT — needs owner review (line under the badge QR) |
 | STAFF-SCAN-ERROR | تعذّر تشغيل الكاميرا — استخدم إدخال الرمز أو البحث بالاسم | DRAFT — needs owner review (camera denied/unavailable) |
 | STAFF-OR | أو | DRAFT — divider between scanner and manual entry |
 | INVITE-STATUS | created: لم تُرسل · sent: مرسلة · checked_in: حضر · revoked: ملغاة | DRAFT — needs owner review (door-staff status chips) |

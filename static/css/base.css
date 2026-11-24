@@ -762,3 +762,52 @@ button[type="submit"].btn-secondary-sm:hover { background: var(--surface); borde
 /* VIP invitation QR (inline SVG from invitations/views.py) */
 .invite-qr { width: 170px; height: 170px; }
 .invite-qr svg { display: block; width: 100%; height: 100%; }
+
+/* ---- Entry badges (players + VIP guests) — print-first card ---- */
+.badge-wrap {
+  min-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  padding: 40px 16px;
+}
+.badge-card {
+  width: 320px;
+  background: #fff;
+  color: #0B1220;
+  border-radius: 14px;
+  border: 1px solid #D7DEE8;
+  border-top: 6px solid var(--accent);
+  padding: 26px 22px 22px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.badge-brand { display: flex; flex-direction: column; gap: 2px; }
+.badge-event { font-family: var(--font-display, inherit); font-weight: 800; font-size: 17px; }
+.badge-sub { font-size: 11px; color: #5A6A80; }
+.badge-kind {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: #0B1220;
+  background: rgb(var(--accent-rgb) / 0.18);
+  border: 1px solid rgb(var(--accent-rgb) / 0.55);
+  border-radius: 999px;
+  padding: 3px 14px;
+}
+.badge-name { font-size: 24px; font-weight: 800; margin: 2px 0 0; }
+.badge-sub-line { font-size: 14px; color: #39465A; margin: 0; }
+.badge-qr { width: 160px; height: 160px; margin-top: 8px; }
+.badge-qr svg { width: 100%; height: 100%; display: block; }
+.badge-hint { font-size: 11px; color: #5A6A80; margin: 4px 0 0; }
+@media print {
+  body { background: #fff; }
+  .badge-print, .funnel-head, .footer { display: none !important; }
+  .badge-wrap { min-height: auto; padding: 0; }
+  .badge-card { border-radius: 0; border-color: #000; }
+}

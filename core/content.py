@@ -220,6 +220,12 @@ CONTENT = {
     "STAFF_SCAN_HINT": "وجّه الكاميرا نحو رمز QR في الدعوة",
     "STAFF_SCAN_ERROR": "تعذّر تشغيل الكاميرا — استخدم إدخال الرمز أو البحث بالاسم",
     "STAFF_OR": "أو",
+    # Entry badges (players + VIP guests) ------------------------------------- DRAFT
+    "BADGE_TITLE": "بطاقة الدخول",
+    "BADGE_PLAYER": "لاعب",
+    "BADGE_GUEST": "ضيف",
+    "BADGE_PRINT": "اطبع البطاقة",
+    "BADGE_HINT": "أبرز رمز QR عند بوابة الدخول",
     # invitation status labels for door staff (model choices are English for admin)
     "INVITE_STATUS": {
         "created": "لم تُرسل",
