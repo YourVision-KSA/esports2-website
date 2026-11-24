@@ -73,23 +73,34 @@ def staff_checkin(request):
          → shows the guest card (name, organisation, status); nothing is written
       2. confirm — POST action=confirm → services.check_in (atomic, single-use, audited)
 
+    One page for both QR kinds (entry-badges spec 2026-11-24): VIP invitation tokens
+    and player badge tokens (registration.services.check_in). Tokens are 128-bit
+    random, so a lookup that matches no invitation falls through to the players.
+
     (The camera scanner, cut-list item 1, will feed step 1; this page works without it.)"""
-    result = guest = None
+    from registration import services as registration_services
+
+    result = guest = player = player_game = None
     if request.method == "POST":
         token = _token_from(request.POST.get("token", ""))
         if request.POST.get("action") == "confirm":
-            result, guest = services.check_in(token, request.user)
+            if request.POST.get("kind") == "player":
+                result, player = registration_services.check_in(token, request.user)
+                player_game = _confirmed_game(player)
+            else:
+                result, guest = services.check_in(token, request.user)
         else:
             guest = Invitation.objects.filter(token=token).first() if token else None
-            if guest is None or guest.status in (
-                Invitation.Status.CREATED,
-                Invitation.Status.REVOKED,
-            ):
-                result, guest = services.CheckInResult.INVALID, None
-            elif guest.status == Invitation.Status.CHECKED_IN:
-                result = services.CheckInResult.ALREADY
+            if guest is not None:
+                if guest.status in (Invitation.Status.CREATED, Invitation.Status.REVOKED):
+                    result, guest = services.CheckInResult.INVALID, None
+                elif guest.status == Invitation.Status.CHECKED_IN:
+                    result = services.CheckInResult.ALREADY
+                else:
+                    result = "lookup"  # sent → show the card with the confirm button
             else:
-                result = "lookup"  # sent → show the card with the confirm button
+                result, player = _player_lookup(token)
+                player_game = _confirmed_game(player)
 
     query = request.GET.get("q", "").strip()
     guests = Invitation.objects.none()
@@ -100,5 +111,49 @@ def staff_checkin(request):
     return render(
         request,
         "staff/checkin.html",
-        {"result": result, "guest": guest, "query": query, "guests": guests},
+        {
+            "result": result,
+            "guest": guest,
+            "player": player,
+            "player_game": player_game,
+            "query": query,
+            "guests": guests,
+        },
     )
+
+
+def _player_lookup(token):
+    """Step-1 lookup for a player badge token: shows the card, writes nothing.
+    Mirrors registration.services.check_in's gating: only a player holding a
+    CONFIRMED seat is valid at the door."""
+    from registration.models import Player, Registration
+
+    player = (
+        Player.objects.filter(checkin_token=token).select_related("checked_in_by").first()
+        if token
+        else None
+    )
+    if (
+        player is None
+        or not Registration.objects.filter(
+            player=player, status=Registration.Status.CONFIRMED
+        ).exists()
+    ):
+        return services.CheckInResult.INVALID, None
+    if player.checked_in_at is not None:
+        return services.CheckInResult.ALREADY, player
+    return "lookup", player
+
+
+def _confirmed_game(player):
+    """Arabic game name for the player card (None when there is no player)."""
+    from registration.models import Registration
+
+    if player is None:
+        return None
+    registration = (
+        Registration.objects.filter(player=player, status=Registration.Status.CONFIRMED)
+        .select_related("game")
+        .first()
+    )
+    return registration.game.name_ar if registration else None

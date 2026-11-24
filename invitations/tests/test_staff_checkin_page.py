@@ -116,3 +116,63 @@ def test_scanner_markup_and_no_autostart_while_a_guest_awaits_confirmation(door_
         "/staff/checkin/", {"action": "confirm", "token": inv.token}
     ).content.decode()
     assert 'data-autostart="1"' in body  # next guest
+
+
+# ---- player badges at the same door (entry-badges spec 2026-11-24) ----
+
+
+def make_confirmed_player(game, i=1):
+    from registration import services as reg_services
+
+    registration, _ = reg_services.register(
+        full_name="لاعب الاختبار",
+        phone=f"+96655{i:07d}",
+        email="",
+        game=game,
+        game_player_id=f"tag-{i}",
+    )
+    return registration
+
+
+def test_lookup_player_token_shows_player_card(door_client, game):
+    registration = make_confirmed_player(game)
+    player = registration.player
+    body = door_client.post(
+        "/staff/checkin/", {"action": "lookup", "token": player.checkin_token}
+    ).content.decode()
+    player.refresh_from_db()
+    assert player.checked_in_at is None  # lookup writes nothing
+    assert player.full_name in body
+    assert registration.game.name_ar in body
+    assert CONTENT["BADGE_PLAYER"] in body
+    assert CONTENT["STAFF_CONFIRM_CHECKIN"] in body
+    assert 'name="kind" value="player"' in body
+
+
+def test_confirm_player_checks_in(door_client, game):
+    registration = make_confirmed_player(game)
+    player = registration.player
+    first = door_client.post(
+        "/staff/checkin/",
+        {"action": "confirm", "kind": "player", "token": player.checkin_token},
+    )
+    assert CONTENT["CHECKIN_OK"] in first.content.decode()
+    player.refresh_from_db()
+    assert player.checked_in_at is not None
+    second = door_client.post(
+        "/staff/checkin/",
+        {"action": "confirm", "kind": "player", "token": player.checkin_token},
+    ).content.decode()
+    assert "guest-already" in second and "door1" in second
+
+
+def test_lookup_waitlisted_player_is_invalid(door_client, game):
+    from registration.models import Registration
+
+    registration = make_confirmed_player(game)
+    Registration.objects.filter(pk=registration.pk).update(status=Registration.Status.WAITLISTED)
+    body = door_client.post(
+        "/staff/checkin/", {"action": "lookup", "token": registration.player.checkin_token}
+    ).content.decode()
+    assert CONTENT["CHECKIN_INVALID"] in body
+    assert registration.player.full_name not in body
