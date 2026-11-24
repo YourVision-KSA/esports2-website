@@ -32,6 +32,32 @@ def invite(request, token):
     )
 
 
+@never_cache
+def invite_badge(request, token):
+    """Print-ready VIP badge (entry-badges spec 2026-11-24). Same validity rules as
+    the invite page; the QR data stays the invite URL the door scanner already reads."""
+    invitation = Invitation.objects.filter(
+        token=token,
+        status__in=[
+            Invitation.Status.CREATED,
+            Invitation.Status.SENT,
+            Invitation.Status.CHECKED_IN,
+        ],
+    ).first()
+    if invitation is None:
+        raise Http404  # unknown and revoked look identical (docs/routes.md)
+    return render(
+        request,
+        "badges/badge.html",
+        {
+            "kind": "guest",
+            "person_name": invitation.guest_name,
+            "subtitle": invitation.organization,
+            "qr_svg": qr.qr_svg(invitation.invite_url()),
+        },
+    )
+
+
 def _token_from(raw: str) -> str:
     """Accept a bare token or the full invite URL (what a QR code contains)."""
     return raw.strip().rstrip("/").split("/")[-1]
