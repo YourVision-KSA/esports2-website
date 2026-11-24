@@ -238,3 +238,46 @@ def manage_url(raw_token: str) -> str:
 def seats_left(game: Game) -> int:
     n = game.registrations.filter(status=Registration.Status.CONFIRMED).count()
     return max(game.seats - n, 0)
+
+
+# ------------------------------------------------------------------ door check-in
+
+
+def check_in(token: str, actor) -> tuple[str, Player | None]:
+    """Badge-QR door check-in (single-use, race-safe — same conditional-UPDATE
+    pattern as invitations.services.check_in). Only a player who currently holds a
+    CONFIRMED seat gets through; waitlisted/withdrawn/removed badges are INVALID.
+    Returns (CheckInResult, player)."""
+    from invitations.services import CheckInResult
+
+    confirmed = Registration.objects.filter(status=Registration.Status.CONFIRMED).values("player")
+    updated = Player.objects.filter(
+        checkin_token=token, checked_in_at__isnull=True, pk__in=confirmed
+    ).update(checked_in_at=timezone.now(), checked_in_by=actor)
+    player = Player.objects.filter(checkin_token=token).select_related("checked_in_by").first()
+    if updated == 1:
+        audit.record(actor, "player.checkin", player)
+        return CheckInResult.OK, player
+    if (
+        player is not None
+        and player.checked_in_at is not None
+        and Registration.objects.filter(
+            player=player, status=Registration.Status.CONFIRMED
+        ).exists()
+    ):
+        return CheckInResult.ALREADY, player
+    return CheckInResult.INVALID, None
+
+
+def undo_checkin(player: Player, actor) -> Player | None:
+    """Clear a check-in recorded by mistake (admin only, audited — mirror of
+    invitations.services.undo_checkin). The badge QR works again afterwards."""
+    with transaction.atomic():
+        locked = Player.objects.select_for_update().filter(pk=player.pk).first()
+        if locked is None or locked.checked_in_at is None:
+            return None
+        locked.checked_in_at = None
+        locked.checked_in_by = None
+        locked.save(update_fields=["checked_in_at", "checked_in_by", "updated_at"])
+        audit.record(actor, "player.checkin_reversed", locked)
+        return locked

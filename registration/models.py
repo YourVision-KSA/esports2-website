@@ -8,6 +8,7 @@ import re
 import secrets
 import unicodedata
 
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 
@@ -52,6 +53,13 @@ def new_manage_token() -> str:
     return secrets.token_urlsafe(24)
 
 
+def new_checkin_token() -> str:
+    """>=128-bit token printed in the badge QR. Single-purpose: the door scan can only
+    mark attendance, so unlike the manage token it is stored in plain (like
+    Invitation.token) and MUST never appear on the manage pages or grant them."""
+    return secrets.token_urlsafe(24)
+
+
 class Player(models.Model):
     """One player identity per phone number. No accounts — the manage link is
     the only credential (CLAUDE.md hard rule 4). Only its hash is stored."""
@@ -62,6 +70,13 @@ class Player(models.Model):
     phone = models.CharField(max_length=16, unique=True)
     email = models.EmailField(blank=True)
     manage_token_hash = models.CharField(max_length=64, unique=True)
+    # Door entry (docs/superpowers/specs/2026-11-24-entry-badges-design.md): the badge QR
+    # carries this token; check-in is a conditional UPDATE in services.check_in.
+    checkin_token = models.CharField(max_length=48, unique=True, default=new_checkin_token)
+    checked_in_at = models.DateTimeField(null=True, blank=True)
+    checked_in_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
     consent_at = models.DateTimeField()  # privacy-notice consent (DEC-08)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
