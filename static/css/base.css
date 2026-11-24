@@ -806,8 +806,12 @@ button[type="submit"].btn-secondary-sm:hover { background: var(--surface); borde
 .badge-qr svg { width: 100%; height: 100%; display: block; }
 .badge-hint { font-size: 11px; color: #5A6A80; margin: 4px 0 0; }
 @media print {
+  /* Authored @page margins make browsers drop their default header/footer text —
+     which includes the page URL: on the player badge that would print the manage
+     link onto the paper (review 2026-11-24). Breathing room moves to .badge-wrap. */
+  @page { margin: 0; }
   body { background: #fff; }
   .badge-print, .funnel-head, .footer { display: none !important; }
-  .badge-wrap { min-height: auto; padding: 0; }
+  .badge-wrap { min-height: auto; padding: 15mm; }
   .badge-card { border-radius: 0; border-color: #000; }
 }

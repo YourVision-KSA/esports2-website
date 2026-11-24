@@ -58,6 +58,7 @@ state. Flaky-proof by asserting invariants, not orderings.
 | `test_checkin_requires_sent_status` | `created`/`revoked`/`checked_in` tokens cannot check in |
 | `test_invite_page_uniform_404` | unknown and revoked tokens → identical 404 |
 | `test_invitation_creates_outbox_row` | creating + marking sent queues the email; SMTP failure leaves status `queued`/`failed` with retry scheduled; invitation unaffected |
+| `test_outbox_skip_locked` | two workers tick simultaneously → each email sent once |
 
 Player badges ride the same door (entry badges 2026-11-24; `registration/tests/test_checkin.py`,
 `registration/tests/test_badge_page.py`, player rows in `invitations/tests/test_staff_checkin_page.py`):
@@ -68,8 +69,8 @@ Player badges ride the same door (entry badges 2026-11-24; `registration/tests/t
 | `test_checkin_requires_confirmed_registration` | waitlisted / withdrawn / removed / no registration / unknown token → INVALID at the door |
 | `test_undo_checkin_rearms_token` | audited admin reversal clears the record and the same QR checks in again |
 | `test_badge_qr_is_checkin_token_not_manage_token` | the badge page never contains the manage secret; its QR data is exactly `checkin_token` |
-| `test_badge_404_cases` | wrong token, non-confirmed statuses, and pre/vote/permits phases → uniform 404 |
-| `test_outbox_skip_locked` | two workers tick simultaneously → each email sent once |
+| `test_badge_404_cases` | wrong token, non-confirmed statuses, and pre/vote/permits phases → uniform 404 with identical bodies |
+| `test_badge_print_css_suppresses_browser_headers` | the print stylesheet authors `@page` margins, so browsers drop their default header/footer (the page URL — on the player badge that would be the manage link) |
 
 ## Phases & misc
 

@@ -51,19 +51,41 @@ def test_badge_qr_is_checkin_token_not_manage_token(client, confirmed, monkeypat
     assert token not in body  # the manage secret is never printed on the badge
 
 
+def test_badge_print_css_suppresses_browser_headers():
+    """Review 2026-11-24 (Important): browsers print the page URL in their default
+    header/footer — on the player badge that would put the MANAGE link on paper.
+    Authoring @page margins makes browsers drop that default text."""
+    from pathlib import Path
+
+    from django.conf import settings
+
+    css = Path(settings.BASE_DIR, "static", "css", "base.css").read_text(encoding="utf-8")
+    print_block = css.split("@media print", 1)[1]
+    assert "@page" in print_block
+    assert "margin: 0" in print_block.split("@page", 1)[1].split("}", 1)[0]
+
+
 def test_badge_404_cases(client, confirmed, game):
     registration, token = confirmed
+    bodies = set()
     # Wrong token (uniform 404, same as manage page).
-    assert client.get("/r/not-a-real-token/badge/").status_code == 404
+    response = client.get("/r/not-a-real-token/badge/")
+    assert response.status_code == 404
+    bodies.add(response.content)
     # Too-early phases: badge not reachable.
     for phase in (Phase.PRE, Phase.VOTE, Phase.PERMITS):
         set_phase(phase)
-        assert client.get(f"/r/{token}/badge/").status_code == 404
+        response = client.get(f"/r/{token}/badge/")
+        assert response.status_code == 404
+        bodies.add(response.content)
     # Not confirmed: no badge.
     set_phase(Phase.REGISTRATION)
     for status in (Registration.Status.WAITLISTED, Registration.Status.WITHDRAWN):
         Registration.objects.filter(pk=registration.pk).update(status=status)
-        assert client.get(f"/r/{token}/badge/").status_code == 404
+        response = client.get(f"/r/{token}/badge/")
+        assert response.status_code == 404
+        bodies.add(response.content)
+    assert len(bodies) == 1  # uniform: no oracle distinguishes the refusal reasons
 
 
 def test_manage_page_links_to_badge_only_when_confirmed(client, confirmed):
