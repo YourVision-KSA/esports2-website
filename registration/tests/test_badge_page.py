@@ -69,7 +69,5 @@ def test_badge_404_cases(client, confirmed, game):
 def test_manage_page_links_to_badge_only_when_confirmed(client, confirmed):
     registration, token = confirmed
     assert "/badge/" in client.get(f"/r/{token}/").content.decode()
-    Registration.objects.filter(pk=registration.pk).update(
-        status=Registration.Status.WAITLISTED
-    )
+    Registration.objects.filter(pk=registration.pk).update(status=Registration.Status.WAITLISTED)
     assert "/badge/" not in client.get(f"/r/{token}/").content.decode()
