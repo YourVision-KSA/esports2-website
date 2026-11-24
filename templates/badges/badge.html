@@ -1,0 +1,22 @@
+{# Entry badge — players and VIP guests (entry-badges spec 2026-11-24). #}
+{# Print-first: light card so it photocopies and saves ink; brand fonts from base. #}
+{% extends "base.html" %}
+{% block title %}{{ content.BADGE_TITLE }}{% endblock %}
+{% block header %}{% endblock %}
+{% block footer %}{% endblock %}
+{% block content %}
+<div class="badge-wrap">
+  <div class="badge-card">
+    <div class="badge-brand">
+      <span class="badge-event">{{ content.LOGO_TITLE }}</span>
+      <span class="badge-sub">{{ content.LOGO_SUB }}</span>
+    </div>
+    <span class="badge-kind">{% if kind == "player" %}{{ content.BADGE_PLAYER }}{% else %}{{ content.BADGE_GUEST }}{% endif %}</span>
+    <h1 class="badge-name">{{ person_name }}</h1>
+    {% if subtitle %}<p class="badge-sub-line">{{ subtitle }}</p>{% endif %}
+    <div class="badge-qr" role="img" aria-label="QR">{{ qr_svg }}</div>
+    <p class="badge-hint">{{ content.BADGE_HINT }}</p>
+  </div>
+  <button type="button" class="btn badge-print" onclick="window.print()">{{ content.BADGE_PRINT }}</button>
+</div>
+{% endblock %}

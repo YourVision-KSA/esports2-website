@@ -120,6 +120,13 @@ Order agreed — code work that did NOT wait on owner decisions:
 - [x] Windows test portability — fixed 2026-11-22: `os.devnull`-safe `setup_roles` call,
       POSIX-only file-mode assert, `SYSTEMROOT` passed to the settings subprocesses
       (WinError 10106). Full suite 279/279 green on Hussein's Windows machine.
+- [x] **Entry badges + player QR check-in** (Hussein, 2026-11-24; spec
+      `docs/superpowers/specs/2026-11-24-entry-badges-design.md`): print-ready badge
+      pages for CONFIRMED players (`/r/<token>/badge/`, QR = new single-purpose
+      `Player.checkin_token`) and VIP guests (`/invite/<token>/badge/`); door scanner
+      at `/staff/checkin/` now checks BOTH kinds in (race-safe single-use, audited,
+      admin reversal). New Arabic strings are DRAFT rows in content-ar.md
+      (BADGE-TITLE/-PLAYER/-GUEST/-PRINT/-HINT) — need owner review.
 
 ## ⬜ Remaining — needs an owner decision or content (Your Vision)
 

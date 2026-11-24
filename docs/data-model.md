@@ -60,6 +60,8 @@ Tallies are computed queries over `status=counted` — never stored counters.
 | email | optional; if given, the manage link is also emailed via OutboxEmail at registration |
 | manage_token | **unique**, ≥128-bit urlsafe random; the secret manage link. Store a hash if feasible; minimum bar: unguessable + never logged |
 | consent_at | datetime; privacy-notice consent checkbox timestamp |
+| checkin_token | **unique**, ≥128-bit urlsafe random, stored in plain (like Invitation.token): single-purpose badge-QR token — the door scan can only mark attendance, never reach the manage pages. Never shown on the manage pages |
+| checked_in_at / checked_in_by | door check-in record (entry badges 2026-11-24): single-use via conditional UPDATE (`registration/services.py check_in`), only while a CONFIRMED registration exists; reversal is the audited admin action `undo_checkin_action` |
 | (age/guardian fields) | pending DEC-09 — leave out until decided |
 
 **Registration**

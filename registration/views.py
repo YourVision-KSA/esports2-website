@@ -11,7 +11,7 @@ from django.http import Http404, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.cache import never_cache
 
-from core import privacy, turnstile
+from core import privacy, qr, turnstile
 from core.models import Game
 from core.phases import Phase, current_phase, require_phase
 from core.security import client_ip
@@ -169,6 +169,28 @@ def manage(request, token):
             "can_withdraw": (
                 phase == Phase.REGISTRATION and registration.status in Registration.ACTIVE
             ),
+        },
+    )
+
+
+@never_cache
+def badge(request, token):
+    """Print-ready entry badge (entry-badges spec 2026-11-24): CONFIRMED players only,
+    same phase window as the manage page. The QR carries the single-purpose
+    checkin_token — never the manage secret, which door staff must not see."""
+    if current_phase() in (Phase.PRE, Phase.VOTE, Phase.PERMITS):
+        raise Http404
+    player, registration = _get_registration_or_404(token)
+    if registration.status != Registration.Status.CONFIRMED:
+        raise Http404
+    return render(
+        request,
+        "badges/badge.html",
+        {
+            "kind": "player",
+            "person_name": player.full_name,
+            "subtitle": registration.game.name_ar,
+            "qr_svg": qr.qr_svg(player.checkin_token),
         },
     )
 

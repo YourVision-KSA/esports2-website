@@ -6,10 +6,30 @@
   <h1>{{ content.STAFF_CHECKIN_TITLE }}</h1>
 
   {% if result %}
-  {# ---- guest card: the result of a lookup or a confirmation ---- #}
+  {# ---- card: the result of a lookup or a confirmation (guest OR player) ---- #}
   <section class="guest-card guest-{{ result }}" role="status">
     {% if result == "invalid" %}
       <p class="guest-state">{{ content.CHECKIN_INVALID }}</p>
+    {% elif player %}
+      {% if result == "ok" %}<p class="guest-state">{{ content.CHECKIN_OK }}</p>{% endif %}
+      {% if result == "already" %}
+      <p class="guest-state">{{ content.CHECKIN_ALREADY|cut:" ({time})" }}
+        <span dir="ltr">{{ player.checked_in_at|date:"H:i" }}</span>
+        {% if player.checked_in_by %}· {{ content.STAFF_CHECKED_BY|cut:"{user}" }}<b dir="auto">{{ player.checked_in_by.get_username }}</b>{% endif %}
+      </p>
+      {% endif %}
+      <p class="guest-name">{{ player.full_name }}</p>
+      <p class="guest-org">{{ content.BADGE_PLAYER }}{% if player_game %} · {{ player_game }}{% endif %}</p>
+      {% if result == "lookup" %}
+      <p class="guest-verify">{{ content.STAFF_VERIFY_ID }}</p>
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="token" value="{{ player.checkin_token }}">
+        <input type="hidden" name="kind" value="player">
+        <input type="hidden" name="action" value="confirm">
+        <button type="submit">{{ content.STAFF_CONFIRM_CHECKIN }}</button>
+      </form>
+      {% endif %}
     {% else %}
       {% if result == "ok" %}<p class="guest-state">{{ content.CHECKIN_OK }}</p>{% endif %}
       {% if result == "already" %}
