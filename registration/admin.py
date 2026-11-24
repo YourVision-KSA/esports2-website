@@ -64,14 +64,22 @@ class RegistrationInline(admin.TabularInline):
 
 @admin.register(Player)
 class PlayerAdmin(admin.ModelAdmin):
-    list_display = ("id", "full_name", "phone", "email", "created_at")
+    list_display = ("id", "full_name", "phone", "email", "checked_in_at", "created_at")
     search_fields = ("full_name", "phone", "email")
-    readonly_fields = ("manage_token_hash", "consent_at")
+    # Check-in state changes only through the door page / the audited undo action.
+    readonly_fields = (
+        "manage_token_hash",
+        "consent_at",
+        "checkin_token",
+        "checked_in_at",
+        "checked_in_by",
+    )
     inlines = [RegistrationInline]
     actions = [
         export_csv_action(["id", "full_name", "phone", "email"]),
         "regenerate_manage_link",
         "release_phone",
+        "undo_checkin_action",
     ]
 
     def has_add_permission(self, request):
@@ -98,6 +106,16 @@ class PlayerAdmin(admin.ModelAdmin):
                 self.message_user(request, f"player {player.pk}: new link queued to email.")
             else:
                 self.message_user(request, f"player {player.pk}: {url}")
+
+    @admin.action(description="Undo check-in (recorded by mistake; the badge QR works again)")
+    def undo_checkin_action(self, request, queryset):
+        if not request.user.is_superuser:
+            self.message_user(request, "This action is admin-only.", level=messages.ERROR)
+            return
+        undone = sum(
+            1 for player in queryset if services.undo_checkin(player, request.user) is not None
+        )
+        self.message_user(request, f"Reversed {undone} check-in(s).")
 
     @admin.action(description="Release phone number (someone else registered it; audited)")
     def release_phone(self, request, queryset):

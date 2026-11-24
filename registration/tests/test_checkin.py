@@ -103,3 +103,38 @@ def test_undo_checkin_rearms_token(game, door_user):
     ).exists()
     result, _ = services.check_in(player.checkin_token, door_user)
     assert result == CheckInResult.OK
+
+
+# ---- admin reversal (mirror of the invitation undo) ----
+
+
+def test_admin_undo_checkin_action(game, admin_user, door_user):
+    from django.contrib.admin.sites import site
+
+    from registration.admin import PlayerAdmin
+
+    player = make_player(game)
+    services.check_in(player.checkin_token, door_user)
+
+    class Req:
+        user = admin_user
+        _messages = None
+
+    model_admin = PlayerAdmin(Player, site)
+    model_admin.message_user = lambda *a, **k: None
+    model_admin.undo_checkin_action(Req(), Player.objects.filter(pk=player.pk))
+    player.refresh_from_db()
+    assert player.checked_in_at is None and player.checked_in_by is None
+    assert AuditLog.objects.filter(
+        action="player.checkin_reversed", object_id=str(player.pk)
+    ).exists()
+
+
+def test_checkin_fields_readonly_in_admin(game):
+    from django.contrib.admin.sites import site
+
+    from registration.admin import PlayerAdmin
+
+    readonly = PlayerAdmin(Player, site).readonly_fields
+    for field in ("checkin_token", "checked_in_at", "checked_in_by"):
+        assert field in readonly
